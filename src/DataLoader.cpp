@@ -2,8 +2,8 @@
 // Created by Pedro Bedmar on 16/3/22.
 //
 
-#include "DataLoader.h"
 #include <fstream>
+#include "DataLoader.h"
 
 DataLoader::DataLoader(std::string path) {
     ifstream file(path);
@@ -25,7 +25,6 @@ DataLoader::DataLoader(std::string path) {
         file >> data;
         int j = stoi(data);
         file >> data;
-        cout << i << endl;
         distanceMatrix[i][j] = stod(data);
         distanceMatrix[j][i] = stod(data);
     }
