@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <iostream>
 #include "GreedyAlgorithm.h"
+#include "functions.h"
 
 
 GreedyAlgorithm::GreedyAlgorithm(vector<vector<double> > distanceMatrix_, int numElements_, int numRequiredElements_, int seed_) {
@@ -13,6 +14,14 @@ GreedyAlgorithm::GreedyAlgorithm(vector<vector<double> > distanceMatrix_, int nu
     numElements = numElements_;
     numRequiredElements = numRequiredElements_;
     srand(seed);
+}
+
+double GreedyAlgorithm::getAvgCost() {
+    return avg_cost;
+}
+
+double GreedyAlgorithm::getAvgTime() {
+ return avg_time;
 }
 
 void GreedyAlgorithm::run(int n_times) {
@@ -48,16 +57,17 @@ void GreedyAlgorithm::run(int n_times) {
             }
         }
 
+        double min_g = 0;
+        double element_min_g = -1;
+
         while (solution.size() < numRequiredElements) {
 
-            cout << "Hola" << endl;
-
-            double min_g = 0;
-            double element_min_g = -1;
+            min_g = numeric_limits<double>::max();
+            element_min_g = -1;
 
             for (auto u = unselected_elements.cbegin(); u != unselected_elements.cend(); u++) {
-                double del_v_max = 0;
-                double del_v_min = 0;
+                double del_v_max = -numeric_limits<double>::max();
+                double del_v_min = numeric_limits<double>::max();
 
                 for (auto v = solution.cbegin(); v != solution.cend(); v++) {
                     double del_v = sum[*v] + distanceMatrix[*u][*v];
@@ -88,23 +98,26 @@ void GreedyAlgorithm::run(int n_times) {
                 sum[*u] += distanceMatrix[*u][element_min_g];
             }
 
-
-
             for (auto v = solution.cbegin(); v != solution.cend(); v++) {
                 sum[*v] += distanceMatrix[*v][element_min_g];
             }
         }
 
-        double time = (clock()- start_time) / CLOCKS_PER_SEC;
-        cout << "Execution number " << exec << ". Time " << time << ". Solution: ";
-        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
-            cout << *it << " ";
-        }
-        cout << endl;
+        double elapsed = (clock()- start_time);
+        double elapsed_in_seconds = elapsed / CLOCKS_PER_SEC;
+
+        avg_time += elapsed_in_seconds;
+        avg_cost += min_g;
+
+        //print iteration results
+//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost  " << min_g << ". Solution: ";
+//        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
+//            cout << *it << " ";
+//        }
+//        cout << endl;
     }
 
+    avg_time = avg_time/n_times;
+    avg_cost = avg_cost/n_times;
 }
 
-int GreedyAlgorithm::randInt(int min, int max) {
-    return rand() % (( max + 1 ) - min);
-}

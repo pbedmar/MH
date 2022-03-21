@@ -1,22 +1,26 @@
 SRC=src
 OBJ=obj
 BIN=bin
-FLAGS = -g -O3 -std=c++14
+CXXFLAGS = -g -O3 -std=c++17
 
 all: practica1
 
-practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/random.o
-	g++ $(FLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o -o $(BIN)/practica1
+practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/functions.o
+	g++ $(CXXFLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica1
+
 
 $(OBJ)/practica1.o: src/practica1.cpp
-	g++ $(FLAGS) -c $(SRC)/practica1.cpp -o $(OBJ)/practica1.o
+	g++ $(CXXFLAGS) -c $(SRC)/practica1.cpp -o $(OBJ)/practica1.o
 
+
+$(OBJ)/functions.o: src/functions.cpp
+	g++ $(CXXFLAGS) -c $(SRC)/functions.cpp -o $(OBJ)/functions.o
 
 $(OBJ)/DataLoader.o: $(SRC)/DataLoader.cpp $(SRC)/DataLoader.h
-	g++ $(FLAGS) -c $(SRC)/DataLoader.cpp -o $(OBJ)/DataLoader.o -I$(SRC)
+	g++ $(CXXFLAGS) -c $(SRC)/DataLoader.cpp -o $(OBJ)/DataLoader.o -I$(SRC)
 
 $(OBJ)/GreedyAlgorithm.o: $(SRC)/GreedyAlgorithm.cpp $(SRC)/GreedyAlgorithm.h
-	g++ $(FLAGS) -c $(SRC)/GreedyAlgorithm.cpp -o $(OBJ)/GreedyAlgorithm.o -I$(SRC)
+	g++ $(CXXFLAGS) -c $(SRC)/GreedyAlgorithm.cpp -o $(OBJ)/GreedyAlgorithm.o -I$(SRC)
 
 
 #$(OBJ)/random.o: $(SRC)/random.cpp $(SRC)/random.h

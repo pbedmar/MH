@@ -1,22 +1,36 @@
 #include <iostream>
+#include <fstream>
+#include <list>
+#include "functions.h"
 #include "DataLoader.h"
 #include "GreedyAlgorithm.h"
 using namespace std;
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    DataLoader data_ = DataLoader("data/GKD-b_36_n125_m37.txt");
 
-    DataLoader data = DataLoader("data/GKD-b_36_n125_m37.txt");
+    list<string> paths;
+    ifstream parser("data/data_index.txt");
+    string path;
 
-    cout << "Number of elements: " << data.getNumElements() << endl;
-    cout << "Number of solution elements: " << data.getNumRequiredElements() << endl << endl;
+    while(getline(parser, path)) {
+        paths.push_back(path);
+    }
 
-    cout << "Testing distances:" << endl;
-    cout << data.getDistanceMatrix()[0][5] << endl;
-    cout << data.getDistanceMatrix()[5][0] << endl << endl;
+    list<double> costs;
+    list<double> times;
 
-    GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
-    greedyAlgorithm.run(10);
+    for (const auto entry : paths) {
+        DataLoader data = DataLoader(entry);
+
+        GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
+        greedyAlgorithm.run(5);
+
+        costs.push_back(greedyAlgorithm.getAvgCost());
+        times.push_back(greedyAlgorithm.getAvgTime());
+    }
+
+    printResults(costs, times);
 
     return 0;
 }
