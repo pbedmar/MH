@@ -5,8 +5,8 @@ CXXFLAGS = -g -O3 -std=c++17
 
 all: practica1
 
-practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/functions.o
-	g++ $(CXXFLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica1
+practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o
+	g++ $(CXXFLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica1
 
 
 $(OBJ)/practica1.o: src/practica1.cpp
@@ -22,6 +22,8 @@ $(OBJ)/DataLoader.o: $(SRC)/DataLoader.cpp $(SRC)/DataLoader.h
 $(OBJ)/GreedyAlgorithm.o: $(SRC)/GreedyAlgorithm.cpp $(SRC)/GreedyAlgorithm.h
 	g++ $(CXXFLAGS) -c $(SRC)/GreedyAlgorithm.cpp -o $(OBJ)/GreedyAlgorithm.o -I$(SRC)
 
+$(OBJ)/LocalSearchAlgorithm.o: $(SRC)/LocalSearchAlgorithm.cpp $(SRC)/LocalSearchAlgorithm.h
+	g++ $(CXXFLAGS) -c $(SRC)/LocalSearchAlgorithm.cpp -o $(OBJ)/LocalSearchAlgorithm.o -I$(SRC)
 
 #$(OBJ)/random.o: $(SRC)/random.cpp $(SRC)/random.h
 #	g++ $(FLAGS) -c $(SRC)/random.cpp -o $(OBJ)/random.o -I$(SRC)

@@ -110,7 +110,7 @@ void GreedyAlgorithm::run(int n_times) {
         avg_cost += min_g;
 
         //print iteration results
-//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost  " << min_g << ". Solution: ";
+//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << min_g << ". Solution: ";
 //        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
 //            cout << *it << " ";
 //        }

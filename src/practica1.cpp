@@ -4,10 +4,12 @@
 #include "functions.h"
 #include "DataLoader.h"
 #include "GreedyAlgorithm.h"
+#include "LocalSearchAlgorithm.h"
 using namespace std;
 
 int main() {
-    DataLoader data_ = DataLoader("data/GKD-b_36_n125_m37.txt");
+    DataLoader data_ = DataLoader("data/GKD-b_1_n25_m2.txt");
+    //DataLoader data_ = DataLoader("data/GKD-b_36_n125_m37.txt");
 
     list<string> paths;
     ifstream parser("data/data_index.txt");
@@ -17,20 +19,24 @@ int main() {
         paths.push_back(path);
     }
 
-    list<double> costs;
-    list<double> times;
+    //Greedy
+//    list<double> costs;
+//    list<double> times;
+//
+//    for (const auto entry : paths) {
+//        DataLoader data = DataLoader(entry);
+//
+//        GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
+//        greedyAlgorithm.run(5);
+//
+//        costs.push_back(greedyAlgorithm.getAvgCost());
+//        times.push_back(greedyAlgorithm.getAvgTime());
+//    }
+//
+//    printResults(costs, times);
 
-    for (const auto entry : paths) {
-        DataLoader data = DataLoader(entry);
-
-        GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
-        greedyAlgorithm.run(5);
-
-        costs.push_back(greedyAlgorithm.getAvgCost());
-        times.push_back(greedyAlgorithm.getAvgTime());
-    }
-
-    printResults(costs, times);
+    LocalSearchAlgorithm localSearchAlgorithm(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements());
+    localSearchAlgorithm.run(1);
 
     return 0;
 }
