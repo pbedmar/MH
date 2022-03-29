@@ -6,11 +6,14 @@
 #define PRACTICAS_GREEDYALGORITHM_H
 
 #include <vector>
+#include <random>
 using namespace std;
 
 class GreedyAlgorithm {
 private:
     int seed;
+    mt19937 rng_gen;
+
     int numElements;
     int numRequiredElements;
     vector<vector<double> > distanceMatrix;

@@ -6,11 +6,14 @@
 #define PRACTICAS_LOCALSEARCHALGORITHM_H
 
 #include <vector>
+#include <random>
 using namespace std;
 
 class LocalSearchAlgorithm {
 private:
     int seed;
+    mt19937 rng_gen;
+
     int numElements;
     int numRequiredElements;
     const int MAX_EVAL = 100000;

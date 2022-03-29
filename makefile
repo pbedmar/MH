@@ -25,9 +25,5 @@ $(OBJ)/GreedyAlgorithm.o: $(SRC)/GreedyAlgorithm.cpp $(SRC)/GreedyAlgorithm.h
 $(OBJ)/LocalSearchAlgorithm.o: $(SRC)/LocalSearchAlgorithm.cpp $(SRC)/LocalSearchAlgorithm.h
 	g++ $(CXXFLAGS) -c $(SRC)/LocalSearchAlgorithm.cpp -o $(OBJ)/LocalSearchAlgorithm.o -I$(SRC)
 
-#$(OBJ)/random.o: $(SRC)/random.cpp $(SRC)/random.h
-#	g++ $(FLAGS) -c $(SRC)/random.cpp -o $(OBJ)/random.o -I$(SRC)
-
-
 clean:
 	rm $(OBJ)/*.o $(BIN)/*

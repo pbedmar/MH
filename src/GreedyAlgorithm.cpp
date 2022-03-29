@@ -13,7 +13,7 @@ GreedyAlgorithm::GreedyAlgorithm(vector<vector<double> > distanceMatrix_, int nu
     distanceMatrix = distanceMatrix_;
     numElements = numElements_;
     numRequiredElements = numRequiredElements_;
-    srand(seed);
+    rng_gen.seed(seed);
 }
 
 double GreedyAlgorithm::getAvgCost() {
@@ -37,11 +37,13 @@ void GreedyAlgorithm::run(int n_times) {
             unselected_elements.insert(i);
         }
 
-        int current_element = randInt(0, numElements-1); // first element is chosen randomly
+        uniform_int_distribution<mt19937::result_type> dist(0,numElements-1);
+
+        int current_element = dist(rng_gen); // first element is chosen randomly
         solution.insert(current_element);
         unselected_elements.erase(current_element);
         do {
-            solution.insert(randInt(0, numElements - 1));// TODO: second element too, as we need three to compute dispersion?
+            solution.insert(dist(rng_gen));// TODO: second element too as we need three to compute dispersion?
         } while (solution.size() < 2);
         unselected_elements.erase(current_element);
 
@@ -117,7 +119,7 @@ void GreedyAlgorithm::run(int n_times) {
 //        cout << endl;
     }
 
-    avg_time = avg_time/n_times;
+    avg_time = avg_time/n_times; //TODO: Accumulated or mean time?
     avg_cost = avg_cost/n_times;
 }
 

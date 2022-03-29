@@ -3,11 +3,8 @@
 //
 
 #include <iostream>
+#include <random>
 #include "functions.h"
-
-int randInt(int min, int max) {
-    return rand() % (( max + 1 ) - min);
-}
 
 double avg(vector<double> v) {
     double sum = 0;

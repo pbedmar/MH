@@ -19,24 +19,45 @@ int main() {
         paths.push_back(path);
     }
 
-    //Greedy
-//    list<double> costs;
-//    list<double> times;
-//
-//    for (const auto entry : paths) {
-//        DataLoader data = DataLoader(entry);
-//
-//        GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
-//        greedyAlgorithm.run(5);
-//
-//        costs.push_back(greedyAlgorithm.getAvgCost());
-//        times.push_back(greedyAlgorithm.getAvgTime());
-//    }
-//
-//    printResults(costs, times);
+    // GREEDY
+    cout << "------ GREEDY ALGORITHM ------" << endl;
+    list<double> greedy_costs;
+    list<double> greedy_times;
+
+    for (const auto entry : paths) {
+        DataLoader data = DataLoader(entry);
+
+        GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
+        greedyAlgorithm.run(5);
+
+        greedy_costs.push_back(greedyAlgorithm.getAvgCost());
+        greedy_times.push_back(greedyAlgorithm.getAvgTime());
+    }
+
+    printResults(greedy_costs, greedy_times);
 
     LocalSearchAlgorithm localSearchAlgorithm(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements());
     localSearchAlgorithm.run(1);
+    cout << endl << endl;
+
+
+    //LOCAL SEARCH
+    cout << "------ LOCAL SEARCH ALGORITHM ------" << endl;
+    list<double> ls_costs;
+    list<double> ls_times;
+
+    for (const auto entry : paths) {
+        DataLoader data = DataLoader(entry);
+
+        LocalSearchAlgorithm localSearchAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
+        localSearchAlgorithm.run(5);
+
+        ls_costs.push_back(localSearchAlgorithm.getAvgCost());
+        ls_times.push_back(localSearchAlgorithm.getAvgTime());
+    }
+
+    printResults(ls_costs, ls_times);
+    cout << endl << endl;
 
     return 0;
 }
