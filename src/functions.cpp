@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <random>
 #include "functions.h"
 
 double avg(vector<double> v) {
@@ -14,6 +13,46 @@ double avg(vector<double> v) {
     }
 
     return sum/v.size();
+}
+
+double dispersion(vector<vector<double> > distanceMatrix, unordered_set<int> solution) {
+    double max = -numeric_limits<double>::max();
+    double min = numeric_limits<double>::max();
+
+    for (auto v: solution) {
+        double d = 0;
+        for (auto v2: solution) {
+            d += distanceMatrix[v][v2];
+        }
+        if (d > max) {
+            max = d;
+        }
+        if (d < min) {
+            min = d;
+        }
+    }
+
+    return max - min;
+}
+
+double dispersion(vector<vector<double> > distanceMatrix, vector<int> solution) {
+    double max = -numeric_limits<double>::max();
+    double min = numeric_limits<double>::max();
+
+    for (auto v: solution) {
+        double d = 0;
+        for (auto v2: solution) {
+            d += distanceMatrix[v][v2];
+        }
+        if (d > max) {
+            max = d;
+        }
+        if (d < min) {
+            min = d;
+        }
+    }
+
+    return max - min;
 }
 
 void printResults(list<double> cost, list<double> time) {

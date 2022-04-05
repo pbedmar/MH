@@ -7,11 +7,14 @@
 
 #include <vector>
 #include <list>
+#include <unordered_set>
 using namespace std;
 
-int randInt(int min, int max);
-
 double avg(vector<double> v);
+
+double dispersion(vector<vector<double> > distanceMatrix, unordered_set<int> solution);
+
+double dispersion(vector<vector<double> > distanceMatrix, vector<int> solution);
 
 void printResults(list<double> cost, list<double> time);
 

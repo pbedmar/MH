@@ -39,23 +39,26 @@ void GreedyAlgorithm::run(int n_times) {
 
         uniform_int_distribution<mt19937::result_type> dist(0,numElements-1);
 
-        int current_element = dist(rng_gen); // first element is chosen randomly
-        solution.insert(current_element);
-        unselected_elements.erase(current_element);
-        do {
-            solution.insert(dist(rng_gen));// TODO: second element too as we need three to compute dispersion?
-        } while (solution.size() < 2);
-        unselected_elements.erase(current_element);
+        int first_element = dist(rng_gen); // first element is chosen randomly
+        solution.insert(first_element);
+        unselected_elements.erase(first_element);
 
-        for (auto u = unselected_elements.cbegin(); u != unselected_elements.cend(); u++) {
-            for (auto v = solution.cbegin(); v != solution.cend(); v++) {
-                sum[*u] += distanceMatrix[*u][*v];
+        int second_element;
+        do {
+            second_element = dist(rng_gen);
+        } while (first_element == second_element);
+        solution.insert(second_element);
+        unselected_elements.erase(second_element);
+
+        for (auto u: unselected_elements) {
+            for (auto v: solution) {
+                sum[u] += distanceMatrix[u][v];
             }
         }
 
-        for (auto v = solution.cbegin(); v != solution.cend(); v++) {
-            for (auto v2 = solution.cbegin(); v2 != solution.cend(); v2++) {
-                sum[*v] += distanceMatrix[*v][*v2];
+        for (auto v: solution) {
+            for (auto v2: solution) {
+                sum[v] += distanceMatrix[v][v2];
             }
         }
 
@@ -67,12 +70,12 @@ void GreedyAlgorithm::run(int n_times) {
             min_g = numeric_limits<double>::max();
             element_min_g = -1;
 
-            for (auto u = unselected_elements.cbegin(); u != unselected_elements.cend(); u++) {
+            for (auto u: unselected_elements) {
                 double del_v_max = -numeric_limits<double>::max();
                 double del_v_min = numeric_limits<double>::max();
 
-                for (auto v = solution.cbegin(); v != solution.cend(); v++) {
-                    double del_v = sum[*v] + distanceMatrix[*u][*v];
+                for (auto v: solution) {
+                    double del_v = sum[v] + distanceMatrix[u][v];
 
                     if (del_v_max < del_v) {
                         del_v_max = del_v;
@@ -82,13 +85,13 @@ void GreedyAlgorithm::run(int n_times) {
                     }
                 }
 
-                double delta_u_max = max(sum[*u], del_v_max);
-                double delta_u_min = min(sum[*u], del_v_min);
+                double delta_u_max = max(sum[u], del_v_max);
+                double delta_u_min = min(sum[u], del_v_min);
 
                 double g = delta_u_max - delta_u_min;
                 if (min_g > g) {
                     min_g = g;
-                    element_min_g = *u;
+                    element_min_g = u;
                 }
 
             }
@@ -96,13 +99,19 @@ void GreedyAlgorithm::run(int n_times) {
             unselected_elements.erase(element_min_g);
             solution.insert(element_min_g);
 
-            for (auto u = unselected_elements.cbegin(); u != unselected_elements.cend(); u++) {
-                sum[*u] += distanceMatrix[*u][element_min_g];
+            for (int i = 0; i < numElements; i++) {
+                sum[i] += distanceMatrix[i][element_min_g];
             }
 
-            for (auto v = solution.cbegin(); v != solution.cend(); v++) {
-                sum[*v] += distanceMatrix[*v][element_min_g];
-            }
+//            cout << "Sol: ";
+//            for (auto v: solution) {
+//                cout << v << ",";
+//            }
+//            cout << ". Not chosen: ";
+//            for (auto u: unselected_elements) {
+//                cout << u << ",";
+//            }
+//            cout << ". Element min g: " << element_min_g << ". Disp: " << min_g << ". Real disp: " << dispersion(distanceMatrix, solution) << endl;
         }
 
         double elapsed = (clock()- start_time);
@@ -112,11 +121,15 @@ void GreedyAlgorithm::run(int n_times) {
         avg_cost += min_g;
 
         //print iteration results
-//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << min_g << ". Solution: ";
+        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << min_g << ". Cost optim " << dispersion(distanceMatrix, solution) << ". Solution: ";
+        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
+            cout << *it << ", ";
+        }
+        cout << endl;
+//        cout << "accumulated distance:" << endl;
 //        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
-//            cout << *it << " ";
+//            cout << "\t\t" << *it << " => " << sum[*it] << endl;
 //        }
-//        cout << endl;
     }
 
     avg_time = avg_time/n_times; //TODO: Accumulated or mean time?
