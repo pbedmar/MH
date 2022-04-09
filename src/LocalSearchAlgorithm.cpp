@@ -31,7 +31,12 @@ void LocalSearchAlgorithm::run(int n_times) {
         clock_t start_time = clock();
 
         vector<int> solution;
+        vector<int> best_solution;
         vector<int> unselected_items;
+
+        double current_cost = 0;
+        double best_cost = 0;
+
         vector<double> sum(numElements, 0);
 
         for (int i = 0; i < numElements; i++) {
@@ -41,16 +46,18 @@ void LocalSearchAlgorithm::run(int n_times) {
         shuffle(unselected_items.begin(), unselected_items.end(), rng_gen);
 
         for (int i = 0; i < numRequiredElements; i++) {
-            solution.push_back(unselected_items[unselected_items.size()-1]);
+            int element = unselected_items[unselected_items.size()-1];
             unselected_items.pop_back();
+            solution.push_back(element);
         }
 
+        best_solution = solution;
+        current_cost = dispersion(distanceMatrix, solution);
+        best_cost = current_cost;
 
-        double current_cost = 0;
         for (auto w: solution) {
             for (auto w2: solution) {
-                sum[w] += distanceMatrix[w][w2]; //TODO: What is anterior(w)? Am I initializing this correctly for the base case?
-                current_cost += distanceMatrix[w][w2];
+                sum[w] += distanceMatrix[w][w2];
             }
         }
 
@@ -60,87 +67,77 @@ void LocalSearchAlgorithm::run(int n_times) {
 
             bool better_solution = false;
 
-//            for (auto u: solution) {
-//                cout << u << " ";
-//            }
-//
-//            cout << endl;
-//            for (auto u: unselected_items) {
-//                cout << u << " ";
-//            }
-//            cout << endl << endl;
-
-            int swap = solution[solution.size() - 1];
-            solution.pop_back();
-            solution.push_back(unselected_items[unselected_items.size() - 1]);
-            unselected_items.pop_back();
-            unselected_items.push_back(swap);
-
-            shuffle(solution.begin(), solution.end(), rng_gen);
-            shuffle(unselected_items.begin(), unselected_items.end(), rng_gen);
-
             auto u = solution.begin();
-            auto v = unselected_items.begin();
-
             while (u != solution.end() && !better_solution && eval < MAX_EVAL) {
+                auto v = unselected_items.begin();
                 while (v != unselected_items.end() && !better_solution && eval < MAX_EVAL) {
 
+                    eval++;
+
                     vector<double> delta(numElements, 0);
+                    double delta_max_w = -numeric_limits<double>::max();
+                    double delta_min_w = numeric_limits<double>::max();
 
-                    double delta_w_max = -numeric_limits<double>::max();
-                    double delta_w_min = numeric_limits<double>::max();
+                    for (auto w: solution) {
+                        if (w != *u) {
+                            delta[w] = sum[w] - distanceMatrix[w][*u] + distanceMatrix[w][*v];
+                            delta[*v] += distanceMatrix[w][*v];
 
-                    for (auto w = solution.begin(); w != solution.end(); w++) {
-                        if (*w != *u) {
-                            delta[*w] = sum[*w] - distanceMatrix[*w][*u] + distanceMatrix[*w][*v]; //TODO: Anterior
-                            delta[*v] += distanceMatrix[*v][*w];
-
-                            if (delta[*w] > delta_w_max) {
-                                delta_w_max = delta[*w];
+                            if (delta[w] > delta_max_w) {
+                                delta_max_w = delta[w];
                             }
 
-                            if (delta[*w] < delta_w_min) {
-                                delta_w_min = delta[*w];
+                            if (delta[w] < delta_min_w) {
+                                delta_min_w = delta[w];
                             }
                         }
                     }
 
-                    double delta_max = max(delta[*v], delta_w_max);
-                    double delta_min = min(delta[*v], delta_w_min);
+                    double delta_max = max(delta[*v], delta_max_w);
+                    double delta_min = min(delta[*v], delta_min_w);
                     double new_cost = delta_max - delta_min;
 
-                    if (new_cost < current_cost) {
-                        sum = delta;
-                        current_cost = new_cost;
-                        better_solution = true;
-                        eval = 0;
+//                    //print iteration results
+//                    cout << "u" << *u << "v" << *v << ". Cost " << new_cost << ". Solution: ";
+//                    for (auto it: solution) {
+//                        cout << it << ",";
+//                    }
+//                    cout << endl;
 
-                        int last_u = *u;
-                        int last_v = *v;
-                        solution.erase(u);
-                        solution.push_back(last_v);
-                        unselected_items.erase(v);
-                        unselected_items.push_back(last_u);
+                    if (new_cost < current_cost) {
+                        best_cost = new_cost;
+                        current_cost = new_cost;
+                        sum = delta;
+
+                        int u_value = *u;
+                        int v_value = *v;
+                        *u = v_value;
+                        *v = u_value;
+
+                        better_solution = true;
+                        best_solution = solution;
                     }
-                    eval++;
                     v++;
                 }
                 u++;
             }
+
+            shuffle(solution.begin(), solution.end(), rng_gen);
+            shuffle(unselected_items.begin(), unselected_items.end(), rng_gen);
         }
 
         double elapsed = (clock()- start_time);
         double elapsed_in_seconds = elapsed / CLOCKS_PER_SEC;
 
         avg_time += elapsed_in_seconds;
-        avg_cost += current_cost;
+        avg_cost += best_cost;
 
         //print iteration results
-//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << current_cost << ". Solution: ";
-//        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
-//            cout << *it << " ";
-//        }
-//        cout << endl;
+        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost funcion aux " << dispersion(distanceMatrix, best_solution) << ". Cost " << best_cost << ". Solution: ";
+        for (auto it: best_solution) {
+            cout << it << ",";
+        }
+        cout << endl;
     }
 
     avg_time = avg_time/n_times;

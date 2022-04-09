@@ -8,8 +8,14 @@
 using namespace std;
 
 int main() {
-    DataLoader data_ = DataLoader("data/GKD-b_1_n25_m2.txt");
-    //DataLoader data_ = DataLoader("data/GKD-b_36_n125_m37.txt");
+    //DataLoader data_ = DataLoader("data/GKD-b_1_n25_m2.txt");
+//    DataLoader data_ = DataLoader("data/GKD-b_43_n150_m15.txt");
+//
+//    LocalSearchAlgorithm localSearchAlgorithm_(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements());
+//
+//    localSearchAlgorithm_.run(1);
+//
+//    return 0;
 
     list<string> paths;
     ifstream parser("data/data_index.txt");
@@ -27,6 +33,7 @@ int main() {
     for (const auto entry : paths) {
         DataLoader data = DataLoader(entry);
 
+        cout << endl << "Dataset: " << entry << endl;
         GreedyAlgorithm greedyAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
         greedyAlgorithm.run(5);
 
@@ -35,10 +42,6 @@ int main() {
     }
 
     printResults(greedy_costs, greedy_times);
-
-    LocalSearchAlgorithm localSearchAlgorithm(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements());
-    localSearchAlgorithm.run(1);
-    cout << endl << endl;
 
 
     //LOCAL SEARCH
@@ -49,6 +52,7 @@ int main() {
     for (const auto entry : paths) {
         DataLoader data = DataLoader(entry);
 
+        cout << endl << "Dataset: " << entry << endl;
         LocalSearchAlgorithm localSearchAlgorithm(data.getDistanceMatrix(), data.getNumElements(), data.getNumRequiredElements());
         localSearchAlgorithm.run(5);
 

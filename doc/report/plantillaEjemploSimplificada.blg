@@ -1,0 +1,55 @@
+This is BibTeX, Version 0.99d (TeX Live 2020)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: plantillaEjemploSimplificada.aux
+The style file: plain.bst
+Database file #1: citas.bib
+Warning--to sort, need author or key in centos-install-phoronix
+Warning--to sort, need author or key in centos-phoronix-libc-error
+Warning--to sort, need author or key in ubuntu-install-phoronix
+Warning--to sort, need author or key in isep4jmeter
+Warning--to sort, need author or key in jmeter-download
+Warning--to sort, need author or key in jmeter-documentation
+Warning--to sort, need author or key in docker-download
+Warning--to sort, need author or key in docker-phoronix
+You've used 8 entries,
+            2118 wiz_defined-function locations,
+            518 strings with 4909 characters,
+and the built_in function-call counts, 1236 in all, are:
+= -- 104
+> -- 8
+< -- 0
++ -- 8
+- -- 0
+* -- 50
+:= -- 129
+add.period$ -- 8
+call.type$ -- 8
+change.case$ -- 24
+chr.to.int$ -- 0
+cite$ -- 16
+duplicate$ -- 56
+empty$ -- 185
+format.name$ -- 0
+if$ -- 305
+int.to.chr$ -- 0
+int.to.str$ -- 8
+missing$ -- 0
+newline$ -- 27
+num.names$ -- 0
+pop$ -- 72
+preamble$ -- 1
+purify$ -- 16
+quote$ -- 0
+skip$ -- 64
+stack$ -- 0
+substring$ -- 40
+swap$ -- 8
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 32
+warning$ -- 8
+while$ -- 0
+width$ -- 9
+write$ -- 50
+(There were 8 warnings)
