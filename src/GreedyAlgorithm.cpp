@@ -93,7 +93,6 @@ void GreedyAlgorithm::run(int n_times) {
                     min_g = g;
                     element_min_g = u;
                 }
-
             }
 
             unselected_elements.erase(element_min_g);
@@ -102,16 +101,6 @@ void GreedyAlgorithm::run(int n_times) {
             for (int i = 0; i < numElements; i++) {
                 sum[i] += distanceMatrix[i][element_min_g];
             }
-
-//            cout << "Sol: ";
-//            for (auto v: solution) {
-//                cout << v << ",";
-//            }
-//            cout << ". Not chosen: ";
-//            for (auto u: unselected_elements) {
-//                cout << u << ",";
-//            }
-//            cout << ". Element min g: " << element_min_g << ". Disp: " << min_g << ". Real disp: " << dispersion(distanceMatrix, solution) << endl;
         }
 
         double elapsed = (clock()- start_time);
@@ -126,10 +115,6 @@ void GreedyAlgorithm::run(int n_times) {
             cout << *it << ", ";
         }
         cout << endl;
-//        cout << "accumulated distance:" << endl;
-//        for (auto it = solution.cbegin(); it != solution.cend(); it++) {
-//            cout << "\t\t" << *it << " => " << sum[*it] << endl;
-//        }
     }
 
     avg_time = avg_time/n_times; //TODO: Accumulated or mean time?

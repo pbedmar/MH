@@ -55,7 +55,7 @@
 
 Sea $G = (V,E)$ un grafo completo no dirigido donde $V$, de tamaño $n$, es el conjunto de vértices que lo forman y $E$ es el conjunto de las aristas que unen estos vértices. Este grafo es un grafo ponderado, ya que cada una de las aristas $e_{u,v} \in E$ lleva asociada un peso que representa la distancia $d_{u,v}$ entre dos vértices $u,v \in V$.
 
-La dispersión es una medida que se puede aplicar en este dominio, donde dado un subconjunto $S \subseteq V$ de tamaño $m$ se mide cómo de homogéneas son las distancias entre los vértices que forman $S$. Una de las aplicaciones más importantes de las Ciencias de la Computación consiste en optimizar valores como éste, maximizando o minimizando el resultado que devuelve una \textbf{función objetivo}. 
+La dispersión es una medida que se puede aplicar en este dominio, donde dado un subconjunto $S \subset V$ de tamaño $m$ se mide cómo de homogéneas son las distancias entre los vértices que forman $S$. Una de las aplicaciones más importantes de las Ciencias de la Computación consiste en optimizar valores como éste, maximizando o minimizando el resultado que devuelve una \textbf{función objetivo}. 
 
 En esta práctica queremos minimizar su valor, obteniendo la mínima dispersión. Este problema tiene un gran paralelismo con problemas reales, como puede ser la organización del género en almacenes, donde minimizar la dispersión de la mercancía reduce los costes. Por tanto, si resolvemos este problema de forma teórica es trivial aplicar la solución en estos casos.
 
@@ -66,20 +66,58 @@ Anteriormente he definido la dispersión de una forma muy genérica, sin entrar 
 
 Utilizando esta definición de dispersión como función objetivo obtenemos lo que se conoce como \textbf{Problema de la Mínima Dispersión Diferencial (MDD)}, es decir: 
 \begin{align*}
-    S^{*} = {arg min}_{S \subseteq V} diff(S)
+    S^{*} = {arg min}_{S \subset V} diff(S)
 \end{align*}
 
 
 \part{Descripción de la aplicación de los algoritmos}
+En esta primera práctica de la asignatura implementamos y comparamos el rendimiento de dos familias de algoritmos, \textbf{Greedy} y \textbf{Búsqueda Local primero el mejor}. Antes de describirlos, vamos a comentar información común a ambos.
 
 
+\section{Datos utilizados}
+Los datos que necesitamos para analizar el comportamiento de los algoritmos en este problema no son muy complejos. En cada posible instancia se necesita conocer el valor $n$ indicando el número de puntos que contiene el dataset, el valor $m < n$ indicando cuantos puntos se quieren escoger de forma que se minimice la dispersión en esos $m$ puntos y la matriz $d$ con tamaño $n \times n$, simétrica y con valor 0 en su diagonal, que contiene las distancias entre cada uno de los $n$ puntos del dataset. En definitiva, se necesita conocer el grafo $G$.
 
-\section{Algoritmo Greedy}
+En total, utilizamos 50 instancias diferentes con datos extraídos del dataset \textbf{GKD}. Las instancias toman valores $n \in \{25,50,100,125,150\}$ y $m \in [2,45]$.
 
 
-\section{Búsqueda Local}
+\section{Representación de soluciones}
 
+El conjunto $V$ descrito en la formulación del problema coincide con $n$ en tamaño. $S$ es una solución válida del problema si:
+\begin{itemize}
+    \item $|S| = m$
+    \item $S \subset V$
+\end{itemize}
+Y por tanto, $m < n$.
 
+\section{Función objetivo}
+
+Como hemos comentado al describir el problema, la función objetivo a minimizar se define como:
+\begin{align*}
+    diff(S) = max_{i \in S} \{ \sum_{j \in S} d_{i,j}\} - min_{i \in S} \{ \sum_{j \in S} d_{i,j}\}
+\end{align*}
+
+\noindent En pseudocódigo quedaría de la siguiente forma:
+\begin{algorithm}
+    \caption{Función objetivo}
+\begin{algorithmic}
+\State $max \gets -\infty$
+\State $min \gets \infty$
+\For{$s \in S$}
+    \State $distance \gets \sum_{s2 \in S} d_{s,s2}$
+    \If{$distance > max$}
+        \State $max \gets distance$
+    \EndIf
+    \If{$distance < min$}
+        \State $min \gets distance$
+    \EndIf
+\EndFor
+\State \textbf{return} $max - min$
+\end{algorithmic}
+\end{algorithm}
+
+En los algoritmos que aparecen en esta práctica, no se utiliza directamente esta implementación de la función objetivo (excepto para inicializar la Búsqueda Local). Esto se debe a que es costosa, en concreto tiene una complejidad computacional de $O(n^2)$. Utilizamos versiones factorizadas de la función, que reutilizan cálculos previos de iteraciones anteriores para actualizar el valor de la dispersión. De esta forma, obtenemos una complejidad de $O(n)$.
+
+%\section{Operadores comunes}
 
 
 
@@ -89,10 +127,155 @@ Utilizando esta definición de dispersión como función objetivo obtenemos lo q
 
 \section{Algoritmo Greedy}
 
+El primer algoritmo que implementamos para resolver el problema utiliza una estrategia Greedy, donde partiendo de una solución incompleta $S$ con sólo dos vértices $v_1,v_2 \in V$ elegidos aleatoriamente, llegamos a una solución completa añadiendo un nuevo vértice en cada iteración. En concreto, se añade el vértice que minimiza la dispersión con respecto a los ya existentes.
 
+\begin{algorithm}[H]
+\caption{Algoritmo Greedy}
+\begin{algorithmic}[1]
+\State $s_1, s_2 \gets$ Rand($V$) \Comment{Rand() devuelve dos vértices aleatorios de V}
+\State $S \gets \{s_1,s_2\}$
+\State $U \gets V \setminus \{s_1,s_2\}$  
+\State 
+\State $sum \gets [ \, ]$ \Comment{Array que contiene la distancia acumulada,}
+\For{$u \in U$} \Comment{necesario para la factorización de la función objetivo}
+    \For{$s \in S$}
+        \State $sum[u] \pluseq d_{u,s}$
+    \EndFor
+\EndFor
+\For{$s \in S$}
+    \For{$s2 \in S$}
+        \State $sum[s] \pluseq d_{s,s2}$
+    \EndFor
+\EndFor
+\algstore{myalg}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{myalg}
+\While{$|S| < m$} \Comment{Donde $m$ es el tamaño que debe tener la solución}
+    \State $g_{min} \gets \infty$
+    \State $u\_g_{min} \gets -1$
+    \State
+    \For{$u \in U$}
+        \State $\delta(v)_{max} \gets -\infty$
+        \State $\delta(v)_{min} \gets \infty$
+        \State
+        \For{$v \in S$}
+            \State $\delta(v) \gets sum[v] + d_{u,v}$
+            \If{$\delta(v)_{max} < \delta(v)$}
+                \State $\delta(v)_{max} \gets \delta(v)$
+            \EndIf
+             \If{$\delta(v)_{min} > \delta(v)$}
+                \State $\delta(v)_{min} \gets \delta(v)$
+            \EndIf
+            \State
+            \State $\delta(u)_{max} \gets max(sum[u], \delta(v)_{max})$
+            \State $\delta(u)_{min} \gets min(sum[u], \delta(v)_{min})$
+            \State $g = \delta(u)_{max} - \delta(u)_{min}$
+            \If{$g_{min} > g$}
+                \State $g_{min} \gets g$
+                \State $u\_g_{min} \gets -1$
+            \EndIf
+        \EndFor
+        \State
+        \State $U \gets U \setminus \{u\_g_{min}\}$
+        \State $S \gets S + \{u\_g_{min}\}$
+    \EndFor
+    \State
+    \For{$v \in V $}
+        \State $sum[v] \pluseq d_{v,u\_g_{min}}$
+    \EndFor
+\EndWhile
+\State
+\State \textbf{return} $S$ 
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
 \section{Búsqueda Local}
 
+En esta segunda implementación utilizamos una búsqueda local. Para ello, se genera una solución inicial aleatoria (y válida) y se va explorando su entorno. Cuando se encuentra un vecino que reduce la dispersión, se actualiza como nueva solución. Así se procede hasta haber recorrido todo el vecindario sin encontrar una solución mejor o hasta llegar a las 100000 evaluaciones de la función objetivo. Cada vez que se reinicia la exploración del vecindario, se barajan el vector que contiene la solución y el que contiene los vértices que no pertenecen a esta, para asegurar que el orden en el que se visitan los nodos no es determinístico.
 
+
+
+\begin{algorithm}[H]
+\caption{Algoritmo Búsqueda Local primero el mejor}
+\begin{algorithmic}[1]
+\State $U \gets V$
+\State $U \gets$ Shuffle($U$)
+\State $S \gets [ \, ]$
+\State $sum \gets [ \, ]$
+\State
+\For{$i = 0$ \textbf{to} $m-1$}
+    \State element $\gets U.last$
+    \State $U \gets U - \{element\}$
+    \State $S \gets S + \{element\}$
+\EndFor
+\State
+\State $S_{best} \gets S$
+\State $current\_cost \gets $dispersion($S$)
+\State $best\_cost \gets current\_cost$
+\State
+\State eval $\gets 0$
+\State $better\_solution \gets true$
+\State
+\While{eval $< 100000$ \textbf{and} $better\_solution$}
+    \State $better\_solution \gets false$
+    \State
+    \For{$u \in S$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 100000$}
+        \For{$v \in U$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 100000$}
+            \State $eval \gets eval+1$
+            \State $\delta \gets [\,]$ \Comment Array inicializado a 0
+            \State $\delta(w)_{max} \gets -\infty$
+            \State $\delta(w)_{min} \gets \infty$
+            \State
+\algstore{myalg2}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{myalg2}
+            \For{$w \in S$}
+                \If{$w != u$}
+                    \State $\delta[w] \gets sum[w] - d_{w,u} + d_{w,v}$
+                    \State $\delta[v] \pluseq d_{w,v}$
+                    \State
+                    \If{$\delta[w] > \delta(w)_{max}$}
+                        \State $\delta(w)_{max} \gets \delta[w]$
+                    \EndIf
+                    \If{$\delta[w] < \delta(w)_{min}$}
+                        \State $\delta(w)_{min} \gets \delta[w]$
+                    \EndIf
+                \EndIf
+            \EndFor
+            \State
+            \State $\delta_{max} \gets max(\delta[v], \delta(w)_{max})$
+            \State $\delta_{min} \gets min(\delta[v], \delta(w)_{min})$
+            \State $new\_cost \gets \delta_{max} - \delta_{min}$
+            \If{$new\_cost < current\_cost$}
+                \State $best\_cost \gets new\_cost$
+                \State $current\_cost \gets new\_cost$
+                \State
+                \State $swap \gets u$ \Comment intercambio $u$ y $v$ en $S$ y $U$
+                \State $u \gets v$
+                \State $v \gets swap$
+                \State $better\_solution = true$
+                \State $best\_solution = S$
+            \EndIf
+            \State
+        \EndFor
+    \EndFor
+    \State
+    \State shuffle($S$)
+    \State shuffle($U$)
+\EndWhile
+\State
+\State \textbf{return} $S$  
+\end{algorithmic}
+\end{algorithm}
 
 
 

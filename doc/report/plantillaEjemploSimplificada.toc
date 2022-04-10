@@ -1,9 +1,10 @@
 \babel@toc {spanish}{}
 \contentsline {part}{I\hspace {1em}Formulación del problema}{3}%
 \contentsline {part}{II\hspace {1em}Descripción de la aplicación de los algoritmos}{4}%
-\contentsline {section}{\numberline {1}Algoritmo Greedy}{4}%
-\contentsline {section}{\numberline {2}Búsqueda Local}{4}%
-\contentsline {part}{III\hspace {1em}Pseudocódigo de los algoritmos}{5}%
-\contentsline {section}{\numberline {3}Algoritmo Greedy}{5}%
-\contentsline {section}{\numberline {4}Búsqueda Local}{5}%
-\contentsline {part}{IV\hspace {1em}Pseudocódigo de los algoritmos}{6}%
+\contentsline {section}{\numberline {1}Datos utilizados}{4}%
+\contentsline {section}{\numberline {2}Representación de soluciones}{4}%
+\contentsline {section}{\numberline {3}Función objetivo}{5}%
+\contentsline {part}{III\hspace {1em}Pseudocódigo de los algoritmos}{6}%
+\contentsline {section}{\numberline {4}Algoritmo Greedy}{6}%
+\contentsline {section}{\numberline {5}Búsqueda Local}{8}%
+\contentsline {part}{IV\hspace {1em}Pseudocódigo de los algoritmos}{10}%

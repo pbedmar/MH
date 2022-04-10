@@ -98,13 +98,6 @@ void LocalSearchAlgorithm::run(int n_times) {
                     double delta_min = min(delta[*v], delta_min_w);
                     double new_cost = delta_max - delta_min;
 
-//                    //print iteration results
-//                    cout << "u" << *u << "v" << *v << ". Cost " << new_cost << ". Solution: ";
-//                    for (auto it: solution) {
-//                        cout << it << ",";
-//                    }
-//                    cout << endl;
-
                     if (new_cost < current_cost) {
                         best_cost = new_cost;
                         current_cost = new_cost;
