@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  9 APR 2022 08:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  9 APR 2022 10:54
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -8,8 +8,8 @@ entering extended mode
 LaTeX2e <2020-02-02> patch level 5
 L3 programming layer <2020-03-06> (/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/preambuloSimple.tex (/usr/local/texlive/2020/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2019/12/20 v1.4l Standard LaTeX document class
-(/usr/local/texlive/2020/texmf-dist/tex/latex/base/size10.clo
-File: size10.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2019/12/20 v1.4l Standard LaTeX file (size option)
 )
 \c@part=\count167
 \c@section=\count168
@@ -159,16 +159,30 @@ Package: fancyhdr 2019/01/31 v3.10 Extensive control of page headers and footers
 \f@nch@O@erf=\skip61
 \f@nch@O@olf=\skip62
 \f@nch@O@orf=\skip63
-)) (/usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
+)) (/usr/local/texlive/2020/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+ (/usr/local/texlive/2020/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+ (/usr/local/texlive/2020/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2020/03/06 v1.0d TeX engine tests
+))
+\Gm@cnth=\count191
+\Gm@cntv=\count192
+\c@Gm@tempcnt=\count193
+\Gm@bindingoffset=\dimen147
+\Gm@wd@mp=\dimen148
+\Gm@odd@mp=\dimen149
+\Gm@even@mp=\dimen150
+\Gm@layoutwidth=\dimen151
+\Gm@layoutheight=\dimen152
+\Gm@layouthoffset=\dimen153
+\Gm@layoutvoffset=\dimen154
+\Gm@dimlist=\toks32
+) (/usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
 File: l3backend-pdfmode.def 2020-03-12 L3 backend support: PDF mode
-\l__kernel_color_stack_int=\count191
+\l__kernel_color_stack_int=\count194
 \l__pdf_internal_box=\box49
-)
-
-LaTeX Warning: Unused global option(s):
-    [paper=a4,fontsize=11pt].
-
-(/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.aux
+) (/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.aux
 LaTeX Info: Redefining \. on input line 7.
 LaTeX Info: Redefining \% on input line 7.
 )
@@ -192,30 +206,64 @@ LaTeX Info: Redefining \. on input line 36.
 LaTeX Info: Redefining \% on input line 36.
  (/usr/local/texlive/2020/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count192
-\scratchdimen=\dimen147
+\scratchcounter=\count195
+\scratchdimen=\dimen155
 \scratchbox=\box50
-\nofMPsegments=\count193
-\nofMParguments=\count194
-\everyMPshowfont=\toks32
-\MPscratchCnt=\count195
-\MPscratchDim=\dimen148
-\MPnumerator=\count196
-\makeMPintoPDFobject=\count197
-\everyMPtoPDFconversion=\toks33
+\nofMPsegments=\count196
+\nofMParguments=\count197
+\everyMPshowfont=\toks33
+\MPscratchCnt=\count198
+\MPscratchDim=\dimen156
+\MPnumerator=\count199
+\makeMPintoPDFobject=\count266
+\everyMPtoPDFconversion=\toks34
 ) (/usr/local/texlive/2020/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
  (/usr/local/texlive/2020/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(79.6678pt, 441.01773pt, 76.82234pt)
+* v-part:(T,H,B)=(113.81102pt, 645.87756pt, 85.35826pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=441.01773pt
+* \textheight=645.87756pt
+* \oddsidemargin=7.39781pt
+* \evensidemargin=7.39781pt
+* \topmargin=4.54103pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=12.0pt
+* \footskip=30.0pt
+* \marginparwidth=44.0pt
+* \marginparsep=10.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
 <img/ugr.png, id=1, 728.7225pt x 241.90375pt>
 File: img/ugr.png Graphic file (type png)
 <use img/ugr.png>
 Package pdftex.def Info: img/ugr.png  used on input line 39.
 (pdftex.def)             Requested size: 291.48383pt x 96.75978pt.
 LaTeX Font Info:    Trying to load font information for U+msa on input line 39.
- (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsa.fd
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 LaTeX Font Info:    Trying to load font information for U+msb on input line 39.
@@ -225,10 +273,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 LaTeX Warning: No \author given.
 
-
-Overfull \vbox (10.0pt too high) has occurred while \output is active []
-
- [1
+[1
 
 
 {/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map} </Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/img/ugr.png>] (/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.toc
@@ -238,38 +283,28 @@ LaTeX Info: Redefining \% on input line 1.
 \tf@toc=\write3
 \openout3 = `plantillaEjemploSimplificada.toc'.
 
-
-
-Package Fancyhdr Warning: \headheight is too small (-10.0pt): 
-Make it at least 0.0pt.
-We now make it that large for the rest of the document.
-This may cause the page layout to be inconsistent, however.
-
-
-Overfull \vbox (10.0pt too high) has occurred while \output is active []
-
  [2] [3] [4] [5] [6] (/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.bbl
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4.
  (/usr/local/texlive/2020/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
 Underfull \hbox (badness 10000) in paragraph at lines 8--10
-[]$\T1/cmtt/m/n/10 https : / / stackoverflow . com / questions / 68936024 /
+[]$\T1/cmtt/m/n/12 https : / / stackoverflow . com / questions / 68936024 /
  []
 
 
-Overfull \hbox (4.75061pt too wide) in paragraph at lines 8--10
-\T1/cmtt/m/n/10 how-[]can-[]i-[]install-[]the-[]file-[]libc-[]a-[]using-[]dnf-[]install-[]in-[]centos8$\T1/cmr/m/n/10 ,
+Underfull \hbox (badness 10000) in paragraph at lines 8--10
+\T1/cmtt/m/n/12 how-[]can-[]i-[]install-[]the-[]file-[]libc-[]a-[]using-[]dnf-[]install-[]in-[]centos8$\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (133.46857pt too wide) in paragraph at lines 12--14
-[]$\T1/cmtt/m/n/10 https : / / ubunlog . com / phoronix-[]test-[]suite-[]una-[]herramienta-[]para-[]benchmark-[]multiplataforma/$\T1/cmr/m/n/10 ,
+Overfull \hbox (121.11385pt too wide) in paragraph at lines 12--14
+[]$\T1/cmtt/m/n/12 https : / / ubunlog . com / phoronix-[]test-[]suite-[]una-[]herramienta-[]para-[]benchmark-[]multiplataforma/$\T1/cmr/m/n/12 ,
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 32--34
-[]$\T1/cmtt/m/n/10 https : / / www . phoronix . com / scan . php ? page = article & item =
+[]$\T1/cmtt/m/n/12 https : / / www . phoronix . com / scan . php ? page = article & item =
  []
 
 ) [7] (/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.aux
@@ -277,18 +312,18 @@ LaTeX Info: Redefining \. on input line 7.
 LaTeX Info: Redefining \% on input line 7.
 ) ) 
 Here is how much of TeX's memory you used:
- 3506 strings out of 480608
- 47947 string characters out of 5903631
- 299847 words of memory out of 5000000
- 19339 multiletter control sequences out of 15000+600000
- 545935 words of font info for 60 fonts, out of 8000000 for 9000
+ 4014 strings out of 480608
+ 55311 string characters out of 5903631
+ 314915 words of memory out of 5000000
+ 19839 multiletter control sequences out of 15000+600000
+ 546841 words of font info for 63 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 33i,10n,47p,399b,361s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx1000.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx2074.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on /Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.pdf (7 pages, 434601 bytes).
+ 33i,10n,47p,532b,361s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm2488.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
+Output written on /Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/doc/report/plantillaEjemploSimplificada.pdf (7 pages, 490967 bytes).
 PDF statistics:
- 72 PDF objects out of 1000 (max. 8388607)
- 50 compressed objects within 1 object stream
+ 96 PDF objects out of 1000 (max. 8388607)
+ 68 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

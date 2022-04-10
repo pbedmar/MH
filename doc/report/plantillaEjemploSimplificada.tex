@@ -7,7 +7,7 @@
 
 \title{	
 \normalfont \normalsize 
-\huge{\textbf{Metaheurísticas (Curso 2021-2022)} \newline \newline Grado en Ingeniería Informática \\ Universidad de Granada} \\ [23pt] % Your university, school and/or department name(s)
+\huge{\textbf{Metaheurísticas (Curso 2021-2022)}\linebreak \linebreak Grado en Ingeniería Informática \\ Universidad de Granada} \\ [23pt] % Your university, school and/or department name(s)
 
 \begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
     \centering
@@ -20,7 +20,7 @@
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 \vspace{0.7cm}
 
-\Large{Pedro Bedmar López - 75935296Z}
+\Large{Pedro Bedmar López - 75935296Z} \\
 \Large{pedrobedmar@correo.ugr.es} \linebreak
 
 \large Grupo de prácticas 3 - Martes 17:30-19:30
@@ -53,7 +53,21 @@
 
 \part{Formulación del problema}
 
-El problema de la \textbf{Mínima Dispersión Diferencial (MDD)} es un problema en el que dados 
+Sea $G = (V,E)$ un grafo completo no dirigido donde $V$, de tamaño $n$, es el conjunto de vértices que lo forman y $E$ es el conjunto de las aristas que unen estos vértices. Este grafo es un grafo ponderado, ya que cada una de las aristas $e_{u,v} \in E$ lleva asociada un peso que representa la distancia $d_{u,v}$ entre dos vértices $u,v \in V$.
+
+La dispersión es una medida que se puede aplicar en este dominio, donde dado un subconjunto $S \subseteq V$ de tamaño $m$ se mide cómo de homogéneas son las distancias entre los vértices que forman $S$. Una de las aplicaciones más importantes de las Ciencias de la Computación consiste en optimizar valores como éste, maximizando o minimizando el resultado que devuelve una \textbf{función objetivo}. 
+
+En esta práctica queremos minimizar su valor, obteniendo la mínima dispersión. Este problema tiene un gran paralelismo con problemas reales, como puede ser la organización del género en almacenes, donde minimizar la dispersión de la mercancía reduce los costes. Por tanto, si resolvemos este problema de forma teórica es trivial aplicar la solución en estos casos.
+
+Anteriormente he definido la dispersión de una forma muy genérica, sin entrar en su formalización. Y es que se puede definir de diferentes formas, teniendo en cuenta la dispersión media de los elementos del conjunto $S$ o utilizando los valores extremos (máximos y mínimos) en éste. Esta segunda opción se define formalmente como:
+\begin{align*}
+    diff(S) = max_{i \in S} \{ \sum_{j \in S} d_{i,j}\} - min_{i \in S} \{ \sum_{j \in S} d_{i,j}\}
+\end{align*}
+
+Utilizando esta definición de dispersión como función objetivo obtenemos lo que se conoce como \textbf{Problema de la Mínima Dispersión Diferencial (MDD)}, es decir: 
+\begin{align*}
+    S^{*} = {arg min}_{S \subseteq V} diff(S)
+\end{align*}
 
 
 \part{Descripción de la aplicación de los algoritmos}

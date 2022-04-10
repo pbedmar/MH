@@ -62,10 +62,11 @@ void LocalSearchAlgorithm::run(int n_times) {
         }
 
         int eval = 0;
+        bool better_solution = true;
 
-        while (eval < MAX_EVAL) {
+        while (eval < MAX_EVAL && better_solution) {
 
-            bool better_solution = false;
+            better_solution = false;
 
             auto u = solution.begin();
             while (u != solution.end() && !better_solution && eval < MAX_EVAL) {
