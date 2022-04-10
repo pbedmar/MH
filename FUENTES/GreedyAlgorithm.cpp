@@ -24,6 +24,14 @@ double GreedyAlgorithm::getAvgTime() {
  return avg_time;
 }
 
+double GreedyAlgorithm::getLowestCost(){
+    return lowest_cost;
+}
+
+double GreedyAlgorithm::getHighestCost(){
+    return highest_cost;
+}
+
 void GreedyAlgorithm::run(int n_times) {
 
     for (int exec = 0; exec<n_times; exec++) {
@@ -108,6 +116,12 @@ void GreedyAlgorithm::run(int n_times) {
 
         avg_time += elapsed_in_seconds;
         avg_cost += min_g;
+        if (min_g < lowest_cost) {
+            lowest_cost = min_g;
+        }
+        if (min_g > highest_cost) {
+            highest_cost = min_g;
+        }
 
         //print iteration results
         cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << min_g << ". Solution: ";
@@ -117,7 +131,7 @@ void GreedyAlgorithm::run(int n_times) {
         cout << endl;
     }
 
-    avg_time = avg_time/n_times; //TODO: Accumulated or mean time?
+    avg_time = avg_time/n_times;
     avg_cost = avg_cost/n_times;
 }
 

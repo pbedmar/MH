@@ -21,11 +21,15 @@ private:
 
     double avg_time = 0;
     double avg_cost = 0;
+    double lowest_cost = numeric_limits<double>::max();
+    double highest_cost = -numeric_limits<double>::max();
 
 public:
     LocalSearchAlgorithm(vector<vector<double> > distanceMatrix_, int numElements_, int numRequiredElements_, int seed_ = 1);
     double getAvgTime();
     double getAvgCost();
+    double getLowestCost();
+    double getHighestCost();
     void run(int n_times);
 };
 

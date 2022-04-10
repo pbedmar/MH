@@ -25,6 +25,14 @@ double LocalSearchAlgorithm::getAvgTime() {
     return avg_time;
 }
 
+double LocalSearchAlgorithm::getLowestCost(){
+    return lowest_cost;
+}
+
+double LocalSearchAlgorithm::getHighestCost(){
+    return highest_cost;
+}
+
 void LocalSearchAlgorithm::run(int n_times) {
 
     for (int exec = 0; exec<n_times; exec++) {
@@ -125,6 +133,14 @@ void LocalSearchAlgorithm::run(int n_times) {
 
         avg_time += elapsed_in_seconds;
         avg_cost += best_cost;
+
+        if (best_cost < lowest_cost) {
+            lowest_cost = best_cost;
+        }
+        if (best_cost > highest_cost) {
+            highest_cost = best_cost;
+        }
+
 
         //print iteration results
         cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost funcion aux " << dispersion(distanceMatrix, best_solution) << ". Cost " << best_cost << ". Solution: ";

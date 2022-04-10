@@ -77,7 +77,7 @@ En esta primera práctica de la asignatura implementamos y comparamos el rendimi
 \section{Datos utilizados}
 Los datos que necesitamos para analizar el comportamiento de los algoritmos en este problema no son muy complejos. En cada posible instancia se necesita conocer el valor $n$ indicando el número de puntos que contiene el dataset, el valor $m < n$ indicando cuantos puntos se quieren escoger de forma que se minimice la dispersión en esos $m$ puntos y la matriz $d$ con tamaño $n \times n$, simétrica y con valor 0 en su diagonal, que contiene las distancias entre cada uno de los $n$ puntos del dataset. En definitiva, se necesita conocer el grafo $G$.
 
-En total, utilizamos 50 instancias diferentes con datos extraídos del dataset \textbf{GKD}. Las instancias toman valores $n \in \{25,50,100,125,150\}$ y $m \in [2,45]$.
+En total, en los experimentos utilizamos 50 instancias diferentes con datos extraídos del dataset \textbf{GKD}. Las instancias toman valores $n \in \{25,50,100,125,150\}$ y $m \in [2,45]$.
 
 
 \section{Representación de soluciones}
@@ -194,7 +194,7 @@ El primer algoritmo que implementamos para resolver el problema utiliza una estr
 \end{algorithm}
 
 \newpage
-\section{Búsqueda Local}
+\section{Algoritmo Búsqueda Local}
 
 En esta segunda implementación utilizamos una búsqueda local. Para ello, se genera una solución inicial aleatoria (y válida) y se va explorando su entorno. Cuando se encuentra un vecino que reduce la dispersión, se actualiza como nueva solución. Así se procede hasta haber recorrido todo el vecindario sin encontrar una solución mejor o hasta llegar a las 100000 evaluaciones de la función objetivo. Cada vez que se reinicia la exploración del vecindario, se barajan el vector que contiene la solución y el que contiene los vértices que no pertenecen a esta, para asegurar que el orden en el que se visitan los nodos no es determinístico.
 
@@ -279,15 +279,90 @@ En esta segunda implementación utilizamos una búsqueda local. Para ello, se ge
 
 
 
-\part{Pseudocódigo de los algoritmos}
+\part{Procedimiento considerado para desarrollar la práctica}
+
+La implementación de los algoritmos ha sido realizada en C++, concretamente en su versión de 2017. Para ello, hemos creado un proyecto con la siguiente estructura:
+
+\dirtree{%
+    .1 /.
+    .2 BIN\DTcomment{archivos ejecutables}.
+    .3 practica1.
+    .2 data\DTcomment{ficheros .txt con los datos de entrada}.
+    .3 data\_index.txt\DTcomment{índice con los nombres de los archivos de datos}.
+    .3 ....
+    .2 doc.
+    .2 FUENTES.
+    .3 DataLoader.cpp\DTcomment{clase encargada de cargar los datos de los ficheros}.
+    .3 DataLoader.h.
+    .3 functions.cpp\DTcomment{funciones auxiliares}.
+    .3 functions.h.
+    .3 GreedyAlgorithm.cpp\DTcomment{implementación del algoritmo Greedy}.
+    .3 GreedyAlgorithm.h.
+    .3 LocalSearchAlgorithm.cpp\DTcomment{implementación del algoritmo BL}.
+    .3 LocalSearchAlgorithm.h.
+    .3 practica1.cpp\DTcomment{archivo desde donde se inicia la ejecución}.
+    .2 obj\DTcomment{ficheros objeto}.
+    .2 makefile.
+    .2 LEEME.
+}
+
+Se ha partido desde cero, sin utilizar ningún framework de metaheurísticas ni librería adicional a las que vienen incluídas en el propio C++. Para la generación de números aleatorios, se utiliza la librería $<random>$ incluida en el lenguaje. La semilla utilizada en los experimentos es el número $1$. El equipo donde se han realizado las pruebas es un MacBook Pro de 15 pulgadas del año 2015, con CPU Intel Core i7 2.5 GHz I7-4870HQ y 16 GB de RAM. Utiliza el sistema operativo macOS Big Sur 11.6.1.
+
+Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $make$ en la terminal. A continuación, ejecutamos:
+
+\noindent $./bin/practica1$ <$semilla$> \space <$algoritmo$> \space <$fichero\_datos$>
+
+\noindent Donde <$algoritmo$> \space puede tomar como valor g (Greedy) o b (Búsqueda Local).
+
+\noindent Ejemplo: ./bin/practica1 1 g data/GKD-b\_50\_n150\_m45.txt
+
+
+\part{Experimentos y análisis de resultados}
+Para comprobar el funcionamiento de los algoritmos, realizamos experimentos de ejecución. Nuestros algoritmos son probabilísticos, ya que la aleatoriedad está presente en ellos. Por tanto, para que los resultados sean reproducibles es necesario fijar una semilla. Como mencionamos en el apartado anterior, fijamos su valor en $1$. 
+
+Vamos a ejecutar el algoritmo con los 50 casos que tenemos, y cada caso 5 veces para promediar los resultados de tiempo de ejecución y coste. La semilla se volverá a fijar al ejecutar cada caso, pero no entre ejecuciones sobre el mismo conjunto de datos.
+
+\section{Algoritmo Greedy}
+Con este algoritmo se observan unos tiempos de ejecución bajos, ya que la solución se construye progresivamente, y una vez elegido un elemento no se vuelve atrás. Los costes obtenidos no son demasiado cercanos a los óptimos y por tanto su desviación es bastante alta. 
+
+También se puede observar cómo el peor y mejor coste entre ejecuciones varía en gran medida. Esto se debe a que el algoritmo se encuentra influenciado por los dos elementos aleatorios elegidos al inicio de la ejecución.
+
+Como desviación y tiempo de ejecución medio entre todos los casos encontramos:
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.35]{img/greedy2.png}
+\end{figure}
+
+Lo cuál es un valor de desviación bastante elevado. Como ventajas de este algoritmo, podemos destacar su bajo tiempo de ejecución. Aún así, el criterio heurístico que utiliza para elegir los candidatos no es bastante bueno en este problema.
+
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.65]{img/greedy.png}
+\end{figure}
 
 %------------------------------------------------
 \newpage
 
-\nocite{*}
+\section{Algoritmo Búsqueda Local}
+Utilizando esta técnica, los tiempos de ejecución aumentan con respecto a Greedy, aunque se siguen manteniendo en valores bajos. Los costes mejoran, aunque no en demasiada medida.
 
-\bibliography{citas} %archivo citas.bib que contiene las entradas 
+Ocurre la misma situación que en el otro algoritmo: los peores y mejores costes presentan gran variabilidad. En este caso, el no determinismo es incluso mayor que en Greedy, ya que se realiza un shuffle() cada vez que se encuentra una solución que mejora la actual y no se recorre todo el vecindario (ya que nos encontramos ante una búsqueda primero el mejor). 
 
-\bibliographystyle{plain} % hay varias formas de citar
+Como desviación y tiempo de ejecución medio entre todos los casos encontramos:
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.35]{img/bl2.png}
+\end{figure}
+
+Ninguno de los dos algoritmos que hemos estudiado se acerca demasiado a la solución óptima, ya que sus criterios heurísticos no son demasiado fuertes. En el caso de Greedy, una vez elegido un elemento no se puede volver atrás, y en el caso de la búsqueda local, sólo tenemos en cuenta los posibles cambios con el vecindario y no el resto.
+
+Aún así, el hecho de poder utilizar factorización hace que los algoritmos presenten una baja complejidad y tiempos de ejecución, que con técnicas más avanzadas no se conseguirían.
+
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.65]{img/bl.png}
+\end{figure}
 
 \end{document}
+
+

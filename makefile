@@ -1,7 +1,7 @@
-SRC=src
+SRC=FUENTES
 OBJ=obj
-BIN=bin
-CXXFLAGS = -g -O3 -std=c++17
+BIN=BIN
+CXXFLAGS = -O3 -std=c++17
 
 all: practica1
 
@@ -9,11 +9,11 @@ practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ
 	g++ $(CXXFLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica1
 
 
-$(OBJ)/practica1.o: src/practica1.cpp
+$(OBJ)/practica1.o: $(SRC)/practica1.cpp
 	g++ $(CXXFLAGS) -c $(SRC)/practica1.cpp -o $(OBJ)/practica1.o
 
 
-$(OBJ)/functions.o: src/functions.cpp
+$(OBJ)/functions.o: $(SRC)/functions.cpp
 	g++ $(CXXFLAGS) -c $(SRC)/functions.cpp -o $(OBJ)/functions.o
 
 $(OBJ)/DataLoader.o: $(SRC)/DataLoader.cpp $(SRC)/DataLoader.h

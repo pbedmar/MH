@@ -6,5 +6,8 @@
 \contentsline {section}{\numberline {3}Función objetivo}{5}%
 \contentsline {part}{III\hspace {1em}Pseudocódigo de los algoritmos}{6}%
 \contentsline {section}{\numberline {4}Algoritmo Greedy}{6}%
-\contentsline {section}{\numberline {5}Búsqueda Local}{8}%
-\contentsline {part}{IV\hspace {1em}Pseudocódigo de los algoritmos}{10}%
+\contentsline {section}{\numberline {5}Algoritmo Búsqueda Local}{8}%
+\contentsline {part}{IV\hspace {1em}Procedimiento considerado para desarrollar la práctica}{10}%
+\contentsline {part}{V\hspace {1em}Experimentos y análisis de resultados}{11}%
+\contentsline {section}{\numberline {6}Algoritmo Greedy}{11}%
+\contentsline {section}{\numberline {7}Algoritmo Búsqueda Local}{13}%

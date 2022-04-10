@@ -55,7 +55,7 @@ double dispersion(vector<vector<double> > distanceMatrix, vector<int> solution) 
     return max - min;
 }
 
-void printResults(list<double> cost, list<double> time) {
+void printResults(list<double> cost, list<double> time, list<double> lowest, list<double> highest) {
     cout << "Number of cases: " << cost.size() << endl << endl;
 
     cout << "Cost:" << endl;
@@ -67,6 +67,20 @@ void printResults(list<double> cost, list<double> time) {
 
     cout << "Time:" << endl;
     for (auto it = time.cbegin(); it != time.cend(); it++) {
+        cout << fixed << *it << endl;
+    }
+
+    cout << endl;
+
+    cout << "Min. cost:" << endl;
+    for (auto it = lowest.cbegin(); it != lowest.cend(); it++) {
+        cout << fixed << *it << endl;
+    }
+
+    cout << endl;
+
+    cout << "Max. cost:" << endl;
+    for (auto it = highest.cbegin(); it != highest.cend(); it++) {
         cout << fixed << *it << endl;
     }
 }
