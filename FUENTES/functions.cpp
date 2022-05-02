@@ -55,6 +55,32 @@ double dispersion(vector<vector<double> > distanceMatrix, vector<int> solution) 
     return max - min;
 }
 
+double dispersion(vector<vector<double> > distanceMatrix, vector<bool> individual) {
+    double max = -numeric_limits<double>::max();
+    double min = numeric_limits<double>::max();
+
+    for (int i = 0; i<individual.size(); i++) {
+        if (individual[i]) {
+            double d = 0;
+
+            for (int j = 0; j < individual.size(); j++) {
+                if (individual[j]) {
+                    d += distanceMatrix[i][j];
+                }
+            }
+
+            if (d > max) {
+                max = d;
+            }
+            if(d < min) {
+                min = d;
+            }
+        }
+    }
+
+    return max - min;
+}
+
 void printResults(list<double> cost, list<double> time, list<double> lowest, list<double> highest) {
     cout << "Number of cases: " << cost.size() << endl << endl;
 

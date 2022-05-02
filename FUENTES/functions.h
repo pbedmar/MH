@@ -16,6 +16,8 @@ double dispersion(vector<vector<double> > distanceMatrix, unordered_set<int> sol
 
 double dispersion(vector<vector<double> > distanceMatrix, vector<int> solution);
 
+double dispersion(vector<vector<double> > distanceMatrix, vector<bool> solution);
+
 void printResults(list<double> cost, list<double> time, list<double> lowest, list<double> highest);
 
 #endif //PRACTICAS_FUNCTIONS_H

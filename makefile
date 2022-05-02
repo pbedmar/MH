@@ -1,16 +1,21 @@
 SRC=FUENTES
 OBJ=obj
 BIN=BIN
-CXXFLAGS = -O3 -std=c++17
+CXXFLAGS = -g -O3 -std=c++17
 
-all: practica1
+all: practica1 practica2
 
 practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o
 	g++ $(CXXFLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica1
 
+practica2: $(OBJ)/practica2.o $(OBJ)/DataLoader.o $(OBJ)/GeneticAlgorithm.o $(OBJ)/functions.o
+	g++ $(CXXFLAGS) $(OBJ)/practica2.o $(OBJ)/DataLoader.o $(OBJ)/GeneticAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica2
 
 $(OBJ)/practica1.o: $(SRC)/practica1.cpp
 	g++ $(CXXFLAGS) -c $(SRC)/practica1.cpp -o $(OBJ)/practica1.o
+
+$(OBJ)/practica2.o: $(SRC)/practica2.cpp
+	g++ $(CXXFLAGS) -c $(SRC)/practica2.cpp -o $(OBJ)/practica2.o
 
 
 $(OBJ)/functions.o: $(SRC)/functions.cpp
@@ -24,6 +29,9 @@ $(OBJ)/GreedyAlgorithm.o: $(SRC)/GreedyAlgorithm.cpp $(SRC)/GreedyAlgorithm.h
 
 $(OBJ)/LocalSearchAlgorithm.o: $(SRC)/LocalSearchAlgorithm.cpp $(SRC)/LocalSearchAlgorithm.h
 	g++ $(CXXFLAGS) -c $(SRC)/LocalSearchAlgorithm.cpp -o $(OBJ)/LocalSearchAlgorithm.o -I$(SRC)
+
+$(OBJ)/GeneticAlgorithm.o: $(SRC)/GeneticAlgorithm.cpp $(SRC)/GeneticAlgorithm.h
+	g++ $(CXXFLAGS) -c $(SRC)/GeneticAlgorithm.cpp -o $(OBJ)/GeneticAlgorithm.o -I$(SRC)
 
 clean:
 	rm $(OBJ)/*.o $(BIN)/*
