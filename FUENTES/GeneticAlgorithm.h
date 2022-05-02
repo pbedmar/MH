@@ -16,7 +16,7 @@ private:
 
     int numElements;
     int numRequiredElements;
-    const int MAX_EVAL = 100000;
+    const int MAX_EVAL = 1000;
     const int POPULATION_SIZE = 50;
     const double PROB_AGG_CROSSOVER = 0.7;
     const double PROB_AGE_CROSSOVER = 1;
@@ -27,7 +27,7 @@ private:
     double avg_cost = 0;
     double lowest_cost = numeric_limits<double>::max();
     double highest_cost = -numeric_limits<double>::max();
-    void generationalModel(vector<vector<bool> > population);
+    vector<bool> generationalModel(vector<vector<bool> > population);
     vector<vector<bool> > generationalSelectionOperator(vector<vector<bool> > population);
     vector<bool> uniformCrossoverOperator(vector<bool> parent1, vector<bool> parent2);
 

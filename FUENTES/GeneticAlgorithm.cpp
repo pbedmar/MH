@@ -15,10 +15,6 @@ GeneticAlgorithm::GeneticAlgorithm(vector<vector<double> > distanceMatrix_, int 
     rng_gen.seed(seed);
 }
 
-//GeneticAlgorithm::EvolutionaryScheme(){
-//
-//}
-
 void GeneticAlgorithm::run(int n_times){
 
     for (int exec = 0; exec<n_times; exec++) {
@@ -40,26 +36,32 @@ void GeneticAlgorithm::run(int n_times){
             population.push_back(individual);
         }
 
-        generationalModel(population);
+        vector<bool> solution = generationalModel(population);
+        double solutionDispersion = dispersion(distanceMatrix, solution);
 
         double elapsed = (clock()- start_time);
         double elapsed_in_seconds = elapsed / CLOCKS_PER_SEC;
 
         avg_time += elapsed_in_seconds;
-//        avg_cost += best_cost;
-//
-//        if (best_cost < lowest_cost) {
-//            lowest_cost = best_cost;
-//        }
-//        if (best_cost > highest_cost) {
-//            highest_cost = best_cost;
-//        }
+        avg_cost += solutionDispersion;
+
+        if (solutionDispersion < lowest_cost) {
+            lowest_cost = solutionDispersion;
+        }
+        if (solutionDispersion > highest_cost) {
+            highest_cost = solutionDispersion;
+        }
 
 
-//        //print iteration results
-//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost funcion aux " << dispersion(distanceMatrix, best_solution) << ". Cost " << best_cost << ". Solution: ";
-//        for (auto it: best_solution) {
+        //print iteration results
+//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << solutionDispersion << ". Solution: ";
+//        for (auto it: solution) {
 //            cout << it << ",";
+//        }
+//        cout << "Solution not binary: " ;
+//        for (int i=0; i<numElements; i++) {
+//            if (solution[i])
+//                cout << i << ",";
 //        }
 //        cout << endl;
     }
@@ -68,7 +70,7 @@ void GeneticAlgorithm::run(int n_times){
     avg_cost = avg_cost/n_times;
 }
 
-void GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopulation) {
+vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopulation) {
 
     double lastLowerDispersion = numeric_limits<double>::max();
     int lastBestSolutionIndex = -1;
@@ -81,6 +83,7 @@ void GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopulation) {
 
     int numEvaluations = 0;
     while (numEvaluations < MAX_EVAL) {
+        cout << numEvaluations;
         // generate parents
         vector<vector<bool> > population = generationalSelectionOperator(lastPopulation);
 
@@ -118,9 +121,11 @@ void GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopulation) {
         lastLowerDispersion = lowerDispersion;
         lastBestSolutionIndex = bestSolutionIndex;
         lastPopulation = population;
+
+        numEvaluations++;
     }
 
-
+    return lastPopulation[lastBestSolutionIndex];
 }
 
 vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vector<bool> > population) {
@@ -152,9 +157,9 @@ vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vec
 }
 
 vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, vector<bool> parent2) {
+    cout  << "New operator call:" << endl;
     uniform_int_distribution<mt19937::result_type> dist(0,1); //TODO: how should I generate random numbers to decide? like this?
     vector<bool> child(parent1);
-
 
     for (int i = 0; i<numElements; i++) {
         if (parent1[i] != parent2[i]) {
@@ -179,7 +184,9 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, ve
         }
     }
 
-    avg /= countAvg;
+    if (countAvg > 0) {
+        avg /= countAvg;
+    }
 
     // if there are more trues than required
     while (countNbTrues > numRequiredElements) {
@@ -213,8 +220,9 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, ve
                 avg -= distanceMatrix[maxPosition][i];
             }
         }
-        avg /= countAvg;
-
+        if (countAvg > 0) {
+            avg /= countAvg;
+        }
         // decrease number of trues
         countNbTrues--;
     }
@@ -251,7 +259,9 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, ve
                 avg += distanceMatrix[minPosition][i];
             }
         }
-        avg /= countAvg;
+        if (countAvg > 0) {
+            avg /= countAvg;
+        }
 
         // increase number of trues
         countNbTrues++;
