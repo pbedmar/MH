@@ -81,6 +81,17 @@ double dispersion(vector<vector<double> > distanceMatrix, vector<bool> individua
     return max - min;
 }
 
+vector<int> binaryToNumeric(vector<bool> solution) {
+    vector<int> result;
+    for (int i=0; i<solution.size(); i++) {
+        if (solution[i])
+            result.push_back(i);
+    }
+    cout << endl;
+
+    return result;
+}
+
 void printResults(list<double> cost, list<double> time, list<double> lowest, list<double> highest) {
     cout << "Number of cases: " << cost.size() << endl << endl;
 

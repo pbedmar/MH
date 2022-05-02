@@ -83,12 +83,11 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopul
 
     int numEvaluations = 0;
     while (numEvaluations < MAX_EVAL) {
-        cout << numEvaluations;
         // generate parents
         vector<vector<bool> > population = generationalSelectionOperator(lastPopulation);
 
         // crossover (only between the first POPULATION_SIZE*PROB_AGG_CROSSOVER individuals)
-        for (int i = 0; i < POPULATION_SIZE * PROB_AGG_CROSSOVER; i += 2) {
+        for (int i=0; i<POPULATION_SIZE*PROB_AGG_CROSSOVER; i+=2) {
             vector<bool> parent1 = population[i];
             vector<bool> parent2 = population[i + 1];
 
@@ -97,6 +96,11 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopul
 
             population[i] = child1;
             population[i + 1] = child2;
+        }
+
+        // perform mutations
+        for (int i=0; i<POPULATION_SIZE*PROB_MUTATION; i++) { //TODO: Is this correct? Should I mutate the first individuals or shuffle right before?
+            population[i] = mutationOperator(population[i]);
         }
 
         double lowerDispersion = numeric_limits<double>::max();
@@ -114,15 +118,26 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopul
             }
         }
 
-        if (lowerDispersion > lastLowerDispersion) {
-            population[worstSolutionIndex] = lastPopulation[bestSolutionIndex];
+        if (lowerDispersion > lastLowerDispersion) { //TODO: why my implementation increases dispersion in some iterations? Should that happen?
+            population[worstSolutionIndex] = lastPopulation[lastBestSolutionIndex];
+            lastBestSolutionIndex = worstSolutionIndex;
+        } else {
+            lastLowerDispersion = lowerDispersion;
+            lastBestSolutionIndex = bestSolutionIndex;
         }
-
-        lastLowerDispersion = lowerDispersion;
-        lastBestSolutionIndex = bestSolutionIndex;
         lastPopulation = population;
 
+        cout << "Evaluation " << numEvaluations << ": " << dispersion(distanceMatrix, lastPopulation[lastBestSolutionIndex]) << endl;
+
         numEvaluations++;
+    }
+
+    for (const auto i: lastPopulation) {
+        vector<int> numericSolution = binaryToNumeric(i);
+        for (auto c: numericSolution) {
+            cout << c << ",";
+        }
+        cout << endl;
     }
 
     return lastPopulation[lastBestSolutionIndex];
@@ -144,8 +159,8 @@ vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vec
 
         // choose the best between the two
         int bestRandElem = firstRandElem;
-        if (dispersion(distanceMatrix, population[secondRandElem]) >
-            dispersion(distanceMatrix, population[bestRandElem])) {
+        if (dispersion(distanceMatrix, population[bestRandElem]) >
+            dispersion(distanceMatrix, population[secondRandElem])) {
             bestRandElem = secondRandElem;
         }
 
@@ -157,7 +172,6 @@ vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vec
 }
 
 vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, vector<bool> parent2) {
-    cout  << "New operator call:" << endl;
     uniform_int_distribution<mt19937::result_type> dist(0,1); //TODO: how should I generate random numbers to decide? like this?
     vector<bool> child(parent1);
 
@@ -268,4 +282,23 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, ve
     }
 
     return child;
+}
+
+vector<bool> GeneticAlgorithm::mutationOperator(vector<bool> individual) {
+    uniform_int_distribution<mt19937::result_type> dist(0, numElements-1);
+
+    int position = dist(rng_gen);
+    int position2 = dist(rng_gen);
+    bool value = individual[position];
+    bool value2 = individual[position2];
+
+    while (position==position2 || value==value2) {
+        position2 = dist(rng_gen);
+        value2 = individual[position2];
+    }
+
+    individual[position] = !value;
+    individual[position2] = !value2;
+
+    return individual;
 }

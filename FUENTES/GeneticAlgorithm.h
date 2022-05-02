@@ -16,11 +16,11 @@ private:
 
     int numElements;
     int numRequiredElements;
-    const int MAX_EVAL = 1000;
+    const int MAX_EVAL = 10000;
     const int POPULATION_SIZE = 50;
     const double PROB_AGG_CROSSOVER = 0.7;
     const double PROB_AGE_CROSSOVER = 1;
-    const double PROB_MUTATION = 0.1;
+    const double PROB_MUTATION = 0.1; //TODO: isn't better to increase mutation probability (with 0.2, 29.38 error)
     vector<vector<double> > distanceMatrix;
 
     double avg_time = 0;
@@ -30,6 +30,7 @@ private:
     vector<bool> generationalModel(vector<vector<bool> > population);
     vector<vector<bool> > generationalSelectionOperator(vector<vector<bool> > population);
     vector<bool> uniformCrossoverOperator(vector<bool> parent1, vector<bool> parent2);
+    vector<bool> mutationOperator(vector<bool> individual);
 
 public:
     GeneticAlgorithm(vector<vector<double> > distanceMatrix_, int numElements_, int numRequiredElements_, int seed_ = 1);
