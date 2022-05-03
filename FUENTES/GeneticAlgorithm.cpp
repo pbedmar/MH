@@ -76,10 +76,10 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
 
 
         //print iteration results
-//        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << solutionDispersion << ". Solution: ";
-//        for (auto it: solution) {
-//            cout << it << ",";
-//        }
+        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << solutionDispersion << ". Solution: ";
+        for (auto it: solution) {
+            cout << it << ",";
+        }
 //        cout << "Solution not binary: " ;
 //        for (int i=0; i<numElements; i++) {
 //            if (solution[i])
@@ -92,21 +92,22 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
     avg_cost = avg_cost/n_times;
 }
 
-vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopulation, string crossoverOperator) {
+vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& population, string crossoverOperator) {
 
     double lastLowerDispersion = numeric_limits<double>::max();
     int lastBestSolutionIndex = -1;
     for (int i = 0; i<POPULATION_SIZE; i++) {
-        if (lastLowerDispersion > dispersion(distanceMatrix, lastPopulation[i])) {
+        if (lastLowerDispersion > dispersion(distanceMatrix, population[i])) {
             lastBestSolutionIndex = i;
-            lastLowerDispersion = dispersion(distanceMatrix, lastPopulation[i]);
+            lastLowerDispersion = dispersion(distanceMatrix, population[i]);
         }
     }
+    vector<bool> lastBestSolution = population[lastBestSolutionIndex];
 
     int numEvaluations = 0;
     while (numEvaluations < MAX_EVAL) {
         // generate parents
-        vector<vector<bool> > population = generationalSelectionOperator(lastPopulation);
+        population = generationalSelectionOperator(population);
 
         // crossover (only between the first POPULATION_SIZE*PROB_AGG_CROSSOVER individuals)
         for (int i=0; i<POPULATION_SIZE*PROB_AGG_CROSSOVER; i+=2) {
@@ -148,15 +149,15 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopul
         }
 
         if (lowerDispersion > lastLowerDispersion) { //TODO: why my implementation increases dispersion in some iterations? Should that happen?
-            population[worstSolutionIndex] = lastPopulation[lastBestSolutionIndex];
+            population[worstSolutionIndex] = lastBestSolution;
             lastBestSolutionIndex = worstSolutionIndex;
         } else {
             lastLowerDispersion = lowerDispersion;
             lastBestSolutionIndex = bestSolutionIndex;
         }
-        lastPopulation = population;
+        lastBestSolution = population[lastBestSolutionIndex];
 
-        //cout << "Evaluation " << numEvaluations << ": " << dispersion(distanceMatrix, lastPopulation[lastBestSolutionIndex]) << endl;
+        cout << "Evaluation " << numEvaluations << ": " << dispersion(distanceMatrix, lastBestSolution) << endl;
         numEvaluations++;
     }
 
@@ -168,10 +169,10 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> > lastPopul
 //        cout << endl;
 //    }
 
-    return lastPopulation[lastBestSolutionIndex];
+    return lastBestSolution;
 }
 
-vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> > population, string crossoverOperator) {
+vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population, string crossoverOperator) {
     int numEvaluations = 0;
     vector <bool> bestIndividual;
 
@@ -180,17 +181,14 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> > population,
         vector<vector<bool> > parents = stationarySelectionOperator(population);
 
         // crossover (only between the two parents already selected)
-        vector<bool> parent1 = parents[0];
-        vector<bool> parent2 = parents[1];
-
         vector<bool> child1;
         vector<bool> child2;
         if (crossoverOperator == "uni") {
-            child1 = uniformCrossoverOperator(parent1, parent2);
-            child2 = uniformCrossoverOperator(parent1, parent2);
+            child1 = uniformCrossoverOperator(parents[0], parents[1]);
+            child2 = uniformCrossoverOperator(parents[0], parents[1]);
         } else if (crossoverOperator == "pos") {
-            child1 = positionBasedCrossoverOperator(parent1, parent2);
-            child2 = positionBasedCrossoverOperator(parent1, parent2);
+            child1 = positionBasedCrossoverOperator(parents[0], parents[1]);
+            child2 = positionBasedCrossoverOperator(parents[0], parents[1]);
         }
 
         uniform_int_distribution<mt19937::result_type> dist(0,100*PROB_MUTATION-1);
@@ -241,14 +239,14 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> > population,
                 bestIndividual = i;
             }
         }
-        //cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
+        cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
         numEvaluations++;
     }
 
     return bestIndividual;
 }
 
-vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vector<bool> > population) {
+vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vector<bool> >& population) {
     uniform_int_distribution<mt19937::result_type> dist(0,POPULATION_SIZE-1);
     vector<vector<bool> > parentsPopulation;
 
@@ -275,7 +273,7 @@ vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vec
     return parentsPopulation;
 }
 
-vector<vector<bool> > GeneticAlgorithm::stationarySelectionOperator(vector<vector<bool> > population) {
+vector<vector<bool> > GeneticAlgorithm::stationarySelectionOperator(vector<vector<bool> >& population) {
     uniform_int_distribution<mt19937::result_type> dist(0,POPULATION_SIZE-1);
     vector<vector<bool> > parentsPopulation;
 
@@ -302,7 +300,7 @@ vector<vector<bool> > GeneticAlgorithm::stationarySelectionOperator(vector<vecto
     return parentsPopulation;
 }
 
-vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, vector<bool> parent2) {
+vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, vector<bool>& parent2) {
     uniform_int_distribution<mt19937::result_type> dist(0,1); //TODO: how should I generate random numbers to decide? like this?
     vector<bool> child(parent1);
 
@@ -415,7 +413,7 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool> parent1, ve
     return child;
 }
 
-vector<bool> GeneticAlgorithm::positionBasedCrossoverOperator(vector<bool> parent1, vector<bool> parent2) {
+vector<bool> GeneticAlgorithm::positionBasedCrossoverOperator(vector<bool>& parent1, vector<bool>& parent2) {
     vector<bool> child(parent1);
 
     vector <int> notEqualIndexes;
@@ -437,7 +435,7 @@ vector<bool> GeneticAlgorithm::positionBasedCrossoverOperator(vector<bool> paren
     return child;
 }
 
-vector<bool> GeneticAlgorithm::mutationOperator(vector<bool> individual) {
+vector<bool> GeneticAlgorithm::mutationOperator(vector<bool>& individual) {
     uniform_int_distribution<mt19937::result_type> dist(0, numElements-1);
 
     int position = dist(rng_gen);
