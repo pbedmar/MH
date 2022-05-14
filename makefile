@@ -33,5 +33,6 @@ $(OBJ)/LocalSearchAlgorithm.o: $(SRC)/LocalSearchAlgorithm.cpp $(SRC)/LocalSearc
 $(OBJ)/GeneticAlgorithm.o: $(SRC)/GeneticAlgorithm.cpp $(SRC)/GeneticAlgorithm.h
 	g++ $(CXXFLAGS) -c $(SRC)/GeneticAlgorithm.cpp -o $(OBJ)/GeneticAlgorithm.o -I$(SRC)
 
+
 clean:
 	rm $(OBJ)/*.o $(BIN)/*

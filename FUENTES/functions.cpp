@@ -55,7 +55,7 @@ double dispersion(vector<vector<double> > distanceMatrix, vector<int> solution) 
     return max - min;
 }
 
-double dispersion(vector<vector<double> > distanceMatrix, vector<bool> individual) {
+double dispersion(vector<vector<double> >& distanceMatrix, vector<bool>& individual) {
     double max = -numeric_limits<double>::max();
     double min = numeric_limits<double>::max();
 
