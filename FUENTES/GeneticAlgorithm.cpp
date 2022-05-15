@@ -130,12 +130,14 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
             population[i + 1] = child2;
             populationDispersion[i] = dispersion(distanceMatrix, child1);
             populationDispersion[i] = dispersion(distanceMatrix, child2);
+            numEvaluations = numEvaluations+2;
         }
 
         // perform mutations
         for (int i=0; i<POPULATION_SIZE*PROB_MUTATION; i++) { //TODO: Is this correct? Should I directly mutate the first individuals or shuffle right before?
             population[i] = mutationOperator(population[i]);
             populationDispersion[i] = dispersion(distanceMatrix, population[i]);
+            numEvaluations++;
         }
 
         double lowerDispersion = numeric_limits<double>::max();
@@ -156,6 +158,7 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
         if (lowerDispersion > lastLowerDispersion) { //TODO: why my implementation increases dispersion in some iterations? Should that happen?
             population[worstSolutionIndex] = lastBestSolution;
             populationDispersion[worstSolutionIndex] = dispersion(distanceMatrix, lastBestSolution);
+            numEvaluations++;
             lastBestSolutionIndex = worstSolutionIndex;
         } else {
             lastLowerDispersion = lowerDispersion;
@@ -228,6 +231,7 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population
         // replace the old population's worst individuals with the new children (only if they are better)
         double dispChild1 = dispersion(distanceMatrix, child1);
         double dispChild2 = dispersion(distanceMatrix, child2);
+        numEvaluations = numEvaluations+2;
         if (dispChild1 < dispChild2) {
             if (dispChild2 < secondHigherDispersion) {
                 population[secondWorstIndividualIndex] = child2;
@@ -245,6 +249,7 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population
         double lowerDispersion = numeric_limits<double>::max();
         for (auto i: population) {
             double disp = dispersion(distanceMatrix, i);
+            numEvaluations++;
             if (disp < lowerDispersion) {
                 lowerDispersion = disp;
                 bestIndividual = i;

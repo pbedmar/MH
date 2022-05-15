@@ -133,6 +133,7 @@ vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population
         // replace the old population's worst individuals with the new children (only if they are better)
         double dispChild1 = dispersion(distanceMatrix, child1);
         double dispChild2 = dispersion(distanceMatrix, child2);
+        numEvaluations = numEvaluations + 2;
         if (dispChild1 < dispChild2) {
             if (dispChild2 < secondHigherDispersion) {
                 population[secondWorstIndividualIndex] = child2;
