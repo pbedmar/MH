@@ -17,7 +17,11 @@ int main(int argc, char *argv[]) {
     geneticAlgorithm_.run(1, "est", "uni");
 
     MemeticAlgorithm memeticAlgorithm_(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
-    memeticAlgorithm_.run(1, "AM0.1mej");
+    memeticAlgorithm_.run(1, "AM1.0");
+    MemeticAlgorithm memeticAlgorithm_2(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
+    memeticAlgorithm_2.run(1, "AM0.1");
+    MemeticAlgorithm memeticAlgorithm_3(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
+    memeticAlgorithm_3.run(1, "AM0.1mej");
 
     return 0;
 

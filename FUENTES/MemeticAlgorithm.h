@@ -17,7 +17,7 @@ private:
 
     int numElements;
     int numRequiredElements;
-    const int MAX_EVAL = 10000;
+    const int MAX_EVAL = 100000;
     const int MAX_EVAL_BL = 400;
     const int POPULATION_SIZE = 50;
     const double PROB_AGE_CROSSOVER = 1;

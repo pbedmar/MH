@@ -153,18 +153,7 @@ vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population
         if (numEvaluations % 10 == 0) {
             if (memeticType == "AM1.0") {
                 for (int i = 0; i < POPULATION_SIZE; i++) {
-//                    cout << endl;
-//                    for (auto i: binaryToNumeric(population[i])) {
-//                        cout << i << ",";
-//                    }
-//                    cout << endl;
                     localSearchExecution(population[i], populationDispersion[i], numEvaluations);
-//                    cout << endl;
-//                    for (auto i: binaryToNumeric(population[i])) {
-//                        cout << i << ",";
-//                    }
-//                    cout << endl;
-//                    exit(0);
                 }
             } else if (memeticType == "AM0.1") {
                 uniform_int_distribution<mt19937::result_type> dist2(0,POPULATION_SIZE-1);
@@ -181,18 +170,37 @@ vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population
                 }
             } else if (memeticType == "AM0.1mej") {
                 unordered_set<int> chosenIndividuals;
-                double lowerDispersion = numeric_limits<double>::max();
-                int lowerDispersionIndex = -1;
 
                 for (int i = 0; i < POPULATION_SIZE*0.1; i++) {
-                    if (populationDispersion[i] < lowerDispersion && chosenIndividuals.find(i) == chosenIndividuals.end()) {
-                        lowerDispersion = populationDispersion[i];
-                        lowerDispersionIndex = i;
-                    }
-                }
+                    double lowerDispersion = numeric_limits<double>::max();
+                    int lowerDispersionIndex = -1;
 
-                chosenIndividuals.insert(lowerDispersionIndex);
-                localSearchExecution(population[lowerDispersionIndex], populationDispersion[lowerDispersionIndex], numEvaluations);
+                    for (int i = 0; i < POPULATION_SIZE; i++) {
+                        if (populationDispersion[i] < lowerDispersion &&
+                            chosenIndividuals.find(i) == chosenIndividuals.end()) {
+                            lowerDispersion = populationDispersion[i];
+                            lowerDispersionIndex = i;
+                        }
+                    }
+
+                    chosenIndividuals.insert(lowerDispersionIndex);
+
+//                    cout << endl;
+//                    for (auto j: binaryToNumeric(population[lowerDispersionIndex])) {
+//                        cout << j << ",";
+//                    }
+//                    cout << " . Cost: " << populationDispersion[lowerDispersionIndex] << ". Real cost: "
+//                         << dispersion(distanceMatrix, population[lowerDispersionIndex]) << ". Num. eval: "
+//                         << numEvaluations << endl;
+                    localSearchExecution(population[lowerDispersionIndex], populationDispersion[lowerDispersionIndex],
+                                         numEvaluations);
+//                    for (auto j: binaryToNumeric(population[lowerDispersionIndex])) {
+//                        cout << j << ",";
+//                    }
+//                    cout << " . Cost: " << populationDispersion[lowerDispersionIndex] << ". Real cost: "
+//                         << dispersion(distanceMatrix, population[lowerDispersionIndex]) << ". Num. eval: "
+//                         << numEvaluations << endl;
+                }
             }
         }
     }
