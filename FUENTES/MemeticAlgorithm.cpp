@@ -31,7 +31,7 @@ double MemeticAlgorithm::getHighestCost(){
     return highest_cost;
 }
 
-void MemeticAlgorithm::run(int n_times) {
+void MemeticAlgorithm::run(int n_times, string memeticType) {
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
@@ -52,22 +52,35 @@ void MemeticAlgorithm::run(int n_times) {
             populationDispersion.push_back(dispersion(distanceMatrix, individual));
         }
 
-        vector<bool> solution = stationaryModel(population, populationDispersion, "AM1.0");
+        vector<bool> solution = stationaryModel(population, populationDispersion, memeticType);
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
         double elapsed = (clock()- start_time);
         double elapsed_in_seconds = elapsed / CLOCKS_PER_SEC;
-//
-//        avg_time += elapsed_in_seconds;
-//        avg_cost += solutionDispersion;
-//
-//        if (solutionDispersion < lowest_cost) {
-//            lowest_cost = solutionDispersion;
+
+        avg_time += elapsed_in_seconds;
+        avg_cost += solutionDispersion;
+
+        if (solutionDispersion < lowest_cost) {
+            lowest_cost = solutionDispersion;
+        }
+        if (solutionDispersion > highest_cost) {
+            highest_cost = solutionDispersion;
+        }
+
+        //print iteration results
+        cout << "Execution number " << exec << ". Time " << elapsed_in_seconds << ". Cost " << solutionDispersion << ". Solution: ";
+        for (auto it: solution) {
+            cout << it << ",";
+        }
+        cout << endl;
+//        cout << "Solution not binary: " ;
+//        for (int i=0; i<numElements; i++) {
+//            if (solution[i])
+//                cout << i << ",";
 //        }
-//        if (solutionDispersion > highest_cost) {
-//            highest_cost = solutionDispersion;
-//        }
+//        cout << endl;
     }
 
     avg_time = avg_time/n_times;
@@ -134,37 +147,62 @@ vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population
             }
         }
 
-        double lowerDispersion = numeric_limits<double>::max();
-        for (auto i: population) {
-            double disp = dispersion(distanceMatrix, i);
-            if (disp < lowerDispersion) {
-                lowerDispersion = disp;
-                bestIndividual = i;
-            }
-        }
 //        cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
         numEvaluations++;
 
         if (numEvaluations % 10 == 0) {
-            for (int i=0; i<POPULATION_SIZE; i++) {
-                vector<int> solution;
-                vector<int> unselectedItems;
+            if (memeticType == "AM1.0") {
+                for (int i = 0; i < POPULATION_SIZE; i++) {
+//                    cout << endl;
+//                    for (auto i: binaryToNumeric(population[i])) {
+//                        cout << i << ",";
+//                    }
+//                    cout << endl;
+                    localSearchExecution(population[i], populationDispersion[i], numEvaluations);
+//                    cout << endl;
+//                    for (auto i: binaryToNumeric(population[i])) {
+//                        cout << i << ",";
+//                    }
+//                    cout << endl;
+//                    exit(0);
+                }
+            } else if (memeticType == "AM0.1") {
+                uniform_int_distribution<mt19937::result_type> dist2(0,POPULATION_SIZE-1);
+                unordered_set<int> chosenIndividuals;
 
-                for (int j=0; j<numElements; j++) {
-                    if (population[i][j])
-                        solution.push_back(j);
-                    else
-                        unselectedItems.push_back(j);
+                for (int i = 0; i < POPULATION_SIZE*0.1; i++) {
+                    int individualIndex;
+                    while (chosenIndividuals.size() <= i) {
+                        individualIndex = dist2(rng_gen);
+                        chosenIndividuals.insert(individualIndex);
+                    }
+
+                    localSearchExecution(population[individualIndex], populationDispersion[individualIndex], numEvaluations);
+                }
+            } else if (memeticType == "AM0.1mej") {
+                unordered_set<int> chosenIndividuals;
+                double lowerDispersion = numeric_limits<double>::max();
+                int lowerDispersionIndex = -1;
+
+                for (int i = 0; i < POPULATION_SIZE*0.1; i++) {
+                    if (populationDispersion[i] < lowerDispersion && chosenIndividuals.find(i) == chosenIndividuals.end()) {
+                        lowerDispersion = populationDispersion[i];
+                        lowerDispersionIndex = i;
+                    }
                 }
 
-                localSearch(unselectedItems, solution, populationDispersion[i], numEvaluations);
-
-                population[i] = vector<bool>(false, numElements);
-                for (int j=0; j<numRequiredElements; j++) {
-                    if (solution[j])
-                        population[i][solution[j]] = true;
-                }
+                chosenIndividuals.insert(lowerDispersionIndex);
+                localSearchExecution(population[lowerDispersionIndex], populationDispersion[lowerDispersionIndex], numEvaluations);
             }
+        }
+    }
+
+    double lowerDispersion = numeric_limits<double>::max();
+    for (auto i: population) {
+        double disp = dispersion(distanceMatrix, i);
+        if (disp < lowerDispersion) {
+            lowerDispersion = disp;
+            bestIndividual = i;
         }
     }
 
@@ -419,4 +457,23 @@ void MemeticAlgorithm::localSearch(vector<int>& unselected_items, vector<int>& s
 
     solution = best_solution;
     solutionDispersion = best_cost;
+}
+
+void MemeticAlgorithm::localSearchExecution(vector<bool>& individual, double& dispersion, int& numEvaluations) {
+    vector<int> solution;
+    vector<int> unselectedItems;
+
+    for (int j=0; j<numElements; j++) {
+        if (individual[j])
+            solution.push_back(j);
+        else
+            unselectedItems.push_back(j);
+    }
+
+    localSearch(unselectedItems, solution, dispersion, numEvaluations);
+
+    individual = vector<bool>(numElements, false);
+    for (int j=0; j<numRequiredElements; j++) {
+        individual[solution[j]] = true;
+    }
 }

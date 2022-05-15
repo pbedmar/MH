@@ -6,6 +6,7 @@
 #define PRACTICAS_MEMETICALGORITHM_H
 
 #include <vector>
+#include <unordered_set>
 #include <random>
 using namespace std;
 
@@ -33,6 +34,7 @@ private:
     vector<bool> uniformCrossoverOperator(vector<bool>& parent1, vector<bool>& parent2);
     vector<bool> mutationOperator(vector<bool>& individual);
     void localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int& eval);
+    void localSearchExecution(vector<bool>& individual, double& dispersion, int& numEvaluations);
 
 public:
     MemeticAlgorithm(vector<vector<double> > distanceMatrix_, int numElements_, int numRequiredElements_, int seed_ = 1);
@@ -40,7 +42,7 @@ public:
     double getAvgCost();
     double getLowestCost();
     double getHighestCost();
-    void run(int n_times);
+    void run(int n_times, string memeticType);
 };
 
 

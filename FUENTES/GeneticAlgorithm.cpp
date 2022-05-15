@@ -36,7 +36,6 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-
         vector<vector<bool> > population;
         vector<double> populationDispersion;
         for (int i=0; i<POPULATION_SIZE; i++) {
@@ -63,7 +62,7 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
-        double elapsed = (clock()- start_time);
+        double elapsed = (clock() - start_time);
         double elapsed_in_seconds = elapsed / CLOCKS_PER_SEC;
 
         avg_time += elapsed_in_seconds;
