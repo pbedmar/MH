@@ -87,7 +87,6 @@ vector<int> binaryToNumeric(vector<bool> solution) {
         if (solution[i])
             result.push_back(i);
     }
-    cout << endl;
 
     return result;
 }

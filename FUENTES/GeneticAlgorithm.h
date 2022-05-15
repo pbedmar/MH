@@ -19,7 +19,6 @@ private:
     const int MAX_EVAL = 10000;
     const int POPULATION_SIZE = 50;
     const double PROB_AGG_CROSSOVER = 0.7;
-    const double PROB_AGE_CROSSOVER = 1;
     const double PROB_MUTATION = 0.1; //TODO: isn't better to increase mutation probability (with 0.2, 29.38 error)
     vector<vector<double> > distanceMatrix;
 

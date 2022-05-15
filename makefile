@@ -8,8 +8,8 @@ all: practica1 practica2
 practica1: $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o
 	g++ $(CXXFLAGS) $(OBJ)/practica1.o $(OBJ)/DataLoader.o $(OBJ)/GreedyAlgorithm.o $(OBJ)/LocalSearchAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica1
 
-practica2: $(OBJ)/practica2.o $(OBJ)/DataLoader.o $(OBJ)/GeneticAlgorithm.o $(OBJ)/functions.o
-	g++ $(CXXFLAGS) $(OBJ)/practica2.o $(OBJ)/DataLoader.o $(OBJ)/GeneticAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica2
+practica2: $(OBJ)/practica2.o $(OBJ)/DataLoader.o $(OBJ)/GeneticAlgorithm.o $(OBJ)/MemeticAlgorithm.o $(OBJ)/functions.o
+	g++ $(CXXFLAGS) $(OBJ)/practica2.o $(OBJ)/DataLoader.o $(OBJ)/GeneticAlgorithm.o $(OBJ)/MemeticAlgorithm.o $(OBJ)/functions.o -o $(BIN)/practica2
 
 $(OBJ)/practica1.o: $(SRC)/practica1.cpp
 	g++ $(CXXFLAGS) -c $(SRC)/practica1.cpp -o $(OBJ)/practica1.o
@@ -32,6 +32,9 @@ $(OBJ)/LocalSearchAlgorithm.o: $(SRC)/LocalSearchAlgorithm.cpp $(SRC)/LocalSearc
 
 $(OBJ)/GeneticAlgorithm.o: $(SRC)/GeneticAlgorithm.cpp $(SRC)/GeneticAlgorithm.h
 	g++ $(CXXFLAGS) -c $(SRC)/GeneticAlgorithm.cpp -o $(OBJ)/GeneticAlgorithm.o -I$(SRC)
+
+$(OBJ)/MemeticAlgorithm.o: $(SRC)/MemeticAlgorithm.cpp $(SRC)/MemeticAlgorithm.h
+	g++ $(CXXFLAGS) -c $(SRC)/MemeticAlgorithm.cpp -o $(OBJ)/MemeticAlgorithm.o -I$(SRC)
 
 
 clean:
