@@ -96,17 +96,16 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
 
 vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
 
-    double lastLowerDispersion = numeric_limits<double>::max();
-    int lastBestSolutionIndex = -1;
+    double lastBestSolutionDispersion = numeric_limits<double>::max();
+    vector<bool> lastBestSolution;
     for (int i = 0; i<POPULATION_SIZE; i++) {
-        if (lastLowerDispersion > populationDispersion[i]) {
-            lastBestSolutionIndex = i;
-            lastLowerDispersion = populationDispersion[i];
+        if (lastBestSolutionDispersion > populationDispersion[i]) {
+            lastBestSolution = population[i];
+            lastBestSolutionDispersion = populationDispersion[i];
         }
     }
-    vector<bool> lastBestSolution = population[lastBestSolutionIndex];
 
-    int numEvaluations = 0;
+    int numEvaluations = 50;
     while (numEvaluations < MAX_EVAL) {
         // generate parents
         population = generationalSelectionOperator(population, populationDispersion);
@@ -128,14 +127,14 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 
             population[i] = child1;
             population[i + 1] = child2;
-            populationDispersion[i] = dispersion(distanceMatrix, child1);
-            populationDispersion[i] = dispersion(distanceMatrix, child2);
-            numEvaluations = numEvaluations+2;
         }
 
         // perform mutations
         for (int i=0; i<POPULATION_SIZE*PROB_MUTATION; i++) { //TODO: Is this correct? Should I directly mutate the first individuals or shuffle right before?
             population[i] = mutationOperator(population[i]);
+        }
+
+        for (int i = 0; i < POPULATION_SIZE; i++) {
             populationDispersion[i] = dispersion(distanceMatrix, population[i]);
             numEvaluations++;
         }
@@ -155,19 +154,13 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
             }
         }
 
-        if (lowerDispersion > lastLowerDispersion) { //TODO: why my implementation increases dispersion in some iterations? Should that happen?
-            population[worstSolutionIndex] = lastBestSolution;
-            populationDispersion[worstSolutionIndex] = dispersion(distanceMatrix, lastBestSolution);
-            numEvaluations++;
-            lastBestSolutionIndex = worstSolutionIndex;
-        } else {
-            lastLowerDispersion = lowerDispersion;
-            lastBestSolutionIndex = bestSolutionIndex;
-        }
-        lastBestSolution = population[lastBestSolutionIndex];
+        population[worstSolutionIndex] = lastBestSolution;
+        populationDispersion[worstSolutionIndex] = lastBestSolutionDispersion;
+
+        lastBestSolution = population[bestSolutionIndex];
+        lastBestSolutionDispersion = lowerDispersion;
 
 //        cout << "Evaluation " << numEvaluations << ": " << dispersion(distanceMatrix, lastBestSolution) << endl;
-        numEvaluations++;
     }
 
 //    for (const auto i: lastPopulation) {

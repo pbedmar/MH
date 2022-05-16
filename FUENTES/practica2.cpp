@@ -14,16 +14,14 @@ int main(int argc, char *argv[]) {
 //    DataLoader data_ = DataLoader("data/GKD-b_43_n150_m15.txt");
 //
 //    GeneticAlgorithm geneticAlgorithm_(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
-//    geneticAlgorithm_.run(1, "est", "uni");
-//
+//    geneticAlgorithm_.run(1, "gen", "uni");
+
 //    MemeticAlgorithm memeticAlgorithm_(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
 //    memeticAlgorithm_.run(1, "AM1.0");
 //    MemeticAlgorithm memeticAlgorithm_2(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
 //    memeticAlgorithm_2.run(1, "AM0.1");
 //    MemeticAlgorithm memeticAlgorithm_3(data_.getDistanceMatrix(), data_.getNumElements(), data_.getNumRequiredElements(), 1);
 //    memeticAlgorithm_3.run(1, "AM0.1mej");
-//
-//    return 0;
 
     list<string> paths;
     ifstream parser("data/data_index.txt");
