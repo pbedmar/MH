@@ -273,7 +273,7 @@ vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vec
 
         // choose the best between the two
         int bestRandElem = firstRandElem;
-        if (populationDispersion[bestRandElem] > populationDispersion[bestRandElem]) {
+        if (populationDispersion[bestRandElem] > populationDispersion[secondRandElem]) {
             bestRandElem = secondRandElem;
         }
 
