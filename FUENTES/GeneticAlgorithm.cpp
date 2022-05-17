@@ -350,30 +350,35 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
     // repairment process
     // compute the number of trues in the vector and the average distance
     int countNbTrues = 0;
-    int countAvg = 0;
-    double avg = 0;
     for (int i=0; i<numElements; i++) {
         if (child[i]) {
             countNbTrues++;
         }
-        for (int j=0; j<numElements; j++) { // TODO: until numElements or i?
-            if (child[i] && child[j]) {
-                countAvg++;
-                avg += distanceMatrix[i][j];
-            }
-        }
-    }
-
-    if (countAvg > 0) {
-        avg = avg / countAvg;
     }
 
     // if there are more trues than required
     while (countNbTrues > numRequiredElements) {
-        double max = -numeric_limits<double>::max();
-        int maxPosition = -1;
+        // compute accumulated distances and average
+        vector<double> accDistance;
+        for (int i=0; i<numElements; i++) {
+            double sum = 0;
+            for(int j=0; j<numElements; j++) {
+                if (child[i] && child[j]) {
+                    sum += distanceMatrix[i][j];
+                }
+                accDistance.push_back(sum);
+            }
+        }
+
+        double avg = 0;
+        for (auto i: accDistance) {
+            avg += i;
+        }
+        avg = avg / accDistance.size();
 
         // get true more distant to the average
+        double max = -numeric_limits<double>::max();
+        int maxPosition = -1;
         for (int i=0; i<numElements; i++) {
             if (child[i]) {
                 double sum = 0;
@@ -389,30 +394,36 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
             }
         }
 
-        // convert that true to false. TODO: Here or down?
+        // convert that true to false. TODO: Here or below?
         child[maxPosition] = false;
 
-        // update average
-        avg *= countAvg;
-        for (int i=0; i<numElements; i++) {
-            if (child[i]) {
-                countAvg--;
-                avg -= distanceMatrix[maxPosition][i];
-            }
-        }
-        if (countAvg > 0) {
-            avg /= countAvg;
-        }
         // decrease number of trues
         countNbTrues--;
     }
 
     //if there are fewer trues than required
     while (countNbTrues < numRequiredElements) {
-        double min = numeric_limits<double>::max();
-        int minPosition = -1;
+        // compute accumulated distances and average
+        vector<double> accDistance;
+        for (int i=0; i<numElements; i++) {
+            double sum = 0;
+            for(int j=0; j<numElements; j++) {
+                if (child[i] && child[j]) {
+                    sum += distanceMatrix[i][j];
+                }
+                accDistance.push_back(sum);
+            }
+        }
+
+        double avg = 0;
+        for (auto i: accDistance) {
+            avg += i;
+        }
+        avg = avg / accDistance.size();
 
         // get false closer to the average
+        double min = numeric_limits<double>::max();
+        int minPosition = -1;
         for (int i=0; i<numElements; i++) {
             if (!child[i]) {
                 double sum = 0;
@@ -430,18 +441,6 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
 
         // convert that false to true. TODO: Here or down?
         child[minPosition] = true;
-
-        // update average
-        avg *= countAvg;
-        for (int i=0; i<numElements; i++) {
-            if (!child[i]) { // TODO: Negation?
-                countAvg++;
-                avg += distanceMatrix[minPosition][i];
-            }
-        }
-        if (countAvg > 0) {
-            avg /= countAvg;
-        }
 
         // increase number of trues
         countNbTrues++;
