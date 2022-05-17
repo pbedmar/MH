@@ -365,7 +365,7 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
     }
 
     if (countAvg > 0) {
-        avg /= countAvg;
+        avg = avg / countAvg;
     }
 
     // if there are more trues than required
@@ -379,11 +379,11 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
                 double sum = 0;
 
                 for (int j = 0; j < numElements; j++) {
-                    sum += distanceMatrix[i][j] - avg;
+                    sum += distanceMatrix[i][j];
                 }
 
-                if (sum > max) {
-                    max = sum;
+                if (fabs(sum-avg) > max) {
+                    max = fabs(sum-avg);
                     maxPosition = i;
                 }
             }
@@ -418,11 +418,11 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
                 double sum = 0;
 
                 for (int j = 0; j < numElements; j++) {
-                    sum += distanceMatrix[i][j] - avg;
+                    sum += distanceMatrix[i][j];
                 }
 
-                if (sum < min) {
-                    min = sum;
+                if (fabs(sum-avg) < min) {
+                    min = fabs(sum-avg);
                     minPosition = i;
                 }
             }
@@ -434,7 +434,7 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
         // update average
         avg *= countAvg;
         for (int i=0; i<numElements; i++) {
-            if (!child[i]) { // TODO: Negation or as it is?
+            if (!child[i]) { // TODO: Negation?
                 countAvg++;
                 avg += distanceMatrix[minPosition][i];
             }
