@@ -175,7 +175,7 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 }
 
 vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
-    int numEvaluations = 0;
+    int numEvaluations = 50;
     vector <bool> bestIndividual;
 
     while (numEvaluations < MAX_EVAL) {
@@ -226,30 +226,40 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population
         double dispChild2 = dispersion(distanceMatrix, child2);
         numEvaluations = numEvaluations+2;
         if (dispChild1 < dispChild2) {
-            if (dispChild2 < secondHigherDispersion) {
-                population[secondWorstIndividualIndex] = child2;
-                populationDispersion[secondWorstIndividualIndex] = dispChild2;
+            if (dispChild2 < higherDispersion) {
+                population[worstIndividualIndex] = child2;
+                populationDispersion[worstIndividualIndex] = dispChild2;
 
+                population[secondWorstIndividualIndex] = child1;
+                populationDispersion[secondWorstIndividualIndex] = dispChild1;
+
+            } else if (dispChild1 < higherDispersion) {
+                population[worstIndividualIndex] = child1;
+                populationDispersion[worstIndividualIndex] = dispChild1;
+            }
+        } else {
+            if (dispChild1 < higherDispersion) {
                 population[worstIndividualIndex] = child1;
                 populationDispersion[worstIndividualIndex] = dispChild1;
 
-            } else if (dispChild1 < secondHigherDispersion) {
-                population[secondWorstIndividualIndex] = child1;
-                populationDispersion[secondWorstIndividualIndex] = dispChild1;
+                population[secondWorstIndividualIndex] = child2;
+                populationDispersion[secondWorstIndividualIndex] = dispChild2;
+
+            } else if (dispChild2 < higherDispersion) {
+                population[worstIndividualIndex] = child2;
+                populationDispersion[worstIndividualIndex] = dispChild2;
             }
         }
 
         double lowerDispersion = numeric_limits<double>::max();
-        for (auto i: population) {
-            double disp = dispersion(distanceMatrix, i);
-            numEvaluations++;
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            double disp = populationDispersion[i];
             if (disp < lowerDispersion) {
                 lowerDispersion = disp;
-                bestIndividual = i;
+                bestIndividual = population[i];
             }
         }
 //        cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
-        numEvaluations++;
     }
 
     return bestIndividual;
