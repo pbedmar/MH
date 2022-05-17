@@ -96,17 +96,16 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
 
 vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
 
-    double lastLowerDispersion = numeric_limits<double>::max();
-    int lastBestSolutionIndex = -1;
+    double lastBestSolutionDispersion = numeric_limits<double>::max();
+    vector<bool> lastBestSolution;
     for (int i = 0; i<POPULATION_SIZE; i++) {
-        if (lastLowerDispersion > populationDispersion[i]) {
-            lastBestSolutionIndex = i;
-            lastLowerDispersion = populationDispersion[i];
+        if (lastBestSolutionDispersion > populationDispersion[i]) {
+            lastBestSolution = population[i];
+            lastBestSolutionDispersion = populationDispersion[i];
         }
     }
-    vector<bool> lastBestSolution = population[lastBestSolutionIndex];
 
-    int numEvaluations = 0;
+    int numEvaluations = 50;
     while (numEvaluations < MAX_EVAL) {
         // generate parents
         population = generationalSelectionOperator(population, populationDispersion);
@@ -128,14 +127,16 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 
             population[i] = child1;
             population[i + 1] = child2;
-            populationDispersion[i] = dispersion(distanceMatrix, child1);
-            populationDispersion[i] = dispersion(distanceMatrix, child2);
         }
 
         // perform mutations
         for (int i=0; i<POPULATION_SIZE*PROB_MUTATION; i++) { //TODO: Is this correct? Should I directly mutate the first individuals or shuffle right before?
             population[i] = mutationOperator(population[i]);
+        }
+
+        for (int i = 0; i < POPULATION_SIZE; i++) {
             populationDispersion[i] = dispersion(distanceMatrix, population[i]);
+            numEvaluations++;
         }
 
         double lowerDispersion = numeric_limits<double>::max();
@@ -153,18 +154,13 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
             }
         }
 
-        if (lowerDispersion > lastLowerDispersion) { //TODO: why my implementation increases dispersion in some iterations? Should that happen?
-            population[worstSolutionIndex] = lastBestSolution;
-            populationDispersion[worstSolutionIndex] = dispersion(distanceMatrix, lastBestSolution);
-            lastBestSolutionIndex = worstSolutionIndex;
-        } else {
-            lastLowerDispersion = lowerDispersion;
-            lastBestSolutionIndex = bestSolutionIndex;
-        }
-        lastBestSolution = population[lastBestSolutionIndex];
+        population[worstSolutionIndex] = lastBestSolution;
+        populationDispersion[worstSolutionIndex] = lastBestSolutionDispersion;
+
+        lastBestSolution = population[bestSolutionIndex];
+        lastBestSolutionDispersion = lowerDispersion;
 
 //        cout << "Evaluation " << numEvaluations << ": " << dispersion(distanceMatrix, lastBestSolution) << endl;
-        numEvaluations++;
     }
 
 //    for (const auto i: lastPopulation) {
@@ -179,7 +175,7 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 }
 
 vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
-    int numEvaluations = 0;
+    int numEvaluations = 50;
     vector <bool> bestIndividual;
 
     while (numEvaluations < MAX_EVAL) {
@@ -228,30 +224,42 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population
         // replace the old population's worst individuals with the new children (only if they are better)
         double dispChild1 = dispersion(distanceMatrix, child1);
         double dispChild2 = dispersion(distanceMatrix, child2);
+        numEvaluations = numEvaluations+2;
         if (dispChild1 < dispChild2) {
-            if (dispChild2 < secondHigherDispersion) {
-                population[secondWorstIndividualIndex] = child2;
-                populationDispersion[secondWorstIndividualIndex] = dispChild2;
+            if (dispChild2 < higherDispersion) {
+                population[worstIndividualIndex] = child2;
+                populationDispersion[worstIndividualIndex] = dispChild2;
 
+                population[secondWorstIndividualIndex] = child1;
+                populationDispersion[secondWorstIndividualIndex] = dispChild1;
+
+            } else if (dispChild1 < higherDispersion) {
+                population[worstIndividualIndex] = child1;
+                populationDispersion[worstIndividualIndex] = dispChild1;
+            }
+        } else {
+            if (dispChild1 < higherDispersion) {
                 population[worstIndividualIndex] = child1;
                 populationDispersion[worstIndividualIndex] = dispChild1;
 
-            } else if (dispChild1 < secondHigherDispersion) {
-                population[secondWorstIndividualIndex] = child1;
-                populationDispersion[secondWorstIndividualIndex] = dispChild1;
+                population[secondWorstIndividualIndex] = child2;
+                populationDispersion[secondWorstIndividualIndex] = dispChild2;
+
+            } else if (dispChild2 < higherDispersion) {
+                population[worstIndividualIndex] = child2;
+                populationDispersion[worstIndividualIndex] = dispChild2;
             }
         }
 
         double lowerDispersion = numeric_limits<double>::max();
-        for (auto i: population) {
-            double disp = dispersion(distanceMatrix, i);
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            double disp = populationDispersion[i];
             if (disp < lowerDispersion) {
                 lowerDispersion = disp;
-                bestIndividual = i;
+                bestIndividual = population[i];
             }
         }
 //        cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
-        numEvaluations++;
     }
 
     return bestIndividual;
@@ -342,79 +350,90 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
     // repairment process
     // compute the number of trues in the vector and the average distance
     int countNbTrues = 0;
-    int countAvg = 0;
-    double avg = 0;
     for (int i=0; i<numElements; i++) {
         if (child[i]) {
             countNbTrues++;
         }
-        for (int j=0; j<numElements; j++) { // TODO: until numElements or i?
-            if (child[i] && child[j]) {
-                countAvg++;
-                avg += distanceMatrix[i][j];
-            }
-        }
-    }
-
-    if (countAvg > 0) {
-        avg /= countAvg;
     }
 
     // if there are more trues than required
     while (countNbTrues > numRequiredElements) {
-        double max = -numeric_limits<double>::max();
-        int maxPosition = -1;
+        // compute accumulated distances and average
+        vector<double> accDistance;
+        for (int i=0; i<numElements; i++) {
+            double sum = 0;
+            for(int j=0; j<numElements; j++) {
+                if (child[i] && child[j]) {
+                    sum += distanceMatrix[i][j];
+                }
+                accDistance.push_back(sum);
+            }
+        }
+
+        double avg = 0;
+        for (auto i: accDistance) {
+            avg += i;
+        }
+        avg = avg / accDistance.size();
 
         // get true more distant to the average
+        double max = -numeric_limits<double>::max();
+        int maxPosition = -1;
         for (int i=0; i<numElements; i++) {
             if (child[i]) {
                 double sum = 0;
 
                 for (int j = 0; j < numElements; j++) {
-                    sum += distanceMatrix[i][j] - avg;
+                    sum += distanceMatrix[i][j];
                 }
 
-                if (sum > max) {
-                    max = sum;
+                if (fabs(sum-avg) > max) {
+                    max = fabs(sum-avg);
                     maxPosition = i;
                 }
             }
         }
 
-        // convert that true to false. TODO: Here or down?
+        // convert that true to false. TODO: Here or below?
         child[maxPosition] = false;
 
-        // update average
-        avg *= countAvg;
-        for (int i=0; i<numElements; i++) {
-            if (child[i]) {
-                countAvg--;
-                avg -= distanceMatrix[maxPosition][i];
-            }
-        }
-        if (countAvg > 0) {
-            avg /= countAvg;
-        }
         // decrease number of trues
         countNbTrues--;
     }
 
     //if there are fewer trues than required
     while (countNbTrues < numRequiredElements) {
-        double min = numeric_limits<double>::max();
-        int minPosition = -1;
+        // compute accumulated distances and average
+        vector<double> accDistance;
+        for (int i=0; i<numElements; i++) {
+            double sum = 0;
+            for(int j=0; j<numElements; j++) {
+                if (child[i] && child[j]) {
+                    sum += distanceMatrix[i][j];
+                }
+                accDistance.push_back(sum);
+            }
+        }
+
+        double avg = 0;
+        for (auto i: accDistance) {
+            avg += i;
+        }
+        avg = avg / accDistance.size();
 
         // get false closer to the average
+        double min = numeric_limits<double>::max();
+        int minPosition = -1;
         for (int i=0; i<numElements; i++) {
             if (!child[i]) {
                 double sum = 0;
 
                 for (int j = 0; j < numElements; j++) {
-                    sum += distanceMatrix[i][j] - avg;
+                    sum += distanceMatrix[i][j];
                 }
 
-                if (sum < min) {
-                    min = sum;
+                if (fabs(sum-avg) < min) {
+                    min = fabs(sum-avg);
                     minPosition = i;
                 }
             }
@@ -422,18 +441,6 @@ vector<bool> GeneticAlgorithm::uniformCrossoverOperator(vector<bool>& parent1, v
 
         // convert that false to true. TODO: Here or down?
         child[minPosition] = true;
-
-        // update average
-        avg *= countAvg;
-        for (int i=0; i<numElements; i++) {
-            if (!child[i]) { // TODO: Negation or as it is?
-                countAvg++;
-                avg += distanceMatrix[minPosition][i];
-            }
-        }
-        if (countAvg > 0) {
-            avg /= countAvg;
-        }
 
         // increase number of trues
         countNbTrues++;
