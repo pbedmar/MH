@@ -1,0 +1,487 @@
+\input{preambuloSimple.tex}
+
+
+%----------------------------------------------------------------------------------------
+%	TÍTULO Y DATOS DEL ALUMNO
+%----------------------------------------------------------------------------------------
+
+\title{	
+\normalfont \normalsize 
+\huge{\textbf{Metaheurísticas (Curso 2021-2022)}\linebreak \linebreak Grado en Ingeniería Informática \\ Universidad de Granada} \\ [23pt] % Your university, school and/or department name(s)
+
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.4]{img/ugr.png}
+\end{figure}
+
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Práctica 2: Técnicas de Búsqueda basadas en Poblaciones \linebreak \linebreak% The assignment title
+\LARGE Problema a: Mínima Dispersión Diferencial
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+\vspace{0.7cm}
+
+\Large{Pedro Bedmar López - 75935296Z} \\
+\Large{pedrobedmar@correo.ugr.es} \linebreak
+
+\large Grupo de prácticas 3 - Martes 17:30-19:30
+
+}
+
+\date{}
+
+%----------------------------------------------------------------------------------------
+% DOCUMENTO
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\clearpage
+\maketitle % Muestra el Título
+\thispagestyle{empty}
+
+\newpage %inserta un salto de página
+
+\tableofcontents % para generar el índice de contenidos
+
+\newpage
+
+
+
+%----------------------------------------------------------------------------------------
+%	Cuestión 1
+%----------------------------------------------------------------------------------------
+
+\part{Formulación del problema}
+
+Sea $G = (V,E)$ un grafo completo no dirigido donde $V$, de tamaño $n$, es el conjunto de vértices que lo forman y $E$ es el conjunto de las aristas que unen estos vértices. Este grafo es un grafo ponderado, ya que cada una de las aristas $e_{u,v} \in E$ lleva asociada un peso que representa la distancia $d_{u,v}$ entre dos vértices $u,v \in V$.
+
+La dispersión es una medida que se puede aplicar en este dominio, donde dado un subconjunto $S \subset V$ de tamaño $m$ se mide cómo de homogéneas son las distancias entre los vértices que forman $S$. Una de las aplicaciones más importantes de las Ciencias de la Computación consiste en optimizar valores como éste, maximizando o minimizando el resultado que devuelve una \textbf{función objetivo}. 
+
+En esta práctica queremos minimizar su valor, obteniendo la mínima dispersión. Este problema tiene un gran paralelismo con problemas reales, como puede ser la organización del género en almacenes, donde minimizar la dispersión de la mercancía reduce los costes. Por tanto, si resolvemos este problema de forma teórica es trivial aplicar la solución en estos casos.
+
+Anteriormente he definido la dispersión de una forma muy genérica, sin entrar en su formalización. Y es que se puede definir de diferentes formas, teniendo en cuenta la dispersión media de los elementos del conjunto $S$ o utilizando los valores extremos (máximos y mínimos) en éste. Esta segunda opción se define formalmente como:
+\begin{align*}
+    diff(S) = max_{i \in S} \{ \sum_{j \in S} d_{i,j}\} - min_{i \in S} \{ \sum_{j \in S} d_{i,j}\}
+\end{align*}
+
+Utilizando esta definición de dispersión como función objetivo obtenemos lo que se conoce como \textbf{Problema de la Mínima Dispersión Diferencial (MDD)}, es decir: 
+\begin{align*}
+    S^{*} = {arg min}_{S \subset V} diff(S)
+\end{align*}
+
+
+\part{Descripción de la aplicación de los algoritmos}
+En esta segunda práctica de la asignatura implementamos y comparamos el rendimiento de algoritmos de búsqueda basados en poblaciones, en concreto algoritmos \textbf{Genéticos} y \textbf{Meméticos}. Antes de describirlos, vamos a comentar información común a ambos.
+
+
+\section{Datos utilizados}
+Los datos que necesitamos para analizar el comportamiento de los algoritmos en este problema no son muy complejos. En cada posible instancia se necesita conocer el valor $n$ indicando el número de puntos que contiene el dataset, el valor $m < n$ indicando cuantos puntos se quieren escoger de forma que se minimice la dispersión en esos $m$ puntos y la matriz $d$ con tamaño $n \times n$, simétrica y con valor 0 en su diagonal, que contiene las distancias entre cada uno de los $n$ puntos del dataset. En definitiva, se necesita conocer el grafo $G$.
+
+En total, en los experimentos utilizamos 50 instancias diferentes con datos extraídos del dataset \textbf{GKD}. Las instancias toman valores $n \in \{25,50,100,125,150\}$ y $m \in [2,45]$.
+
+\section{Representación de soluciones}
+
+El conjunto $V$ descrito en la formulación del problema coincide con $n$ en tamaño. Al contrario que en la práctica anterior, una posible solución $S$ puede representarse de dos formas diferentes según el punto de ejecución en que se encuentre el algoritmo.
+
+En la búsqueda local del algoritmo memético, la solución se representa de la misma forma que en la práctica anterior para poder reutilizar el código, siendo $S$ es una solución válida si:
+\begin{itemize}
+    \item $|S| = m$
+    \item $S \subset V$
+\end{itemize}
+Y por tanto, $m < n$. Estamos ante una representación entera donde los índices de los vértices que forman la solución son recogidos por $S$. Por ejemplo $S = \{3,7,2\}$ representa que los vértices con índice 3, 7 y 2 forman una solución al problema.
+
+En cambio, para la mayor parte del algoritmo memético y todo el genético, la representación que se utiliza es binaria. Para diferenciar la representación anterior de ésta, vamos a nombrarla $S_b$ en vez de $S$. Cumple las siguientes condiciones:
+\begin{itemize}
+    \item $|S_b| = n$
+    \item count(1, $S_b$) = $m$, donde count(1, $S_b$) devuelve el número de 1s en $S_b$.
+    \item $S_b = [x | x \in \{0,1\}]$
+\end{itemize}
+El orden de los valores en $S_b$ importa, cada uno representa un vértice del grafo, por lo que se implementará como un vector y no como un conjunto. Por ejemplo, $S_b = [1,0,0,1,0,1]$ representa que los vértices 1, 4 y 6 del grafo forman parte de la solución pero el resto no.
+
+
+
+
+\section{Función objetivo}
+
+Como hemos comentado al describir el problema, la función objetivo a minimizar se define como:
+\begin{align*}
+    diff(S) = max_{i \in S} \{ \sum_{j \in S} d_{i,j}\} - min_{i \in S} \{ \sum_{j \in S} d_{i,j}\}
+\end{align*}
+
+\noindent En el caso de utilizar representación entera para las posibles soluciones, el pseudocódigo quedaría de la siguiente forma:
+\begin{algorithm}[H]
+    \caption{Función objetivo, implementación para la representación entera}
+\begin{algorithmic}
+\State $max \gets -\infty$
+\State $min \gets \infty$
+\For{$s \in S$}
+    \State $distance \gets \sum_{s2 \in S} d_{s,s2}$
+    \If{$distance > max$}
+        \State $max \gets distance$
+    \EndIf
+    \If{$distance < min$}
+        \State $min \gets distance$
+    \EndIf
+\EndFor
+\State \textbf{return} $max - min$
+\end{algorithmic}
+\end{algorithm}
+
+En el algoritmo de Búsqueda Local, no se utiliza directamente esta implementación de la función objetivo. Esto se debe a que es costosa, en concreto tiene una complejidad computacional de $O(n^2)$. Utilizamos una versión factorizada de la función, que reutiliza cálculos de iteraciones previas para actualizar el valor de la dispersión. De esta forma, obtenemos una complejidad de $O(n)$.
+
+\noindent En cambio, si se utiliza una representación binaria, el pseudocódigo quedaría así:
+\begin{algorithm}[H]
+    \caption{Función objetivo, implementación para la representación binaria}
+\begin{algorithmic}
+\State $max \gets -\infty$
+\State $min \gets \infty$
+\For{$i \in S_b$} \Comment{Donde $i$ indica la posición en el vector $S_b$}
+    \If{$S_b[i] == 1$}
+        \State $distance \gets 0$
+        \State
+        \For{$j \in S_b$}
+            \If{$S_b[j] == 1$} \Comment{Donde $j$ indica la posición en el vector $S_b$}
+                \State $distance += d_{i,j}$
+            \EndIf
+        \EndFor
+        \State
+        \If{$distance > max$}
+            \State $max \gets distance$
+        \EndIf
+        \If{$distance < min$}
+            \State $min \gets distance$
+        \EndIf
+    \EndIf
+\EndFor
+\State \textbf{return} $max - min$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Operadores comunes}
+
+\subsection{Generador de soluciones aleatorias}
+\begin{algorithm}[H]
+    \caption{Generador de soluciones aleatorias en representación binaria}
+\begin{algorithmic}
+\Procedure{generateRandomSolution}{}
+    \State $individual \leftarrow [ \, ]$
+    \For{$i \in 1..m$}
+        \State $individual = individual + [1]$ \Comment{Insertamos un 1 al final del vector}
+    \EndFor
+    \For{$i \in 1..n-m$}
+        \State $individual = individual + [0]$
+    \EndFor
+    \State shuffle($individual$)
+    \State \textbf{return} $individual$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Mecanismo de selección del algoritmo genético generacional}
+\begin{algorithm}[H]
+    \caption{Mecanismo de selección del algoritmo genético generacional. Toma como argumentos un vector que contiene la población de individuos y otro vector que contiene la dispersión de cada individuo. Devuelve la población que contiene a los padres.}
+\begin{algorithmic}
+\Procedure{generationalSelectionOperator}{popul, populDisp}
+    \State $parentsPopul \leftarrow [ \, ]$
+    \State $parentsPopulDisp \leftarrow [ \, ]$
+    \For{$i \in 1..50$}
+        \State $firstRandElem \leftarrow rand(1,50)$
+        \State $secondRandElem \leftarrow rand(1,50)$ \Comment Debe de ser diferente a $firstRandElem$
+        \State
+        \State $bestRandElem \leftarrow firstRandElem$
+        \If{$populDisp[bestRandElem]>populDisp[secondRandElem]$}
+            \State $bestRandElem \leftarrow secondRandElem$
+        \EndIf
+        \State
+        \State $parentsPopul += \{popul[bestRandElem]\}$
+        \State $parentsPopulDisp += \{populDisp[bestRandElem]\}$
+        \State \textbf{return} $parentsPopul, parentsPopulDisp$
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Mecanismo de selección del algoritmo genético estacionario}
+\begin{algorithm}[H]
+    \caption{Mecanismo de selección del algoritmo genético estacionario. Toma como argumentos un vector que contiene la población de individuos y otro vector que contiene la dispersión de cada individuo. Devuelve el índice en la población de los dos individuos elegidos como padres.}
+\begin{algorithmic}
+\Procedure{stationarySelectionOperator}{popul, populDisp}
+    \State $parents \leftarrow [ \, ]$
+    \State 
+    \State $firstRandElem \leftarrow$ random($1$, $50$) 
+    \State $secondRandElem \leftarrow$ random($1$, $50$) \Comment Debe de ser diferente a $firstRandElem$
+    \State
+    \State $parent1Index \leftarrow firstRandElem$
+    \If{$populDisp[parent1Index] > populDisp[secondRandElem]$}
+        \State $parent1Index \leftarrow secondRandElem$
+    \EndIf
+    \State 
+    \State $firstRandElem \leftarrow$ random($1$, $50$) 
+    \State $secondRandElem \leftarrow$ random($1$, $50$) \Comment Debe de ser diferente a $firstRandElem$
+    \State
+    \State $parent2Index \leftarrow firstRandElem$
+    \If{$populDisp[parent2Index] > populDisp[secondRandElem]$}
+        \State $parent2Index \leftarrow secondRandElem$
+    \EndIf
+    \State \textbf{return} $parent1Index, parent2Index$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Operador de mutación}
+\begin{algorithm}[H]
+    \caption{Operador de mutación de un individuo. Toma como argumento el individuo a mutar. Intercambia el valor de dos genes en el individuo, y devuelve el individuo modificado.}
+\begin{algorithmic}
+\Procedure{mutationOperator}{individual}
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\part{Pseudocódigo de los algoritmos}
+
+
+
+\section{Algoritmo Greedy}
+
+El primer algoritmo que implementamos para resolver el problema utiliza una estrategia Greedy, donde partiendo de una solución incompleta $S$ con sólo dos vértices $v_1,v_2 \in V$ elegidos aleatoriamente, llegamos a una solución completa añadiendo un nuevo vértice en cada iteración. En concreto, se añade el vértice que minimiza la dispersión con respecto a los ya existentes.
+
+\begin{algorithm}[H]
+\caption{Algoritmo Greedy}
+\begin{algorithmic}[1]
+\State $s_1, s_2 \gets$ Rand($V$) \Comment{Rand() devuelve dos vértices aleatorios de V}
+\State $S \gets \{s_1,s_2\}$
+\State $U \gets V \setminus \{s_1,s_2\}$  
+\State 
+\State $sum \gets [ \, ]$ \Comment{Array que contiene la distancia acumulada,}
+\For{$u \in U$} \Comment{necesario para la factorización de la función objetivo}
+    \For{$s \in S$}
+        \State $sum[u] \pluseq d_{u,s}$
+    \EndFor
+\EndFor
+\For{$s \in S$}
+    \For{$s2 \in S$}
+        \State $sum[s] \pluseq d_{s,s2}$
+    \EndFor
+\EndFor
+\algstore{myalg}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{myalg}
+\While{$|S| < m$} \Comment{Donde $m$ es el tamaño que debe tener la solución}
+    \State $g_{min} \gets \infty$
+    \State $u\_g_{min} \gets -1$
+    \State
+    \For{$u \in U$}
+        \State $\delta(v)_{max} \gets -\infty$
+        \State $\delta(v)_{min} \gets \infty$
+        \State
+        \For{$v \in S$}
+            \State $\delta(v) \gets sum[v] + d_{u,v}$
+            \If{$\delta(v)_{max} < \delta(v)$}
+                \State $\delta(v)_{max} \gets \delta(v)$
+            \EndIf
+             \If{$\delta(v)_{min} > \delta(v)$}
+                \State $\delta(v)_{min} \gets \delta(v)$
+            \EndIf
+            \State
+            \State $\delta(u)_{max} \gets max(sum[u], \delta(v)_{max})$
+            \State $\delta(u)_{min} \gets min(sum[u], \delta(v)_{min})$
+            \State $g = \delta(u)_{max} - \delta(u)_{min}$
+            \If{$g_{min} > g$}
+                \State $g_{min} \gets g$
+                \State $u\_g_{min} \gets -1$
+            \EndIf
+        \EndFor
+        \State
+        \State $U \gets U \setminus \{u\_g_{min}\}$
+        \State $S \gets S + \{u\_g_{min}\}$
+    \EndFor
+    \State
+    \For{$v \in V $}
+        \State $sum[v] \pluseq d_{v,u\_g_{min}}$
+    \EndFor
+\EndWhile
+\State
+\State \textbf{return} $S$ 
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+\section{Algoritmo Búsqueda Local}
+
+En esta segunda implementación utilizamos una búsqueda local. Para ello, se genera una solución inicial aleatoria (y válida) y se va explorando su entorno. Cuando se encuentra un vecino que reduce la dispersión, se actualiza como nueva solución. Así se procede hasta haber recorrido todo el vecindario sin encontrar una solución mejor o hasta llegar a las 100000 evaluaciones de la función objetivo. Cada vez que se reinicia la exploración del vecindario, se barajan el vector que contiene la solución y el que contiene los vértices que no pertenecen a esta, para asegurar que el orden en el que se visitan los nodos no es determinístico.
+
+
+
+\begin{algorithm}[H]
+\caption{Algoritmo Búsqueda Local primero el mejor}
+\begin{algorithmic}[1]
+\State $U \gets V$
+\State $U \gets$ Shuffle($U$)
+\State $S \gets [ \, ]$
+\State $sum \gets [ \, ]$
+\State
+\For{$i = 0$ \textbf{to} $m-1$}
+    \State element $\gets U.last$
+    \State $U \gets U - \{element\}$
+    \State $S \gets S + \{element\}$
+\EndFor
+\State
+\State $S_{best} \gets S$
+\State $current\_cost \gets $dispersion($S$)
+\State $best\_cost \gets current\_cost$
+\State
+\State eval $\gets 0$
+\State $better\_solution \gets true$
+\State
+\While{eval $< 100000$ \textbf{and} $better\_solution$}
+    \State $better\_solution \gets false$
+    \State
+    \For{$u \in S$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 100000$}
+        \For{$v \in U$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 100000$}
+            \State $eval \gets eval+1$
+            \State $\delta \gets [\,]$ \Comment Array inicializado a 0
+            \State $\delta(w)_{max} \gets -\infty$
+            \State $\delta(w)_{min} \gets \infty$
+            \State
+\algstore{myalg2}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{myalg2}
+            \For{$w \in S$}
+                \If{$w != u$}
+                    \State $\delta[w] \gets sum[w] - d_{w,u} + d_{w,v}$
+                    \State $\delta[v] \pluseq d_{w,v}$
+                    \State
+                    \If{$\delta[w] > \delta(w)_{max}$}
+                        \State $\delta(w)_{max} \gets \delta[w]$
+                    \EndIf
+                    \If{$\delta[w] < \delta(w)_{min}$}
+                        \State $\delta(w)_{min} \gets \delta[w]$
+                    \EndIf
+                \EndIf
+            \EndFor
+            \State
+            \State $\delta_{max} \gets max(\delta[v], \delta(w)_{max})$
+            \State $\delta_{min} \gets min(\delta[v], \delta(w)_{min})$
+            \State $new\_cost \gets \delta_{max} - \delta_{min}$
+            \If{$new\_cost < current\_cost$}
+                \State $best\_cost \gets new\_cost$
+                \State $current\_cost \gets new\_cost$
+                \State
+                \State $swap \gets u$ \Comment intercambio $u$ y $v$ en $S$ y $U$
+                \State $u \gets v$
+                \State $v \gets swap$
+                \State $better\_solution = true$
+                \State $best\_solution = S$
+            \EndIf
+            \State
+        \EndFor
+    \EndFor
+    \State
+    \State shuffle($S$)
+    \State shuffle($U$)
+\EndWhile
+\State
+\State \textbf{return} $S$  
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\part{Procedimiento considerado para desarrollar la práctica}
+
+La implementación de los algoritmos ha sido realizada en C++, concretamente en su versión de 2017. Para ello, hemos creado un proyecto con la siguiente estructura:
+
+\dirtree{%
+    .1 /.
+    .2 BIN\DTcomment{archivos ejecutables}.
+    .3 practica1.
+    .2 data\DTcomment{ficheros .txt con los datos de entrada}.
+    .3 data\_index.txt\DTcomment{índice con los nombres de los archivos de datos}.
+    .3 ....
+    .2 doc.
+    .2 FUENTES.
+    .3 DataLoader.cpp\DTcomment{clase encargada de cargar los datos de los ficheros}.
+    .3 DataLoader.h.
+    .3 functions.cpp\DTcomment{funciones auxiliares}.
+    .3 functions.h.
+    .3 GreedyAlgorithm.cpp\DTcomment{implementación del algoritmo Greedy}.
+    .3 GreedyAlgorithm.h.
+    .3 LocalSearchAlgorithm.cpp\DTcomment{implementación del algoritmo BL}.
+    .3 LocalSearchAlgorithm.h.
+    .3 practica1.cpp\DTcomment{archivo desde donde se inicia la ejecución}.
+    .2 obj\DTcomment{ficheros objeto}.
+    .2 makefile.
+    .2 LEEME.
+}
+
+Se ha partido desde cero, sin utilizar ningún framework de metaheurísticas ni librería adicional a las que vienen incluídas en el propio C++. Para la generación de números aleatorios, se utiliza la librería $<random>$ incluida en el lenguaje. La semilla utilizada en los experimentos es el número $1$. El equipo donde se han realizado las pruebas es un MacBook Pro de 15 pulgadas del año 2015, con CPU Intel Core i7 2.5 GHz I7-4870HQ y 16 GB de RAM. Utiliza el sistema operativo macOS Big Sur 11.6.1.
+
+Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $make$ en la terminal. A continuación, ejecutamos:
+
+\noindent $./bin/practica1$ <$semilla$> \space <$algoritmo$> \space <$fichero\_datos$>
+
+\noindent Donde <$algoritmo$> \space puede tomar como valor g (Greedy) o b (Búsqueda Local).
+
+\noindent Ejemplo: ./bin/practica1 1 g data/GKD-b\_50\_n150\_m45.txt
+
+
+\part{Experimentos y análisis de resultados}
+Para comprobar el funcionamiento de los algoritmos, realizamos experimentos de ejecución. Nuestros algoritmos son probabilísticos, ya que la aleatoriedad está presente en ellos. Por tanto, para que los resultados sean reproducibles es necesario fijar una semilla. Como mencionamos en el apartado anterior, fijamos su valor en $1$. 
+
+Vamos a ejecutar el algoritmo con los 50 casos que tenemos, y cada caso 5 veces para promediar los resultados de tiempo de ejecución y coste. La semilla se volverá a fijar al ejecutar cada caso, pero no entre ejecuciones sobre el mismo conjunto de datos.
+
+\section{Algoritmo Greedy}
+Con este algoritmo se observan unos tiempos de ejecución bajos, ya que la solución se construye progresivamente, y una vez elegido un elemento no se vuelve atrás. Los costes obtenidos no son demasiado cercanos a los óptimos y por tanto su desviación es bastante alta. 
+
+También se puede observar cómo el peor y mejor coste entre ejecuciones varía en gran medida. Esto se debe a que el algoritmo se encuentra influenciado por los dos elementos aleatorios elegidos al inicio de la ejecución.
+
+Como desviación y tiempo de ejecución medio entre todos los casos encontramos:
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.35]{img/greedy2.png}
+\end{figure}
+
+Lo cuál es un valor de desviación bastante elevado. Como ventajas de este algoritmo, podemos destacar su bajo tiempo de ejecución. Aún así, el criterio heurístico que utiliza para elegir los candidatos no es bastante bueno en este problema.
+
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.65]{img/greedy.png}
+\end{figure}
+
+%------------------------------------------------
+\newpage
+
+\section{Algoritmo Búsqueda Local}
+Utilizando esta técnica, los tiempos de ejecución aumentan con respecto a Greedy, aunque se siguen manteniendo en valores bajos. Los costes mejoran, aunque no en demasiada medida.
+
+Ocurre la misma situación que en el otro algoritmo: los peores y mejores costes presentan gran variabilidad. En este caso, el no determinismo es incluso mayor que en Greedy, ya que se realiza un shuffle() cada vez que se encuentra una solución que mejora la actual y no se recorre todo el vecindario (ya que nos encontramos ante una búsqueda primero el mejor). 
+
+Como desviación y tiempo de ejecución medio entre todos los casos encontramos:
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.35]{img/bl2.png}
+\end{figure}
+
+Ninguno de los dos algoritmos que hemos estudiado se acerca demasiado a la solución óptima, ya que sus criterios heurísticos no son demasiado fuertes. En el caso de Greedy, una vez elegido un elemento no se puede volver atrás, y en el caso de la búsqueda local, sólo tenemos en cuenta los posibles cambios con el vecindario y no el resto.
+
+Aún así, el hecho de poder utilizar factorización hace que los algoritmos presenten una baja complejidad y tiempos de ejecución, que con técnicas más avanzadas no se conseguirían.
+
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.65]{img/bl.png}
+\end{figure}
+
+\end{document}
+
+
