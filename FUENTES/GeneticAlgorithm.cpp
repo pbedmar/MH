@@ -108,7 +108,7 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
     int numEvaluations = 50;
     while (numEvaluations < MAX_EVAL) {
         // generate parents
-        population = generationalSelectionOperator(population, populationDispersion);
+        generationalSelectionOperator(population, populationDispersion);
 
         // crossover (only between the first POPULATION_SIZE*PROB_AGG_CROSSOVER individuals)
         for (int i=0; i<POPULATION_SIZE*PROB_AGG_CROSSOVER; i+=2) {
@@ -134,20 +134,16 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
             population[i] = mutationOperator(population[i]);
         }
 
+        // update dispersion
         for (int i = 0; i < POPULATION_SIZE; i++) {
             populationDispersion[i] = dispersion(distanceMatrix, population[i]);
             numEvaluations++;
         }
 
-        double lowerDispersion = numeric_limits<double>::max();
+
         double higherDispersion = -numeric_limits<double>::max();
-        int bestSolutionIndex = -1;
         int worstSolutionIndex = -1;
         for (int i = 0; i<POPULATION_SIZE; i++) {
-            if (lowerDispersion > populationDispersion[i]) {
-                bestSolutionIndex = i;
-                lowerDispersion = populationDispersion[i];
-            }
             if (higherDispersion < populationDispersion[i]) {
                 worstSolutionIndex = i;
                 higherDispersion = populationDispersion[i];
@@ -156,6 +152,15 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 
         population[worstSolutionIndex] = lastBestSolution;
         populationDispersion[worstSolutionIndex] = lastBestSolutionDispersion;
+
+        double lowerDispersion = numeric_limits<double>::max();
+        int bestSolutionIndex = -1;
+        for(int i = 0; i<POPULATION_SIZE; i++){
+            if (lowerDispersion > populationDispersion[i]) {
+                bestSolutionIndex = i;
+                lowerDispersion = populationDispersion[i];
+            }
+        }
 
         lastBestSolution = population[bestSolutionIndex];
         lastBestSolutionDispersion = lowerDispersion;
@@ -176,7 +181,6 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 
 vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
     int numEvaluations = 50;
-    vector <bool> bestIndividual;
 
     while (numEvaluations < MAX_EVAL) {
         // generate parents
@@ -251,21 +255,24 @@ vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population
             }
         }
 
-        double lowerDispersion = numeric_limits<double>::max();
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            double disp = populationDispersion[i];
-            if (disp < lowerDispersion) {
-                lowerDispersion = disp;
-                bestIndividual = population[i];
-            }
-        }
+
 //        cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
+    }
+
+    vector <bool> bestIndividual;
+    double lowerDispersion = numeric_limits<double>::max();
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        double disp = populationDispersion[i];
+        if (disp < lowerDispersion) {
+            lowerDispersion = disp;
+            bestIndividual = population[i];
+        }
     }
 
     return bestIndividual;
 }
 
-vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vector<bool> >& population, vector<double>& populationDispersion) {
+void GeneticAlgorithm::generationalSelectionOperator(vector<vector<bool> >& population, vector<double>& populationDispersion) {
     uniform_int_distribution<mt19937::result_type> dist(0,POPULATION_SIZE-1);
     vector<vector<bool> > parentsPopulation;
     vector<double> parentsPopulationDispersion;
@@ -292,7 +299,7 @@ vector<vector<bool> > GeneticAlgorithm::generationalSelectionOperator(vector<vec
     }
 
     populationDispersion = parentsPopulationDispersion;
-    return parentsPopulation;
+    population = parentsPopulation;
 }
 
 pair<int,int> GeneticAlgorithm::stationarySelectionOperator(vector<vector<bool> >& population, vector<double>& populationDispersion) {
@@ -310,8 +317,7 @@ pair<int,int> GeneticAlgorithm::stationarySelectionOperator(vector<vector<bool> 
 
     // choose the best between the two
     int bestRandElem = firstRandElem;
-    if (populationDispersion[bestRandElem] >
-        populationDispersion[secondRandElem]) {
+    if (populationDispersion[bestRandElem] > populationDispersion[secondRandElem]) {
         bestRandElem = secondRandElem;
     }
 
@@ -319,15 +325,17 @@ pair<int,int> GeneticAlgorithm::stationarySelectionOperator(vector<vector<bool> 
 
     // get two individuals randomly
     firstRandElem = dist(rng_gen);
+    while (firstRandElem == parents.first) {
+        firstRandElem = dist(rng_gen);
+    }
     secondRandElem = dist(rng_gen);
-    while (firstRandElem == secondRandElem) {
+    while (firstRandElem == secondRandElem || secondRandElem == parents.first) {
         secondRandElem = dist(rng_gen);
     }
 
     // choose the best between the two
     bestRandElem = firstRandElem;
-    if (populationDispersion[bestRandElem] >
-        populationDispersion[secondRandElem]) {
+    if (populationDispersion[bestRandElem] > populationDispersion[secondRandElem]) {
         bestRandElem = secondRandElem;
     }
 
