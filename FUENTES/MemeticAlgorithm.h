@@ -29,7 +29,7 @@ private:
     double lowest_cost = numeric_limits<double>::max();
     double highest_cost = -numeric_limits<double>::max();
 
-    vector<bool> stationaryModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string memeticType);
+    vector<bool> stationaryModel(string memeticType);
     pair<int,int> stationarySelectionOperator(vector<vector<bool> >& population, vector<double>& populationDispersion);
     vector<bool> uniformCrossoverOperator(vector<bool>& parent1, vector<bool>& parent2);
     vector<bool> mutationOperator(vector<bool>& individual);

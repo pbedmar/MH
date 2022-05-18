@@ -26,8 +26,8 @@ private:
     double avg_cost = 0;
     double lowest_cost = numeric_limits<double>::max();
     double highest_cost = -numeric_limits<double>::max();
-    vector<bool> generationalModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator);
-    vector<bool> stationaryModel(vector<vector<bool> >& lastPopulation, vector<double>& populationDispersion, string crossoverOperator);
+    vector<bool> generationalModel(string crossoverOperator);
+    vector<bool> stationaryModel(string crossoverOperator);
     void generationalSelectionOperator(vector<vector<bool> >& population, vector<double>& populationDispersion);
     pair<int,int> stationarySelectionOperator(vector<vector<bool> >& population, vector<double>& populationDispersion);
     vector<bool> uniformCrossoverOperator(vector<bool>& parent1, vector<bool>& parent2);

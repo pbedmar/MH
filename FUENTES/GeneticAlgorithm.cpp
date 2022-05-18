@@ -36,28 +36,13 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-        vector<vector<bool> > population;
-        vector<double> populationDispersion;
-        for (int i=0; i<POPULATION_SIZE; i++) {
-            vector<bool> individual;
 
-            for (int j=0; j<numRequiredElements; j++) {
-                individual.push_back(true);
-            }
-            for (int j=0; j<(numElements-numRequiredElements); j++) {
-                individual.push_back(false);
-            }
-
-            shuffle(individual.begin(), individual.end(), rng_gen);
-            population.push_back(individual);
-            populationDispersion.push_back(dispersion(distanceMatrix, individual));
-        }
 
         vector<bool> solution;
         if (model == "gen") {
-            solution = generationalModel(population, populationDispersion, crossoverOperator);
+            solution = generationalModel(crossoverOperator);
         } else if (model == "est") {
-            solution = stationaryModel(population, populationDispersion, crossoverOperator);
+            solution = stationaryModel(crossoverOperator);
         }
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
@@ -94,7 +79,26 @@ void GeneticAlgorithm::run(int n_times, string model, string crossoverOperator){
     avg_cost = avg_cost/n_times;
 }
 
-vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
+vector<bool> GeneticAlgorithm::generationalModel(string crossoverOperator) {
+    int numEvaluations = 0;
+
+    vector<vector<bool> > population;
+    vector<double> populationDispersion;
+    for (int i=0; i<POPULATION_SIZE; i++) {
+        vector<bool> individual;
+
+        for (int j=0; j<numRequiredElements; j++) {
+            individual.push_back(true);
+        }
+        for (int j=0; j<(numElements-numRequiredElements); j++) {
+            individual.push_back(false);
+        }
+
+        shuffle(individual.begin(), individual.end(), rng_gen);
+        population.push_back(individual);
+        populationDispersion.push_back(dispersion(distanceMatrix, individual));
+        numEvaluations++;
+    }
 
     double lastBestSolutionDispersion = numeric_limits<double>::max();
     vector<bool> lastBestSolution;
@@ -105,7 +109,6 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
         }
     }
 
-    int numEvaluations = 50;
     while (numEvaluations < MAX_EVAL) {
         // generate parents
         generationalSelectionOperator(population, populationDispersion);
@@ -168,19 +171,29 @@ vector<bool> GeneticAlgorithm::generationalModel(vector<vector<bool> >& populati
 //        cout << "Evaluation " << numEvaluations << ": " << dispersion(distanceMatrix, lastBestSolution) << endl;
     }
 
-//    for (const auto i: lastPopulation) {
-//        vector<int> numericSolution = binaryToNumeric(i);
-//        for (auto c: numericSolution) {
-//            cout << c << ",";
-//        }
-//        cout << endl;
-//    }
-
     return lastBestSolution;
 }
 
-vector<bool> GeneticAlgorithm::stationaryModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string crossoverOperator) {
-    int numEvaluations = 50;
+vector<bool> GeneticAlgorithm::stationaryModel(string crossoverOperator) {
+    int numEvaluations = 0;
+
+    vector<vector<bool> > population;
+    vector<double> populationDispersion;
+    for (int i=0; i<POPULATION_SIZE; i++) {
+        vector<bool> individual;
+
+        for (int j=0; j<numRequiredElements; j++) {
+            individual.push_back(true);
+        }
+        for (int j=0; j<(numElements-numRequiredElements); j++) {
+            individual.push_back(false);
+        }
+
+        shuffle(individual.begin(), individual.end(), rng_gen);
+        population.push_back(individual);
+        populationDispersion.push_back(dispersion(distanceMatrix, individual));
+        numEvaluations++;
+    }
 
     while (numEvaluations < MAX_EVAL) {
         // generate parents

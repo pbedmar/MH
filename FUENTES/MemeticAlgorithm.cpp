@@ -35,24 +35,7 @@ void MemeticAlgorithm::run(int n_times, string memeticType) {
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-        vector<vector<bool> > population;
-        vector<double> populationDispersion;
-        for (int i=0; i<POPULATION_SIZE; i++) {
-            vector<bool> individual;
-
-            for (int j=0; j<numRequiredElements; j++) {
-                individual.push_back(true);
-            }
-            for (int j=0; j<(numElements-numRequiredElements); j++) {
-                individual.push_back(false);
-            }
-
-            shuffle(individual.begin(), individual.end(), rng_gen);
-            population.push_back(individual);
-            populationDispersion.push_back(dispersion(distanceMatrix, individual));
-        }
-
-        vector<bool> solution = stationaryModel(population, populationDispersion, memeticType);
+        vector<bool> solution = stationaryModel(memeticType);
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
@@ -87,9 +70,26 @@ void MemeticAlgorithm::run(int n_times, string memeticType) {
     avg_cost = avg_cost/n_times;
 }
 
-vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population, vector<double>& populationDispersion, string memeticType) {
+vector<bool> MemeticAlgorithm::stationaryModel(string memeticType) {
     int numEvaluations = 0;
-    vector <bool> bestIndividual;
+
+    vector<vector<bool> > population;
+    vector<double> populationDispersion;
+    for (int i=0; i<POPULATION_SIZE; i++) {
+        vector<bool> individual;
+
+        for (int j=0; j<numRequiredElements; j++) {
+            individual.push_back(true);
+        }
+        for (int j=0; j<(numElements-numRequiredElements); j++) {
+            individual.push_back(false);
+        }
+
+        shuffle(individual.begin(), individual.end(), rng_gen);
+        population.push_back(individual);
+        populationDispersion.push_back(dispersion(distanceMatrix, individual));
+        numEvaluations++;
+    }
 
     while (numEvaluations < MAX_EVAL) {
         // generate parents
@@ -133,23 +133,32 @@ vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population
         // replace the old population's worst individuals with the new children (only if they are better)
         double dispChild1 = dispersion(distanceMatrix, child1);
         double dispChild2 = dispersion(distanceMatrix, child2);
-        numEvaluations = numEvaluations + 2;
+        numEvaluations = numEvaluations+2;
         if (dispChild1 < dispChild2) {
-            if (dispChild2 < secondHigherDispersion) {
-                population[secondWorstIndividualIndex] = child2;
-                populationDispersion[secondWorstIndividualIndex] = dispChild2;
+            if (dispChild2 < higherDispersion) {
+                population[worstIndividualIndex] = child2;
+                populationDispersion[worstIndividualIndex] = dispChild2;
 
+                population[secondWorstIndividualIndex] = child1;
+                populationDispersion[secondWorstIndividualIndex] = dispChild1;
+
+            } else if (dispChild1 < higherDispersion) {
+                population[worstIndividualIndex] = child1;
+                populationDispersion[worstIndividualIndex] = dispChild1;
+            }
+        } else {
+            if (dispChild1 < higherDispersion) {
                 population[worstIndividualIndex] = child1;
                 populationDispersion[worstIndividualIndex] = dispChild1;
 
-            } else if (dispChild1 < secondHigherDispersion) {
-                population[secondWorstIndividualIndex] = child1;
-                populationDispersion[secondWorstIndividualIndex] = dispChild1;
+                population[secondWorstIndividualIndex] = child2;
+                populationDispersion[secondWorstIndividualIndex] = dispChild2;
+
+            } else if (dispChild2 < higherDispersion) {
+                population[worstIndividualIndex] = child2;
+                populationDispersion[worstIndividualIndex] = dispChild2;
             }
         }
-
-//        cout << "Evaluation " << numEvaluations << ": " << lowerDispersion << endl;
-        numEvaluations++;
 
         if (numEvaluations % 10 == 0) {
             if (memeticType == "AM1.0") {
@@ -207,6 +216,7 @@ vector<bool> MemeticAlgorithm::stationaryModel(vector<vector<bool> >& population
     }
 
     double lowerDispersion = numeric_limits<double>::max();
+    vector<bool> bestIndividual;
     for (auto i: population) {
         double disp = dispersion(distanceMatrix, i);
         if (disp < lowerDispersion) {
