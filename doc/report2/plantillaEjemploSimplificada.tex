@@ -129,7 +129,7 @@ Como hemos comentado al describir el problema, la función objetivo a minimizar 
 
 En el algoritmo de Búsqueda Local, no se utiliza directamente esta implementación de la función objetivo. Esto se debe a que es costosa, en concreto tiene una complejidad computacional de $O(n^2)$. Utilizamos una versión factorizada de la función, que reutiliza cálculos de iteraciones previas para actualizar el valor de la dispersión. De esta forma, obtenemos una complejidad de $O(n)$.
 
-\noindent En cambio, si se utiliza una representación binaria, el pseudocódigo quedaría así:
+En las situaciones en las que las soluciones se representen de forma binaria, el pseudocódigo de la función objetivo quedaría así:
 \begin{algorithm}[H]
     \caption{Función objetivo, implementación para la representación binaria}
 \begin{algorithmic}
@@ -159,17 +159,19 @@ En el algoritmo de Búsqueda Local, no se utiliza directamente esta implementaci
 
 \section{Operadores comunes}
 
+En esta sección se describen los operadores comunes a los diferentes algoritmos.
+
 \subsection{Generador de soluciones aleatorias}
 \begin{algorithm}[H]
-    \caption{Generador de soluciones aleatorias en representación binaria}
+    \caption{Generador de soluciones aleatorias en representación binaria.}
 \begin{algorithmic}
 \Procedure{generateRandomSolution}{}
     \State $individual \leftarrow [ \, ]$
-    \For{$i \in 1..m$}
-        \State $individual = individual + [1]$ \Comment{Insertamos un 1 al final del vector}
+    \For{$i = 0$ \textbf{to} $m-1$}
+        \State $individual += \{true\}$ \Comment{Insertamos un $true$ al final del vector}
     \EndFor
-    \For{$i \in 1..n-m$}
-        \State $individual = individual + [0]$
+    \For{$i = 0$ \textbf{to} $n-m-1$}
+        \State $individual += \{false\}$
     \EndFor
     \State shuffle($individual$)
     \State \textbf{return} $individual$
@@ -178,16 +180,17 @@ En el algoritmo de Búsqueda Local, no se utiliza directamente esta implementaci
 \end{algorithm}
 
 
-\subsection{Mecanismo de selección del algoritmo genético generacional}
+\subsection{Mecanismos de selección}
 \begin{algorithm}[H]
-    \caption{Mecanismo de selección del algoritmo genético generacional. Toma como argumentos un vector que contiene la población de individuos y otro vector que contiene la dispersión de cada individuo. Devuelve la población que contiene a los padres.}
+    \caption{Mecanismo de selección del algoritmo genético generacional. Toma como argumentos un vector que contiene la población de individuos y otro vector que contiene la dispersión de cada individuo. Devuelve la población que contiene a los padres, de tamaño 50.}
 \begin{algorithmic}
 \Procedure{generationalSelectionOperator}{popul, populDisp}
     \State $parentsPopul \leftarrow [ \, ]$
     \State $parentsPopulDisp \leftarrow [ \, ]$
-    \For{$i \in 1..50$}
-        \State $firstRandElem \leftarrow rand(1,50)$
-        \State $secondRandElem \leftarrow rand(1,50)$ \Comment Debe de ser diferente a $firstRandElem$
+    \State
+    \For{$i = 0$ \textbf{to} $49$}
+        \State $firstRandElem \leftarrow $rand($0,49$)
+        \State $secondRandElem \leftarrow $rand($0,49$) \Comment Debe de ser diferente a $firstRandElem$
         \State
         \State $bestRandElem \leftarrow firstRandElem$
         \If{$populDisp[bestRandElem]>populDisp[secondRandElem]$}
@@ -196,203 +199,570 @@ En el algoritmo de Búsqueda Local, no se utiliza directamente esta implementaci
         \State
         \State $parentsPopul += \{popul[bestRandElem]\}$
         \State $parentsPopulDisp += \{populDisp[bestRandElem]\}$
-        \State \textbf{return} $parentsPopul, parentsPopulDisp$
     \EndFor
+    \State
+    \State \textbf{return} $parentsPopul, parentsPopulDisp$
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-
-\subsection{Mecanismo de selección del algoritmo genético estacionario}
 \begin{algorithm}[H]
     \caption{Mecanismo de selección del algoritmo genético estacionario. Toma como argumentos un vector que contiene la población de individuos y otro vector que contiene la dispersión de cada individuo. Devuelve el índice en la población de los dos individuos elegidos como padres.}
 \begin{algorithmic}
 \Procedure{stationarySelectionOperator}{popul, populDisp}
     \State $parents \leftarrow [ \, ]$
     \State 
-    \State $firstRandElem \leftarrow$ random($1$, $50$) 
-    \State $secondRandElem \leftarrow$ random($1$, $50$) \Comment Debe de ser diferente a $firstRandElem$
-    \State
+    \State $firstRandElem \leftarrow$ rand($0$, $49$) 
+    \State $secondRandElem \leftarrow$ rand($0$, $49$) \Comment Debe de ser diferente a $firstRandElem$
     \State $parent1Index \leftarrow firstRandElem$
     \If{$populDisp[parent1Index] > populDisp[secondRandElem]$}
         \State $parent1Index \leftarrow secondRandElem$
     \EndIf
     \State 
-    \State $firstRandElem \leftarrow$ random($1$, $50$) 
-    \State $secondRandElem \leftarrow$ random($1$, $50$) \Comment Debe de ser diferente a $firstRandElem$
-    \State
+    \State $firstRandElem \leftarrow$ rand($0$, $49$) 
+    \State $secondRandElem \leftarrow$ rand($0$, $49$) \Comment Debe de ser diferente a $firstRandElem$
     \State $parent2Index \leftarrow firstRandElem$
     \If{$populDisp[parent2Index] > populDisp[secondRandElem]$}
         \State $parent2Index \leftarrow secondRandElem$
     \EndIf
+    \State
     \State \textbf{return} $parent1Index, parent2Index$
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+
+\subsection{Operadores de cruce}
+\begin{algorithm}[H]
+    \caption{Operador de cruce uniforme. Cruza dos individuos, generando un hijo que mantiene los genes comunes y asigna uno valor aleatorio en aquellos no comunes. Si el hijo no es factible, se repara. Devuelve este hijo.}
+\begin{algorithmic}
+\Procedure{uniformCrossoverOperator}{parent1, parent2}
+    \State $child \leftarrow parent1$
+    \State
+    \For{$i = 0$ \textbf{to} $n-1$}
+        \If{$parent1[i] != parent2[i]$}
+            \State $child[i] \leftarrow$ rand($0,1$)
+        \EndIf
+    \EndFor
+    \State
+    \State $countNbTrues \leftarrow 0$
+    \For{$i = 0$ \textbf{to} $n-1$}
+        \If{$child[i]$}
+            \State $countNbTrues = countNbTrues + 1$
+        \EndIf
+    \EndFor
+    \State
+    \While{$countNbTrues > m$}
+        \State $accDistance \leftarrow [ \, ]$
+        \For{$i = 0$ \textbf{to} $n-1$}
+            \State $sum \leftarrow 0$
+            \For{$j = 0$ \textbf{to} $n-1$}
+                \If{$child[i]$ $and$ $child[j]$}
+                    \State $sum += Distance(i,j)$ \Comment Distance(x,y) devuelve la distancia entre x e y
+                \EndIf
+                \State $accDistance += \{sum\}$
+            \EndFor
+        \EndFor
+        \State
+        \State $avg \leftarrow 0$
+        \State $avg \leftarrow $ \textbf{forall} $i$ \textbf{in} $accDistance$ \textbf{do} $avg + i$
+        \State $avg \leftarrow avg / len(accDistance)$
+        \State
+        \State $max \leftarrow -\infty$
+        \State $maxPosition \leftarrow -1$
+        \For {$i = 0$ \textbf{to} $n-1$}
+            \If{$child[i]$}
+                \State $sum \leftarrow 0$
+                \State
+                \For{$j = 0$ \textbf{to} $n-1$}
+                    \State $sum += Distance(i,j)$
+                \EndFor
+\algstore{uniform}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+\algrestore{uniform}
+                \State
+                \If{$abs(sum-avg) > max$}
+                    \State $max \leftarrow$ abs($sum - avg$) \Comment abs(x) devuelve el valor absoluto de x
+                    \State $maxPosition \leftarrow i$
+                \EndIf
+            \EndIf
+        \EndFor
+        \State
+        \State $child[maxPosition] = false$
+        \State $countNbTrues = countNbTrues - 1$
+    \EndWhile
+    \State
+    \While{$countNbTrues < m$}
+        \State $accDistance \leftarrow []$
+        \For{$i = 0$ \textbf{to} $n-1$}
+            \State $sum \leftarrow 0$
+            \For{$j = 0$ \textbf{to} $n-1$}
+                \If{$child[i]$ $and$ $child[j]$}
+                    \State $sum += Distance(i,j)$ \Comment Distance(x,y) devuelve la distancia entre x e y
+                \EndIf
+                \State $accDistance += \{sum\}$
+            \EndFor
+        \EndFor
+        \State
+        \State $avg \leftarrow 0$
+        \State $avg \leftarrow $ \textbf{forall} $i$ \textbf{in} $accDistance$ \textbf{do} $avg + i$
+        \State $avg \leftarrow avg / len(accDistance)$
+        \State
+        \State $min \leftarrow \infty$
+        \State $minPosition \leftarrow -1$
+        \For {$i = 0$ \textbf{to} $n-1$}
+            \If{$!child[i]$}
+                \State $sum \leftarrow 0$
+                \State
+                \For{$j = 0$ \textbf{to} $n-1$}
+                    \State $sum += Distance(i,j)$
+                \EndFor
+                \State
+                \If{$abs(sum-avg) < min$}
+                    \State $min \leftarrow$ abs($sum - avg$) \Comment abs(x) devuelve el valor absoluto de x
+                    \State $minPosition \leftarrow i$
+                \EndIf
+            \EndIf
+        \EndFor
+        \State
+        \State $child[minPosition] \leftarrow true$
+        \State $countNbTrues \leftarrow countNbTrues + 1$
+    \EndWhile
+    \State \textbf{return} $child$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Operador de cruce basado en posición. Cruza dos individuos, generando un hijo que mantiene los genes comunes y asigna asigna los de un padre cualquiera en aquellos no comunes, en un orden aleatorio. Devuelve este hijo.}
+\begin{algorithmic}
+\Procedure{positionBasedCrossoverOperator}{parent1, parent2}
+    \State $child \leftarrow parent1$
+    \State
+    \State $notEqualIndexes \leftarrow [ \, ]$
+    \For{$i = 0$ \textbf{to} $n-1$}
+        \If{$parent1[i] != parent2[i]$}
+            \State $notEqualIndexes += {i}$
+        \EndIf
+    \EndFor
+    \State
+    \State shuffle($notEqualIndexes$)
+    \State $pos \leftarrow 0$
+    \For{$i = 0$ \textbf{to} $n-1$}
+        \If{$parent1[i] != parent2[i]$}
+            \State $child[i] parent1[notEqualIndexes[pos]]$
+            \State $pos \leftarrow pos + 1$
+        \EndIf
+    \EndFor
+    \State \textbf{return} $child$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
 
 \subsection{Operador de mutación}
 \begin{algorithm}[H]
     \caption{Operador de mutación de un individuo. Toma como argumento el individuo a mutar. Intercambia el valor de dos genes en el individuo, y devuelve el individuo modificado.}
 \begin{algorithmic}
 \Procedure{mutationOperator}{individual}
-
+    \State $position \leftarrow$ rand($0, n-1$)
+    \State $position2 \leftarrow$ rand($0, n-1$)
+    \State $value \leftarrow individual[position]$
+    \State $value2 \leftarrow individual[position2]$ 
+    \State
+    \While{$position==position2 || value==value2$}
+        \State $position2 = $ rand($0, n-1$)
+        \State $value2 = individual[position2]$
+    \EndWhile
+    \State
+    \State $individual[position] \leftarrow !value$
+    \State $individual[position2] \leftarrow !value2$
+    \State \textbf{return} $individual$
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 \part{Pseudocódigo de los algoritmos}
+En los algoritmos basados en poblaciones, nos inspiramos en la naturaleza para simular la evolución de una especie. En ella, una población tiene sucesores, que heredarán sus características. Sólo sobrevivirán los individuos mas fuertes, mejor adaptados al medio, en nuestro caso equivaldría a aquellos que minimizen la función objetivo.
 
+Existen diferentes algoritmos basados en poblaciones, siendo dos de ellos los Genéticos y los Meméticos.
 
+\section{Algoritmos Genéticos}
+En ellos, se parte de una población inicial aleatoria de la que se seleccionan unos progenitores. Estos se cruzarán dando lugar a unos descendientes que heredarán sus genes. Durante el proceso también se podrán producir mutaciones de estos hijos, que finalmente reemplazarán la población inicial. El proceso se repite de forma iterativa hasta llegar a un número máximo de evaluaciones de la función objetivo.
 
-\section{Algoritmo Greedy}
-
-El primer algoritmo que implementamos para resolver el problema utiliza una estrategia Greedy, donde partiendo de una solución incompleta $S$ con sólo dos vértices $v_1,v_2 \in V$ elegidos aleatoriamente, llegamos a una solución completa añadiendo un nuevo vértice en cada iteración. En concreto, se añade el vértice que minimiza la dispersión con respecto a los ya existentes.
+\subsection{Algoritmo Genético Generacional}
+En esta versión de algoritmo genético, se realizan tantas selecciones como individuos tiene la población. De esta selección, los progenitores se cruzan con una probabilidad determinada, generando un conjunto de descendientes. La población de los hijos sustituye a la población anterior, sólamente se mantiene el mejor individuo.
 
 \begin{algorithm}[H]
-\caption{Algoritmo Greedy}
-\begin{algorithmic}[1]
-\State $s_1, s_2 \gets$ Rand($V$) \Comment{Rand() devuelve dos vértices aleatorios de V}
-\State $S \gets \{s_1,s_2\}$
-\State $U \gets V \setminus \{s_1,s_2\}$  
-\State 
-\State $sum \gets [ \, ]$ \Comment{Array que contiene la distancia acumulada,}
-\For{$u \in U$} \Comment{necesario para la factorización de la función objetivo}
-    \For{$s \in S$}
-        \State $sum[u] \pluseq d_{u,s}$
+    \caption{Estructura de búsqueda del Algoritmo Genético Generacional.}
+\begin{algorithmic}
+\Procedure{generationalModel}{}
+    \State $numEvaluations \leftarrow 0$
+    \State $population \leftarrow [ \, ]$
+    \State $populDisp \leftarrow [ \, ]$
+    \For{$i = 0$ \textbf{to} $49$} \Comment{Se genera una población con individuos aleatorios}
+        \State $individual \leftarrow$ generateRandomSolution()
+        \State $population += \{individual\}$
+        \State $populDisp += \{$Dispersion($individual)\}$
+        \State $numEvaluations \leftarrow numEvaluations + 1$
     \EndFor
-\EndFor
-\For{$s \in S$}
-    \For{$s2 \in S$}
-        \State $sum[s] \pluseq d_{s,s2}$
+    \State
+    \State $lastBestSolDisp \leftarrow \infty$
+    \For{$i = 0$ \textbf{to} $49$}
+        \If{$lastBestSolDisp > populDisp[i]$}
+            \State $lastBestSol \leftarrow population[i]$
+            \State $lastBestSolDisp \leftarrow populDisp[i]$
+        \EndIf
     \EndFor
-\EndFor
-\algstore{myalg}
+    \State
+    \While{$numEvaluations < 100000$}
+        \State $population, populDisp, numEvaluations \leftarrow$ generationalModelEvolution($population,$
+        \State $populDisp, numEvaluations$)
+        \State
+        \State $population, populDisp, lastBestSol, lastBestSolDisp \leftarrow$ 
+        \State generationalModelReplacement($population, populDisp, lastBestSol, lastBestSolDisp$)
+    \EndWhile
+    \State
+    \State \textbf{return} $lastBestSol$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Esquema de evolución del Algoritmo Genético Generacional. En él, crossoverOperator puede referirse al operador de cruce uniforme o al basado en posición.}
+\begin{algorithmic}
+\Procedure{generationalModelEvolution}{population, populDisp, numEvals}
+    \State $population, populDisp \leftarrow$ generationalSelectionOperator($population, populDisp$)
+    \For{$i = 0$ \textbf{to} $49*0.7$}
+        \State $child1 \leftarrow$ crossoverOperator($population[i], population[i+1]$)
+        \State $child2 \leftarrow$ crossoverOperator($population[i], population[i+1]$)
+        \State $population[i] = child1$
+        \State $population[i+1] = child2$
+    \EndFor
+    \State
+    \For{$i = 0$ \textbf{to} $49*0.1$}
+        \State $population[i] \leftarrow $mutationOperator($population[i]$)
+    \EndFor
+    \State
+    \For{$i = 0$ \textbf{to} $49$}
+        \State $population[i] \leftarrow $Dispersion($population[i]$)
+        \State $numEvals++$
+    \EndFor
+    \State
+    \State \textbf{return} $population, populDisp, numEvals$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Esquema de reemplazamiento del Algoritmo Genético Generacional}
+\begin{algorithmic}
+\Procedure{generationalModelReplacement}{population, populDisp, lastBestSol, lastBestSolDisp}
+    \State $higherDispersion \leftarrow -\infty$
+    \For{$i \leftarrow 0$ \textbf{to} $49$}
+        \If{$higherDispersion < populDisp[i]$}
+            \State $worstSolutionIndex \leftarrow i$
+            \State $higherDispersion \leftarrow populDisp[i]$
+        \EndIf
+    \EndFor
+    \State $population[worstSolutionIndex] \leftarrow lastBestSol$
+    \State $populDisp[worstSolutionIndex] \leftarrow lastBestSolDisp$
+    \State
+    \State $lowerDispersion \leftarrow -\infty$
+    \For{$i \leftarrow 0$ \textbf{to} $49$}
+        \If{$higherDispersion < populDisp[i]$}
+            \State $bestSolutionIndex \leftarrow i$
+            \State $lowerDispersion \leftarrow populDisp[i]$
+        \EndIf
+    \EndFor
+    \State $lastBestSol \leftarrow population[worstSolutionIndex]$
+    \State $lastBestSolDisp \leftarrow lowerDispersion$
+    \State
+    \State \textbf{return} $population, populDisp, lastBestSol, lastBestSolDisp$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Algoritmo Genético Estacionario}
+\begin{algorithm}[H]
+    \caption{Estructura de búsqueda del Algoritmo Genético Estacionario.}
+\begin{algorithmic}
+\Procedure{stationaryModel}{}
+    \State $numEvaluations \leftarrow 0$
+    \State $population \leftarrow [ \, ]$
+    \State $populDisp \leftarrow [ \, ]$
+    \For{$i = 0$ \textbf{to} $49$} \Comment{Se genera una población con individuos aleatorios}
+        \State $individual \leftarrow$ generateRandomSolution()
+        \State $population += \{individual\}$
+        \State $populDisp += \{$Dispersion($individual)\}$
+        \State $numEvaluations \leftarrow numEvaluations + 1$
+    \EndFor
+    \State
+    \While{$numEvaluations < 100000$}
+        \State $child1, child2 \leftarrow$ stationaryModelEvolution($population, populDisp$)
+        \State
+        \State $population, populDisp, numEvaluations \leftarrow$ stationaryModelReplacement($population,$
+        \State $populDisp, child1, child2, numEvaluations$)
+    \EndWhile
+    \State
+    \State $lowerDispersion \leftarrow \infty$
+    \For{$i = 0$ \textbf{to} $49$}
+        \If{$populDisp[i] < lowerDispersion$}
+            \State $lowerDisp \leftarrow populDisp[i]$
+            \State $bestIndividual \leftarrow popul[i]$
+        \EndIf
+    \EndFor
+    \State \textbf{return} $bestIndividual$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Esquema de evolución del Algoritmo Genético Estacionario. En él, crossoverOperator puede referirse al operador de cruce uniforme o al basado en posición.}
+\begin{algorithmic}
+\Procedure{stationaryModelEvolution}{population, populDisp}
+    \State $parent1Index, parent2Index \leftarrow$ stationarySelectionOperator($population, populDisp$)
+    \State
+    \State $child1 \leftarrow$ crossoverOperator($population[parent1Index], population[parent2Index]$)
+    \State $child2 \leftarrow$ crossoverOperator($population[parent1Index], population[parent2Index]$)
+    \State
+    \If{Rand($0,100*0.1-1$) $== 0$} \Comment{10\% de probabilidad de mutar}
+        \State $child1 \leftarrow$ mutationOperator($child1$)
+    \EndIf
+    \State
+    \If{Rand($0,100*0.1-1$) $== 0$}
+        \State $child2 \leftarrow$ mutationOperator($child2$)
+    \EndIf
+    \State \textbf{return} $child1, child2$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Esquema de reemplazamiento del Algoritmo Genético Estacionario}
+\begin{algorithmic}
+\Procedure{stationaryModelReplacement}{population, populDisp, child1, child2, numEval}
+    \State $higherDispersion \leftarrow -\infty$
+    \State $secondHigherDisp \leftarrow -\infty$
+    \State
+    \For{$i \leftarrow 0$ \textbf{to} $49$}
+        \If{$higherDispersion < populDisp[i]$}
+            \State $worstIndividualIndex \leftarrow i$
+            \State $higherDispersion \leftarrow populDisp[i]$
+        \EndIf
+    \EndFor
+    \For{$i \leftarrow 0$ \textbf{to} $49$}
+        \If{$higherDispersion < populDisp[i]$ \&\& $i!=worstIndividualIndex$}
+            \State $secondWorstIndividualIndex \leftarrow i$
+            \State $secondHigherDisp \leftarrow populDisp[i]$
+        \EndIf
+    \EndFor
+    \State
+    \State $disp1 \leftarrow$ Dispersion($child1$)
+    \State $disp2 \leftarrow$ Dispersion($child2$)
+    \State $numEval \leftarrow numEval + 2$
+    \If{$disp1 < disp2$}
+        \If{$disp2 < higherDispersion$}
+            \State $population[worstIndividualIndex] = child2$
+            \State $populDisp[worstIndividualIndex] = disp2$
+            \State
+            \State $population[secondWorstIndividualIndex] = child1$
+            \State $populDisp[worstIndividualIndex] = disp1$
+            \State
+        \ElsIf{$disp1 < higherDispersion$}
+            \State $population[secondWorstIndividualIndex] = child1$
+            \State $populDisp[worstIndividualIndex] = disp1$
+        \EndIf
+    \Else
+        \If{$disp1 < higherDispersion$}
+            \State $population[worstIndividualIndex] = child1$
+            \State $populDisp[worstIndividualIndex] = disp1$
+            \State
+            \State $population[secondWorstIndividualIndex] = child2$
+            \State $populDisp[worstIndividualIndex] = disp2$
+            \State
+        \ElsIf{$disp1 < higherDispersion$}
+            \State $population[secondWorstIndividualIndex] = child2$
+            \State $populDisp[worstIndividualIndex] = disp2$
+        \EndIf
+    \EndIf
+    \State
+    \State \textbf{return} $population, populDisp, numEval$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\section{Algoritmo Memético}
+
+\subsection{Estructura de búsqueda del Algoritmo Memético}
+\begin{algorithm}[H]
+    \caption{Estructura de búsqueda del Algoritmo Memético.}
+\begin{algorithmic}
+\Procedure{stationaryModel}{}
+    \State $numEvaluations \leftarrow 0$
+    \State $population \leftarrow [ \, ]$
+    \State $populDisp \leftarrow [ \, ]$
+    \For{$i = 0$ \textbf{to} $49$} \Comment{Se genera una población con individuos aleatorios}
+        \State $individual \leftarrow$ generateRandomSolution()
+        \State $population += \{individual\}$
+        \State $populDisp += \{$Dispersion($individual)\}$
+        \State $numEvaluations \leftarrow numEvaluations + 1$
+    \EndFor
+    \State
+    \While{$numEvaluations < 100000$}
+        \State $child1, child2 \leftarrow$ stationaryModelEvolution($population, populDisp$)
+        \State
+        \State $population, populDisp, numEvaluations \leftarrow$ stationaryModelReplacement($population,$
+        \State $populDisp, child1, child2, numEvaluations$)
+    \EndWhile
+    \State
+    \If{$numEvaluations \% 10 == 0$}
+        \If{$memeticType ==$ AM1.0}
+            \For{$i = 0$ \textbf{to} $49$}
+                \State $population[i], populDisp[i], numEvaluations \leftarrow$
+                \State localSearchExecution($population[i], populDisp[i], numEvaluations$)
+            \EndFor
+            \State
+        \ElsIf{$memeticType ==$ AM0.1}
+            \State $idx \leftarrow$ RandIndiv(5) \Comment{Devuelve 5 índices de individuos de la población}
+            \For{$i = 0$ \textbf{to} $5$}
+                \State $population[idx[i]], populDisp[idx[i]], numEvaluations \leftarrow$
+                \State localSearchExecution($population[idx[i]], populDisp[idx[i]], numEvaluations$)
+            \EndFor
+            \State
+        \ElsIf{$memeticType ==$ AM0.1mej}
+            \State $idx \leftarrow$ BestIndiv(5) \Comment{Índices de los 5 mejores individuos de la población}
+            \For{$i = 0$ \textbf{to} $5$}
+                \State $population[idx[i]], populDisp[idx[i]], numEvaluations \leftarrow$
+                \State localSearchExecution($population[idx[i]], populDisp[idx[i]], numEvaluations$)
+            \EndFor
+        \EndIf
+    \EndIf
+\algstore{memetic}
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[H]
 \begin{algorithmic}
-\algrestore{myalg}
-\While{$|S| < m$} \Comment{Donde $m$ es el tamaño que debe tener la solución}
-    \State $g_{min} \gets \infty$
-    \State $u\_g_{min} \gets -1$
+\algrestore{memetic}
     \State
-    \For{$u \in U$}
-        \State $\delta(v)_{max} \gets -\infty$
-        \State $\delta(v)_{min} \gets \infty$
-        \State
-        \For{$v \in S$}
-            \State $\delta(v) \gets sum[v] + d_{u,v}$
-            \If{$\delta(v)_{max} < \delta(v)$}
-                \State $\delta(v)_{max} \gets \delta(v)$
-            \EndIf
-             \If{$\delta(v)_{min} > \delta(v)$}
-                \State $\delta(v)_{min} \gets \delta(v)$
-            \EndIf
-            \State
-            \State $\delta(u)_{max} \gets max(sum[u], \delta(v)_{max})$
-            \State $\delta(u)_{min} \gets min(sum[u], \delta(v)_{min})$
-            \State $g = \delta(u)_{max} - \delta(u)_{min}$
-            \If{$g_{min} > g$}
-                \State $g_{min} \gets g$
-                \State $u\_g_{min} \gets -1$
-            \EndIf
-        \EndFor
-        \State
-        \State $U \gets U \setminus \{u\_g_{min}\}$
-        \State $S \gets S + \{u\_g_{min}\}$
+    \State $lowerDispersion \leftarrow \infty$
+    \For{$i = 0$ \textbf{to} $49$}
+        \If{$populDisp[i] < lowerDispersion$}
+            \State $lowerDisp \leftarrow populDisp[i]$
+            \State $bestIndividual \leftarrow popul[i]$
+        \EndIf
     \EndFor
-    \State
-    \For{$v \in V $}
-        \State $sum[v] \pluseq d_{v,u\_g_{min}}$
-    \EndFor
-\EndWhile
-\State
-\State \textbf{return} $S$ 
+    \State \textbf{return} $bestIndividual$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-\newpage
-\section{Algoritmo Búsqueda Local}
+\subsection{Enlace entre el algoritmo memético y la BL}
+\begin{algorithm}[H]
+    \caption{Enlace entre el algoritmo memético y la BL}
+\begin{algorithmic}
+\Procedure{localSearchExecution}{individual, dispersion, numEvaluations}
+    \State $solution \leftarrow [ \, ]$
+    \State $unselectedItems \leftarrow [ \, ]$
+    \State 
+    \For{$i = 0$ \textbf{to} $49$}
+        \If{$individual[i]$}
+            \State $solution += \{i\}$
+        \Else
+            \State $unselectedItems += \{i\}$
+        \EndIf
+    \EndFor
+    \State
+    \State $unselectedItems, solution, dispersion, numEvaluations \leftarrow$
+    \State localSearch($unselectedItems, solution, dispersion, numEvaluations$)
+    \State $individual <- [ \, ]$ \Comment{Inicializado a $false$}
+    \For{$i = 0$ \textbf{to} $49$}
+        \State $individual[solution[j]] = true$
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-En esta segunda implementación utilizamos una búsqueda local. Para ello, se genera una solución inicial aleatoria (y válida) y se va explorando su entorno. Cuando se encuentra un vecino que reduce la dispersión, se actualiza como nueva solución. Así se procede hasta haber recorrido todo el vecindario sin encontrar una solución mejor o hasta llegar a las 100000 evaluaciones de la función objetivo. Cada vez que se reinicia la exploración del vecindario, se barajan el vector que contiene la solución y el que contiene los vértices que no pertenecen a esta, para asegurar que el orden en el que se visitan los nodos no es determinístico.
-
-
-
+\subsection{Búsqueda Local}
 \begin{algorithm}[H]
 \caption{Algoritmo Búsqueda Local primero el mejor}
 \begin{algorithmic}[1]
-\State $U \gets V$
-\State $U \gets$ Shuffle($U$)
-\State $S \gets [ \, ]$
-\State $sum \gets [ \, ]$
-\State
-\For{$i = 0$ \textbf{to} $m-1$}
-    \State element $\gets U.last$
-    \State $U \gets U - \{element\}$
-    \State $S \gets S + \{element\}$
-\EndFor
-\State
-\State $S_{best} \gets S$
-\State $current\_cost \gets $dispersion($S$)
-\State $best\_cost \gets current\_cost$
-\State
-\State eval $\gets 0$
-\State $better\_solution \gets true$
-\State
-\While{eval $< 100000$ \textbf{and} $better\_solution$}
-    \State $better\_solution \gets false$
+\Procedure{localSearch}{$U$, $S$, $Sdispersion$, $eval$}
+    \State $sum \gets [ \, ]$
     \State
-    \For{$u \in S$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 100000$}
-        \For{$v \in U$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 100000$}
-            \State $eval \gets eval+1$
-            \State $\delta \gets [\,]$ \Comment Array inicializado a 0
-            \State $\delta(w)_{max} \gets -\infty$
-            \State $\delta(w)_{min} \gets \infty$
-            \State
-\algstore{myalg2}
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\begin{algorithmic}
-\algrestore{myalg2}
-            \For{$w \in S$}
-                \If{$w != u$}
-                    \State $\delta[w] \gets sum[w] - d_{w,u} + d_{w,v}$
-                    \State $\delta[v] \pluseq d_{w,v}$
-                    \State
-                    \If{$\delta[w] > \delta(w)_{max}$}
-                        \State $\delta(w)_{max} \gets \delta[w]$
-                    \EndIf
-                    \If{$\delta[w] < \delta(w)_{min}$}
-                        \State $\delta(w)_{min} \gets \delta[w]$
-                    \EndIf
-                \EndIf
-            \EndFor
-            \State
-            \State $\delta_{max} \gets max(\delta[v], \delta(w)_{max})$
-            \State $\delta_{min} \gets min(\delta[v], \delta(w)_{min})$
-            \State $new\_cost \gets \delta_{max} - \delta_{min}$
-            \If{$new\_cost < current\_cost$}
-                \State $best\_cost \gets new\_cost$
-                \State $current\_cost \gets new\_cost$
-                \State
-                \State $swap \gets u$ \Comment intercambio $u$ y $v$ en $S$ y $U$
-                \State $u \gets v$
-                \State $v \gets swap$
-                \State $better\_solution = true$
-                \State $best\_solution = S$
-            \EndIf
-            \State
-        \EndFor
+    \For{$i = 0$ \textbf{to} $m-1$}
+        \State element $\gets U.last$
+        \State $U \gets U - \{element\}$
+        \State $S \gets S + \{element\}$
     \EndFor
     \State
-    \State shuffle($S$)
-    \State shuffle($U$)
-\EndWhile
-\State
-\State \textbf{return} $S$  
+    \State $S_{best} \gets S$
+    \State $current\_cost \gets $Dispersion($S$)
+    \State $best\_cost \gets current\_cost$
+    \State
+    \State $better\_solution \gets true$
+    \State $STOP = eval + 10000$
+    \State
+    \While{eval $< 400$ \textbf{and} $better\_solution$ \textbf{and} $eval < STOP$}
+        \State $better\_solution \gets false$
+        \State
+        \For{$u \in S$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 400$ \textbf{and} $eval < STOP$}
+            \For{$v \in U$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < 400$ \textbf{and} $eval < STOP$}
+                \State $eval \gets eval+1$
+                \State $\delta \gets [\,]$ \Comment Array inicializado a 0
+                \State $\delta(w)_{max} \gets -\infty$
+                \State $\delta(w)_{min} \gets \infty$
+                \State
+                \For{$w \in S$}
+                    \If{$w != u$}
+                        \State $\delta[w] \gets sum[w] - d_{w,u} + d_{w,v}$
+                        \State $\delta[v] \pluseq d_{w,v}$
+                        \State
+                        \If{$\delta[w] > \delta(w)_{max}$}
+                            \State $\delta(w)_{max} \gets \delta[w]$
+                        \EndIf
+                        \If{$\delta[w] < \delta(w)_{min}$}
+                            \State $\delta(w)_{min} \gets \delta[w]$
+                        \EndIf
+                    \EndIf
+                \EndFor
+    \algstore{myalg2}
+    \end{algorithmic}
+    \end{algorithm}
+
+    \begin{algorithm}[H]
+    \begin{algorithmic}
+    \algrestore{myalg2}
+                \State
+                \State $\delta_{max} \gets max(\delta[v], \delta(w)_{max})$
+                \State $\delta_{min} \gets min(\delta[v], \delta(w)_{min})$
+                \State $new\_cost \gets \delta_{max} - \delta_{min}$
+                \If{$new\_cost < current\_cost$}
+                    \State $best\_cost \gets new\_cost$
+                    \State $current\_cost \gets new\_cost$
+                    \State
+                    \State $swap \gets u$ \Comment intercambio $u$ y $v$ en $S$ y $U$
+                    \State $u \gets v$
+                    \State $v \gets swap$
+                    \State $better\_solution = true$
+                    \State $best\_solution = S$
+                \EndIf
+                \State
+            \EndFor
+        \EndFor
+        \State
+        \State shuffle($S$)
+        \State shuffle($U$)
+    \EndWhile
+    \State
+    \State \textbf{return} $U, S, best\_cost, $  
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -419,7 +789,11 @@ La implementación de los algoritmos ha sido realizada en C++, concretamente en 
     .3 GreedyAlgorithm.h.
     .3 LocalSearchAlgorithm.cpp\DTcomment{implementación del algoritmo BL}.
     .3 LocalSearchAlgorithm.h.
-    .3 practica1.cpp\DTcomment{archivo desde donde se inicia la ejecución}.
+    .3 GeneticAlgorithm.cpp\DTcomment{implementación del algoritmo Genético}.
+    .3 GeneticAlgorithm.h.
+    .3 MemeticAlgorithm.cpp\DTcomment{implementación del algoritmo Memético}.
+    .3 MemeticAlgorithm.h.
+    .3 practica2.cpp\DTcomment{archivo desde donde se inicia la ejecución}.
     .2 obj\DTcomment{ficheros objeto}.
     .2 makefile.
     .2 LEEME.
@@ -429,53 +803,75 @@ Se ha partido desde cero, sin utilizar ningún framework de metaheurísticas ni 
 
 Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $make$ en la terminal. A continuación, ejecutamos:
 
-\noindent $./bin/practica1$ <$semilla$> \space <$algoritmo$> \space <$fichero\_datos$>
+\noindent $./bin/practica2$ <$semilla$> \space <$algoritmo$> \space <$fichero\_datos$>
 
-\noindent Donde <$algoritmo$> \space puede tomar como valor g (Greedy) o b (Búsqueda Local).
+\noindent Donde <$algoritmo$> \space puede tomar como valor g (Genético) o m (Memético). Se ejecutan por defecto la versión del genético estacionario con operador uniforme o la del memético AM-(10,0.1).
 
-\noindent Ejemplo: ./bin/practica1 1 g data/GKD-b\_50\_n150\_m45.txt
+\noindent Ejemplo: ./bin/practica2 1 g data/GKD-b\_50\_n150\_m45.txt
 
 
 \part{Experimentos y análisis de resultados}
 Para comprobar el funcionamiento de los algoritmos, realizamos experimentos de ejecución. Nuestros algoritmos son probabilísticos, ya que la aleatoriedad está presente en ellos. Por tanto, para que los resultados sean reproducibles es necesario fijar una semilla. Como mencionamos en el apartado anterior, fijamos su valor en $1$. 
 
-Vamos a ejecutar el algoritmo con los 50 casos que tenemos, y cada caso 5 veces para promediar los resultados de tiempo de ejecución y coste. La semilla se volverá a fijar al ejecutar cada caso, pero no entre ejecuciones sobre el mismo conjunto de datos.
+Vamos a ejecutar el algoritmo con los 50 casos que tenemos.
 
-\section{Algoritmo Greedy}
-Con este algoritmo se observan unos tiempos de ejecución bajos, ya que la solución se construye progresivamente, y una vez elegido un elemento no se vuelve atrás. Los costes obtenidos no son demasiado cercanos a los óptimos y por tanto su desviación es bastante alta. 
+\section{Algoritmos Genéticos}
+Encontramos 4 versiones diferentes de este algoritmo. Estas versiones vienen dadas de combinar dos tipos de modelos evolutivos (generacional y estacionario) con dos tipos de operadores de cruce (uniforme y basado en posición).
 
-También se puede observar cómo el peor y mejor coste entre ejecuciones varía en gran medida. Esto se debe a que el algoritmo se encuentra influenciado por los dos elementos aleatorios elegidos al inicio de la ejecución.
+La versión que mejores resultados devuelve es la que utiliza el modelo estacionario con el operador de cruce uniforme. Esto es así ya que el operador uniforme genera hijos con mayor parecido a los padres que el basado en posición, y por tanto las soluciones buenas se heredan con mayor facilidad. También, el estacionario puede tener ventaja sobre el generacional ya que no se actualiza toda la población, sino sólo dos elementos. En el generacional, al ser elitista sólo mantiene el mejor individuo, perdiendo el segundo, tercero, cuarto... mejores.
 
-Como desviación y tiempo de ejecución medio entre todos los casos encontramos:
+Con los tiempos se puede observar que el operador uniforme es más costoso que el de posición, ya que tiene que reparar las soluciones que no son factibles. El modelo generacional también es un poco más lento, ya que selecciona y cruza toda la población.
+
+Como desviación y tiempo de ejecución medio entre todos los casos encontramos lo siguiente para cada tipo de algoritmo genético:
 \begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
     \centering
-        \includegraphics[scale=0.35]{img/greedy2.png}
+        \includegraphics[scale=0.8]{img/gen.png}
 \end{figure}
 
-Lo cuál es un valor de desviación bastante elevado. Como ventajas de este algoritmo, podemos destacar su bajo tiempo de ejecución. Aún así, el criterio heurístico que utiliza para elegir los candidatos no es bastante bueno en este problema.
-
+A continuación, desglosamos los resultados para cada caso:
 \begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
     \centering
-        \includegraphics[scale=0.65]{img/greedy.png}
+        \includegraphics[scale=0.7]{img/agg.png}
 \end{figure}
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.7]{img/age.png}
+\end{figure}
+
+
+\section{Algoritmos Meméticos}
+Estos algoritmos surgen de la combinación de los algoritmos genéticos con la búsqueda local. En nuestro caso, utilizamos el algoritmo genético que mejor resultado dio para implementarla (AGE - uniforme). Como se puede observar, en los resultados medios de este problema, los resultados son mejores que con los genéticos en todos los casos.
+
+Especialmente buenos son el algoritmo memético que aplica búsqueda local a toda la población cada 10 iteraciones (AM,1.0) y el que la aplica de forma aleatoria a un 10\% de los individuos que la forman (AM,0.1). Esto puede deberse a que la aleatoriedad y pérdida de buenas soluciones introducida por el algotitmo genético es contrarrestada por la búsqueda local, que analiza el entorno para buscar óptimos locales.
+
+Los tiempos de ejecución también se reducen, ya que la búsqueda local es rápida.
+
+Como desviación y tiempo de ejecución medio entre todos los casos encontramos lo siguiente para cada tipo de algoritmo memético:
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.8]{img/mem.png}
+\end{figure}
+
+También mostramos los resultados desglosados:
+\begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
+    \centering
+        \includegraphics[scale=0.5]{img/am.png}
+\end{figure}
+
 
 %------------------------------------------------
 \newpage
 
 \section{Algoritmo Búsqueda Local}
-Utilizando esta técnica, los tiempos de ejecución aumentan con respecto a Greedy, aunque se siguen manteniendo en valores bajos. Los costes mejoran, aunque no en demasiada medida.
-
-Ocurre la misma situación que en el otro algoritmo: los peores y mejores costes presentan gran variabilidad. En este caso, el no determinismo es incluso mayor que en Greedy, ya que se realiza un shuffle() cada vez que se encuentra una solución que mejora la actual y no se recorre todo el vecindario (ya que nos encontramos ante una búsqueda primero el mejor). 
-
-Como desviación y tiempo de ejecución medio entre todos los casos encontramos:
+Como referencia, mantenemos los resultados medios de la búsqueda local:
 \begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
     \centering
         \includegraphics[scale=0.35]{img/bl2.png}
 \end{figure}
 
-Ninguno de los dos algoritmos que hemos estudiado se acerca demasiado a la solución óptima, ya que sus criterios heurísticos no son demasiado fuertes. En el caso de Greedy, una vez elegido un elemento no se puede volver atrás, y en el caso de la búsqueda local, sólo tenemos en cuenta los posibles cambios con el vecindario y no el resto.
+Los algoritmos genéticos y meméticos mejoran su resultado. Los segundos son especialmente destacables ya que incorporan las ventajas de los genéticos y de la búsqueda local, evitando que quedar atrapados en óptimos locales.
 
-Aún así, el hecho de poder utilizar factorización hace que los algoritmos presenten una baja complejidad y tiempos de ejecución, que con técnicas más avanzadas no se conseguirían.
+Los algoritmos genéticos tienen una desventaja, y es que según la versión que utilicemos la población puede verse demasiado modificada entre iteración e iteración. Además, la calidad del operador de cruce también afecta seriamente a la de los sucesores.
 
 \begin{figure}[H] %con el [H] le obligamos a situar aquí la figura
     \centering
