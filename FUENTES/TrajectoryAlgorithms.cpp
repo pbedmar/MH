@@ -41,7 +41,7 @@ void TrajectoryAlgorithms::run(int n_times, string memeticType) {
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-        vector<int> solution = simulatedAnnealing();
+        vector<int> solution = BMB();
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
@@ -70,7 +70,7 @@ void TrajectoryAlgorithms::run(int n_times, string memeticType) {
     avg_cost = avg_cost/n_times;
 }
 
-void TrajectoryAlgorithms::computeRandomSolution(vector<int>& solution, vector<int>& unselected_items) {
+void TrajectoryAlgorithms::computeRandomSolution(vector<int>& unselected_items, vector<int>& solution) {
     for (int i = 0; i < numElements; i++) {
         unselected_items.push_back(i);
     }
@@ -88,7 +88,7 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
     vector<int> solution;
     vector<int> unselected_items;
 
-    computeRandomSolution(solution, unselected_items);
+    computeRandomSolution(unselected_items, solution);
     vector<int> best_solution = solution;
     double current_cost = dispersion(distanceMatrix, solution);
     double best_cost = current_cost;
@@ -172,3 +172,102 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
     return best_solution;
 }
 
+void TrajectoryAlgorithms::localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int MAX_EVAL) {
+    vector<int> best_solution = solution;
+    double current_cost = solutionDispersion;
+    double best_cost = current_cost;
+
+    bool better_solution = true;
+
+    vector<double> sum(numElements, 0);
+    for (auto w: solution) {
+        for (auto w2: solution) {
+            sum[w] += distanceMatrix[w][w2];
+        }
+    }
+
+    int eval = 0;
+
+    while (eval < MAX_EVAL && better_solution) {
+
+        better_solution = false;
+
+        auto u = solution.begin();
+        while (u != solution.end() && !better_solution && eval < MAX_EVAL) {
+            auto v = unselected_items.begin();
+            while (v != unselected_items.end() && !better_solution && eval < MAX_EVAL) {
+
+                eval++;
+
+                vector<double> delta(numElements, 0);
+                double delta_max_w = -numeric_limits<double>::max();
+                double delta_min_w = numeric_limits<double>::max();
+
+                for (auto w: solution) {
+                    if (w != *u) {
+                        delta[w] = sum[w] - distanceMatrix[w][*u] + distanceMatrix[w][*v];
+                        delta[*v] += distanceMatrix[w][*v];
+
+                        if (delta[w] > delta_max_w) {
+                            delta_max_w = delta[w];
+                        }
+
+                        if (delta[w] < delta_min_w) {
+                            delta_min_w = delta[w];
+                        }
+                    }
+                }
+
+                double delta_max = max(delta[*v], delta_max_w);
+                double delta_min = min(delta[*v], delta_min_w);
+                double new_cost = delta_max - delta_min;
+
+                if (new_cost < current_cost) {
+                    best_cost = new_cost;
+                    current_cost = new_cost;
+                    sum = delta;
+
+                    int u_value = *u;
+                    int v_value = *v;
+                    *u = v_value;
+                    *v = u_value;
+
+                    better_solution = true;
+                    best_solution = solution;
+                }
+                v++;
+            }
+            u++;
+        }
+
+        shuffle(solution.begin(), solution.end(), rng_gen);
+        shuffle(unselected_items.begin(), unselected_items.end(), rng_gen);
+    }
+
+    solution = best_solution;
+    solutionDispersion = best_cost;
+}
+
+vector<int> TrajectoryAlgorithms::BMB() {
+    int T = 10;
+    int maxEvalsLS = MAX_EVAL/T;
+
+    vector<int> best_solution;
+    double best_cost = numeric_limits<double>::max();
+
+    for (int i=0; i<T; i++) {
+        vector<int> solution;
+        vector<int> unselected_items;
+        computeRandomSolution(unselected_items, solution);
+
+        double current_cost = dispersion(distanceMatrix, solution);
+        localSearch(unselected_items, solution, current_cost, maxEvalsLS);
+
+        if (current_cost < best_cost) {
+            best_solution = solution;
+            best_cost = current_cost;
+        }
+    }
+
+    return best_solution;
+}
