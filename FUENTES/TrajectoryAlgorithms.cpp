@@ -14,6 +14,10 @@ TrajectoryAlgorithms::TrajectoryAlgorithms(vector<vector<double> > distanceMatri
     numRequiredElements = numRequiredElements_;
     seed = seed_;
     rng_gen.seed(seed);
+
+    max_neighbours = 5*numElements;
+    max_successes = 0.1*max_neighbours;
+    M = MAX_EVAL/max_neighbours;
 }
 
 double TrajectoryAlgorithms::getAvgCost() {
@@ -66,6 +70,20 @@ void TrajectoryAlgorithms::run(int n_times, string memeticType) {
     avg_cost = avg_cost/n_times;
 }
 
+void TrajectoryAlgorithms::computeRandomSolution(vector<int>& solution, vector<int>& unselected_items) {
+    for (int i = 0; i < numElements; i++) {
+        unselected_items.push_back(i);
+    }
+
+    shuffle(unselected_items.begin(), unselected_items.end(), rng_gen);
+
+    for (int i = 0; i < numRequiredElements; i++) {
+        int element = unselected_items[unselected_items.size()-1];
+        unselected_items.pop_back();
+        solution.push_back(element);
+    }
+}
+
 vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
     vector<int> solution;
     vector<int> unselected_items;
@@ -82,16 +100,19 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
         }
     }
 
-    double t_0 = (mu*current_cost) / (-log(phi));
+    cout << "bestCost: " << best_cost << endl;
+
+    double t_0 = (MU*current_cost) / (-log(PHI));
     double t_f = 0.001;
 
     double t = t_0;
     double k = 0;
-    while (t <= t_f && k < M) {
+    cout << t << "  " << t_f;
+    while (t > t_f && k < M) { //TODO: Es esto así?
         double count_neighbours = 0;
         double count_successes = 0;
 
-        while (count_neighbours < MAX_NEIGHBOURS && count_successes < MAX_SUCCESSES) {
+        while (count_neighbours < max_neighbours && count_successes < max_successes) {
             // compute neighbour
             uniform_int_distribution<mt19937::result_type> distS(0,numRequiredElements-1);
             uniform_int_distribution<mt19937::result_type> distU(0,numElements-numRequiredElements-1);
@@ -122,17 +143,19 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
             double neighbour_cost = delta_max - delta_min;
 
             double delta_f = neighbour_cost - current_cost;
-            count_neighbours++;
+            count_neighbours++;  //TODO: here or inside the if below?
 
             uniform_real_distribution<mt19937::result_type> dist01(0,1);
             if (delta_f<0 || dist01(rng_gen) <= exp(-delta_f/k*t)) {
                 solution[indexS] = swapU;
                 unselected_items[indexU] = swapS;
                 current_cost = neighbour_cost;
+                // cout << "Holaaa" << endl;
 
                 if (current_cost < best_cost) {
                     best_solution = solution;
                     best_cost = current_cost;
+                    cout << "Caracolaa" << endl;
 
                     count_successes++;
                 }
@@ -144,21 +167,8 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
 
         k++;
     }
-
+    cout << k << endl;
     cout << "factorized cost: " << best_cost << endl;
     return best_solution;
 }
 
-void TrajectoryAlgorithms::computeRandomSolution(vector<int>& solution, vector<int>& unselected_items) {
-    for (int i = 0; i < numElements; i++) {
-        unselected_items.push_back(i);
-    }
-
-    shuffle(unselected_items.begin(), unselected_items.end(), rng_gen);
-
-    for (int i = 0; i < numRequiredElements; i++) {
-        int element = unselected_items[unselected_items.size()-1];
-        unselected_items.pop_back();
-        solution.push_back(element);
-    }
-}

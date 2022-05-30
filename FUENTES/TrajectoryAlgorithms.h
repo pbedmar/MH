@@ -18,12 +18,12 @@ private:
     int numRequiredElements;
     vector<vector<double> > distanceMatrix;
 
-    double mu = 0.3;
-    double phi = 0.3;
-    const int MAX_NEIGHBOURS = 5*numElements;
-    const int MAX_SUCCESSES = 0.1*MAX_NEIGHBOURS;
     const int MAX_EVAL = 100000;
-    const int M = MAX_EVAL/MAX_NEIGHBOURS;
+    const double MU = 0.3;
+    const double PHI = 0.3;
+    int max_neighbours;
+    int max_successes;
+    int M;
 
     double avg_time = 0;
     double avg_cost = 0;
