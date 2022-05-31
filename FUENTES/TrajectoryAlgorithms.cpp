@@ -41,7 +41,7 @@ void TrajectoryAlgorithms::run(int n_times, string memeticType) {
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-        vector<int> solution = ILS();
+        vector<int> solution = ILS_ES();
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
@@ -84,13 +84,22 @@ void TrajectoryAlgorithms::computeRandomSolution(vector<int>& unselected_items, 
     }
 }
 
-vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
+vector<int> TrajectoryAlgorithms::simulatedAnnealingExecution() {
     vector<int> solution;
     vector<int> unselected_items;
-
     computeRandomSolution(unselected_items, solution);
-    vector<int> best_solution = solution;
+
     double current_cost = dispersion(distanceMatrix, solution);
+
+    simulatedAnnealing(unselected_items, solution, current_cost, MAX_EVAL);
+
+    return solution;
+}
+
+void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vector<int>& solution, double& current_cost, int MAX_EVAL) {
+
+    vector<int> best_solution = solution;
+    vector<int> best_unselected_items = unselected_items;
     double best_cost = current_cost;
 
     vector<double> sum(numElements, 0);
@@ -154,6 +163,7 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
 
                 if (current_cost < best_cost) {
                     best_solution = solution;
+                    best_unselected_items = unselected_items;
                     best_cost = current_cost;
                     cout << "Caracolaa" << endl;
 
@@ -169,7 +179,10 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealing() {
     }
     cout << k << endl;
     cout << "factorized cost: " << best_cost << endl;
-    return best_solution;
+    solution = best_solution;
+    unselected_items = best_unselected_items;
+    current_cost = best_cost;
+
 }
 
 void TrajectoryAlgorithms::localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int MAX_EVAL) {
@@ -303,6 +316,48 @@ vector<int> TrajectoryAlgorithms::ILS() {
         }
 
         localSearch(new_unselected_items, new_solution, new_cost, maxEvalsLS);
+
+        if (new_cost < best_cost) {
+            best_solution = new_solution;
+            best_unselected_items = new_unselected_items;
+            best_cost = new_cost;
+        }
+    }
+
+    return best_solution;
+}
+
+vector<int> TrajectoryAlgorithms::ILS_ES() {
+    int T = 10;
+    int maxEvalsES = MAX_EVAL/T;
+    int num_mutations = 0.1*numRequiredElements;
+    if (num_mutations < 1) {
+        num_mutations = 1;
+    }
+
+    vector<int> best_solution;
+    vector<int> best_unselected_items;
+    computeRandomSolution(best_unselected_items, best_solution);
+
+    double best_cost = dispersion(distanceMatrix, best_solution);
+    simulatedAnnealing(best_unselected_items, best_solution, best_cost, maxEvalsES);
+    T--;
+
+    for (int i=0; i<T; i++) {
+        vector<int> new_solution = best_solution;
+        vector<int> new_unselected_items = best_unselected_items;
+        double new_cost = best_cost;
+
+        shuffle(new_solution.begin(), new_solution.end(), rng_gen);
+        shuffle(new_unselected_items.begin(), new_unselected_items.end(), rng_gen);
+
+        for (int j=0; j<num_mutations; j++) {
+            int swap = new_solution[j];
+            new_solution[j] = new_unselected_items[j];
+            new_unselected_items[j] = swap;
+        }
+
+        simulatedAnnealing(new_unselected_items, new_solution, new_cost, maxEvalsES);
 
         if (new_cost < best_cost) {
             best_solution = new_solution;

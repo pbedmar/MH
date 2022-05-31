@@ -31,10 +31,12 @@ private:
     double highest_cost = -numeric_limits<double>::max();
 
     void computeRandomSolution(vector<int>& unselected_items, vector<int>& solution);
-    vector<int> simulatedAnnealing();
+    vector<int> simulatedAnnealingExecution();
+    void simulatedAnnealing(vector<int>& unselected_items, vector<int>& solution, double& current_cost, int MAX_EVAL);
     void localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int MAX_EVAL);
     vector<int> BMB();
     vector<int> ILS();
+    vector<int> ILS_ES();
 
 public:
     TrajectoryAlgorithms(vector<vector<double> > distanceMatrix_, int numElements_, int numRequiredElements_, int seed_ = 1);
