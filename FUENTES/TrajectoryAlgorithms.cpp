@@ -41,7 +41,7 @@ void TrajectoryAlgorithms::run(int n_times, string memeticType) {
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-        vector<int> solution = BMB();
+        vector<int> solution = ILS();
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
@@ -266,6 +266,48 @@ vector<int> TrajectoryAlgorithms::BMB() {
         if (current_cost < best_cost) {
             best_solution = solution;
             best_cost = current_cost;
+        }
+    }
+
+    return best_solution;
+}
+
+vector<int> TrajectoryAlgorithms::ILS() {
+    int T = 10;
+    int maxEvalsLS = MAX_EVAL/T;
+    int num_mutations = 0.1*numRequiredElements;
+    if (num_mutations < 1) {
+        num_mutations = 1;
+    }
+
+    vector<int> best_solution;
+    vector<int> best_unselected_items;
+    computeRandomSolution(best_unselected_items, best_solution);
+
+    double best_cost = dispersion(distanceMatrix, best_solution);
+    localSearch(best_unselected_items, best_solution, best_cost, maxEvalsLS);
+    T--;
+
+    for (int i=0; i<T; i++) {
+        vector<int> new_solution = best_solution;
+        vector<int> new_unselected_items = best_unselected_items;
+        double new_cost = best_cost;
+
+        shuffle(new_solution.begin(), new_solution.end(), rng_gen);
+        shuffle(new_unselected_items.begin(), new_unselected_items.end(), rng_gen);
+
+        for (int j=0; j<num_mutations; j++) {
+            int swap = new_solution[j];
+            new_solution[j] = new_unselected_items[j];
+            new_unselected_items[j] = swap;
+        }
+
+        localSearch(new_unselected_items, new_solution, new_cost, maxEvalsLS);
+
+        if (new_cost < best_cost) {
+            best_solution = new_solution;
+            best_unselected_items = new_unselected_items;
+            best_cost = new_cost;
         }
     }
 

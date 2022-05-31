@@ -34,6 +34,7 @@ private:
     vector<int> simulatedAnnealing();
     void localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int MAX_EVAL);
     vector<int> BMB();
+    vector<int> ILS();
 
 public:
     TrajectoryAlgorithms(vector<vector<double> > distanceMatrix_, int numElements_, int numRequiredElements_, int seed_ = 1);
