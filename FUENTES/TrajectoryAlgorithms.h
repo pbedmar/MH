@@ -23,7 +23,6 @@ private:
     const double PHI = 0.3;
     int max_neighbours;
     int max_successes;
-    int M;
 
     double avg_time = 0;
     double avg_cost = 0;

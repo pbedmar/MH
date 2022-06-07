@@ -17,7 +17,7 @@ TrajectoryAlgorithms::TrajectoryAlgorithms(vector<vector<double> > distanceMatri
 
     max_neighbours = 5*numElements;
     max_successes = 0.1*max_neighbours;
-    M = MAX_EVAL/max_neighbours;
+
 }
 
 double TrajectoryAlgorithms::getAvgCost() {
@@ -36,12 +36,24 @@ double TrajectoryAlgorithms::getHighestCost(){
     return highest_cost;
 }
 
-void TrajectoryAlgorithms::run(int n_times, string memeticType) {
+void TrajectoryAlgorithms::run(int n_times, string type) {
+
+    avg_time = 0;
+    avg_cost = 0;
 
     for (int exec = 0; exec<n_times; exec++) {
         clock_t start_time = clock();
 
-        vector<int> solution = ILS_ES();
+        vector<int> solution;
+        if (type == "ES") {
+            solution = simulatedAnnealingExecution();
+        } else if (type == "BMB") {
+            solution = BMB();
+        } else if (type == "ILS") {
+            solution = ILS();
+        } else {
+            solution = ILS_ES();
+        }
 
         double solutionDispersion = dispersion(distanceMatrix, solution);
 
@@ -97,6 +109,10 @@ vector<int> TrajectoryAlgorithms::simulatedAnnealingExecution() {
 }
 
 void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vector<int>& solution, double& current_cost, int MAX_EVAL) {
+    uniform_int_distribution<mt19937::result_type> distS(0,numRequiredElements-1);
+    uniform_int_distribution<mt19937::result_type> distU(0,numElements-numRequiredElements-1);
+    uniform_real_distribution<float> dist01(0,1);
+    int M = MAX_EVAL/max_neighbours;
 
     vector<int> best_solution = solution;
     vector<int> best_unselected_items = unselected_items;
@@ -109,23 +125,25 @@ void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vec
         }
     }
 
-    cout << "bestCost: " << best_cost << endl;
+    int eval = 0;
 
     double t_0 = (MU*current_cost) / (-log(PHI));
     double t_f = 0.001;
+    while (t_0 <= t_f && current_cost!=0) {
+        t_f = t_f/10;
+    }
 
+    double beta = (t_0 - t_f) / (M*t_0*t_f);
     double t = t_0;
-    double k = 0;
-    cout << t << "  " << t_f;
-    while (t > t_f && k < M) { //TODO: Es esto así?
-        double count_neighbours = 0;
-        double count_successes = 0;
+
+    int count_neighbours = 1;
+    int count_successes = 1;
+    while (eval < MAX_EVAL && count_successes > 0) {
+        count_neighbours = 0;
+        count_successes = 0;
 
         while (count_neighbours < max_neighbours && count_successes < max_successes) {
             // compute neighbour
-            uniform_int_distribution<mt19937::result_type> distS(0,numRequiredElements-1);
-            uniform_int_distribution<mt19937::result_type> distU(0,numElements-numRequiredElements-1);
-
             int indexS = distS(rng_gen);
             int indexU = distU(rng_gen);
             int swapS = solution[indexS];
@@ -134,16 +152,19 @@ void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vec
             vector<double> delta(numElements, 0);
             double delta_max_w = -numeric_limits<double>::max();
             double delta_min_w = numeric_limits<double>::max();
+
             for (auto w: solution) {
-                delta[w] = sum[w] - distanceMatrix[w][swapS] + distanceMatrix[w][swapU];
-                delta[swapU] += distanceMatrix[w][swapU];
+                if (w != swapS) {
+                    delta[w] = sum[w] - distanceMatrix[w][swapS] + distanceMatrix[w][swapU];
+                    delta[swapU] += distanceMatrix[w][swapU];
 
-                if (delta[w] > delta_max_w) {
-                    delta_max_w = delta[w];
-                }
+                    if (delta[w] > delta_max_w) {
+                        delta_max_w = delta[w];
+                    }
 
-                if (delta[w] < delta_min_w) {
-                    delta_min_w = delta[w];
+                    if (delta[w] < delta_min_w) {
+                        delta_min_w = delta[w];
+                    }
                 }
             }
 
@@ -151,42 +172,47 @@ void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vec
             double delta_min = min(delta[swapU], delta_min_w);
             double neighbour_cost = delta_max - delta_min;
 
-            double delta_f = neighbour_cost - current_cost;
-            count_neighbours++;  //TODO: here or inside the if below?
+//            vector<int> solution_p = solution;
+//            vector<int> unselected_items_p = unselected_items;
+//            solution_p[indexS] = swapU;
+//            unselected_items_p[indexU] = swapS;
+//            double neighbour_cost = dispersion(distanceMatrix,solution_p);
 
-            uniform_real_distribution<mt19937::result_type> dist01(0,1);
-            if (delta_f<0 || dist01(rng_gen) <= exp(-delta_f/k*t)) {
+            double delta_f = fabs(neighbour_cost - current_cost);
+            count_neighbours++;
+            eval++;
+
+            double prob01 = dist01(rng_gen);
+            double exp_formula = exp(-delta_f/t);
+            if (neighbour_cost < current_cost || prob01 <= exp_formula) {
+//                solution = solution_p;
+//                unselected_items = unselected_items_p;
                 solution[indexS] = swapU;
                 unselected_items[indexU] = swapS;
+                sum = delta;
                 current_cost = neighbour_cost;
-                // cout << "Holaaa" << endl;
+                count_successes++;
 
                 if (current_cost < best_cost) {
                     best_solution = solution;
                     best_unselected_items = unselected_items;
                     best_cost = current_cost;
-                    cout << "Caracolaa" << endl;
-
-                    count_successes++;
+//                    cout << "bestCost=" << best_cost << ". realBestCost=" << dispersion(distanceMatrix, solution) << endl;
                 }
             }
         }
 
-        double beta = (t_0 - t_f) / (M*t_0*t_f);
         t = t / (1+beta*t);
-
-        k++;
+//        cout << "Neighbours=" << count_neighbours << ". Successes=" << count_successes << endl;
     }
-    cout << k << endl;
-    cout << "factorized cost: " << best_cost << endl;
     solution = best_solution;
     unselected_items = best_unselected_items;
     current_cost = best_cost;
-
 }
 
 void TrajectoryAlgorithms::localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int MAX_EVAL) {
     vector<int> best_solution = solution;
+    vector<int> best_unselected_items = unselected_items;
     double current_cost = solutionDispersion;
     double best_cost = current_cost;
 
@@ -202,14 +228,12 @@ void TrajectoryAlgorithms::localSearch(vector<int>& unselected_items, vector<int
     int eval = 0;
 
     while (eval < MAX_EVAL && better_solution) {
-
         better_solution = false;
 
         auto u = solution.begin();
         while (u != solution.end() && !better_solution && eval < MAX_EVAL) {
             auto v = unselected_items.begin();
             while (v != unselected_items.end() && !better_solution && eval < MAX_EVAL) {
-
                 eval++;
 
                 vector<double> delta(numElements, 0);
@@ -247,6 +271,7 @@ void TrajectoryAlgorithms::localSearch(vector<int>& unselected_items, vector<int
 
                     better_solution = true;
                     best_solution = solution;
+                    best_unselected_items = unselected_items;
                 }
                 v++;
             }
@@ -259,6 +284,7 @@ void TrajectoryAlgorithms::localSearch(vector<int>& unselected_items, vector<int
 
     solution = best_solution;
     solutionDispersion = best_cost;
+    unselected_items = best_unselected_items;
 }
 
 vector<int> TrajectoryAlgorithms::BMB() {
@@ -304,7 +330,6 @@ vector<int> TrajectoryAlgorithms::ILS() {
     for (int i=0; i<T; i++) {
         vector<int> new_solution = best_solution;
         vector<int> new_unselected_items = best_unselected_items;
-        double new_cost = best_cost;
 
         shuffle(new_solution.begin(), new_solution.end(), rng_gen);
         shuffle(new_unselected_items.begin(), new_unselected_items.end(), rng_gen);
@@ -315,6 +340,7 @@ vector<int> TrajectoryAlgorithms::ILS() {
             new_unselected_items[j] = swap;
         }
 
+        double new_cost = dispersion(distanceMatrix, new_solution);
         localSearch(new_unselected_items, new_solution, new_cost, maxEvalsLS);
 
         if (new_cost < best_cost) {
@@ -346,7 +372,6 @@ vector<int> TrajectoryAlgorithms::ILS_ES() {
     for (int i=0; i<T; i++) {
         vector<int> new_solution = best_solution;
         vector<int> new_unselected_items = best_unselected_items;
-        double new_cost = best_cost;
 
         shuffle(new_solution.begin(), new_solution.end(), rng_gen);
         shuffle(new_unselected_items.begin(), new_unselected_items.end(), rng_gen);
@@ -357,6 +382,7 @@ vector<int> TrajectoryAlgorithms::ILS_ES() {
             new_unselected_items[j] = swap;
         }
 
+        double new_cost = dispersion(distanceMatrix, new_solution);
         simulatedAnnealing(new_unselected_items, new_solution, new_cost, maxEvalsES);
 
         if (new_cost < best_cost) {

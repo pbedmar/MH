@@ -1,0 +1,11 @@
+bin -> ejecutables
+data -> ficheros .txt con los datos de entrada
+FUENTES -> código
+
+Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $make$ en la terminal. A continuación, ejecutamos:
+
+./bin/practica2 <$semilla$> <$algoritmo$> <$fichero\_datos$>
+
+Donde <$algoritmo$> puede tomar como valor g (Genético) o m (Memético). Se ejecutan por defecto la versión del genético estacionario con operador uniforme o la del memético AM-(10,0.1).
+
+Ejemplo: ./bin/practica2 1 g data/GKD-b_50_n150_m45.txt
