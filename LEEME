@@ -1,11 +1,21 @@
-bin -> ejecutables
-data -> ficheros .txt con los datos de entrada
-FUENTES -> código
+**    Grado en Ingeniería Informática
+***   Prácticas de Metaheurísticas (Curso 2021-2022)
+****  Pedro Bedmar López
 
-Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $make$ en la terminal. A continuación, ejecutamos:
 
-./bin/practica2 <$semilla$> <$algoritmo$> <$fichero\_datos$>
+BIN -> ejecutables
+data -> ficheros .txt con los datos de entrada, índice con los ficheros de datos
+FUENTES -> implementación de los algoritmos
 
-Donde <$algoritmo$> puede tomar como valor g (Genético) o m (Memético). Se ejecutan por defecto la versión del genético estacionario con operador uniforme o la del memético AM-(10,0.1).
 
-Ejemplo: ./bin/practica2 1 g data/GKD-b_50_n150_m45.txt
+
+*** Cómo ejecutar la práctica ***
+
+Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos make clean y a continuación make en la terminal. Finalmente, ejecutamos:
+
+./bin/practica3 <semilla> <algoritmo> <fichero_datos>
+
+Donde <algoritmo> puede tomar como valor ES (Enfriamiento Simulado), BMB (Búsqueda Multiarranque Básica), ILS (Búsqueda Local Reiterada) o ILS-ES (Hibridación de ILS y ES).
+
+Ejemplo:
+./bin/practica3 1 ES data/GKD-b_50_n150_m45.txt

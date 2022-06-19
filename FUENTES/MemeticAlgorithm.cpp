@@ -402,7 +402,7 @@ vector<bool> MemeticAlgorithm::mutationOperator(vector<bool>& individual) {
     return individual;
 }
 
-void MemeticAlgorithm::localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int eval) {
+void MemeticAlgorithm::localSearch(vector<int>& unselected_items, vector<int>& solution, double& solutionDispersion, int& eval) {
     vector<int> best_solution = solution;
     double current_cost = solutionDispersion;
     double best_cost = current_cost;

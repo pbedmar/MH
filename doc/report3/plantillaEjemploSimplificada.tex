@@ -485,11 +485,11 @@ Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $ma
 
 \noindent Donde <$algoritmo$> \space puede tomar como valor ES (Enfriamiento Simulado), BMB (Búsqueda Multiarranque Básica), ILS (Búsqueda Local Reiterada) o ILS-ES (Hibridación de ILS y ES).
 
-\noindent Ejemplo: ./bin/practica2 1 ES data/GKD-b\_50\_n150\_m45.txt
+\noindent Ejemplo: ./bin/practica3 1 ES data/GKD-b\_50\_n150\_m45.txt
 
 
 \part{Experimentos y análisis de resultados}
-Para comprobar el funcionamiento de los algoritmos, realizamos experimentos de ejecución. Nuestros algoritmos son probabilísticos, ya que la aleatoriedad está presente en ellos. Por tanto, para que los resultados sean reproducibles es necesario fijar una semilla. Como mencionamos al principio de la práctica, fijamos su valor en $1$. 
+Para comprobar el funcionamiento de los algoritmos, realizamos experimentos de ejecución. Nuestros algoritmos no son determinísticos, ya que la aleatoriedad está presente en ellos. Por tanto, para que los resultados sean reproducibles es necesario fijar una semilla. Como mencionamos al principio de la práctica, fijamos su valor en $1$. 
 
 Vamos a ejecutar cada algoritmo con los 50 casos que tenemos. En la tabla siguiente se muestran los resultados medios de ejecución de cada algoritmo en cada uno de esos problemas.
 
@@ -518,15 +518,15 @@ El nombre de enfriamiento simulado proviene de una analogía con la termodinámi
 
 En la práctica, para este problema no encontramos diferencias muy marcadas entre BL y ES, siendo ES un poco mejor que BL. 
 
-BMB es un algoritmo que realiza varias ejecuciones de la búsqueda local. Para realizar una comparativa justa con BL, el número total de evaluaciones de la función objetivo siempre es el mismo, 100000, pero en BMB estas evaluaciones se dividen entre las 10 ejecuciones que realiza internamente de la búsqueda local. O sea, cada ejecución interna de la búsqueda local realizará 10000 evaluaciones. Aunque cada una de ellas profundice en menor medida en el espacio de búsqueda, tiene la ventaja de que cada ejecución se inicia desde diferentes puntos de este espacio, evitando óptimos locales o soluciones iniciales muy alejadas del óptimo. En una única ejecución de BL con 100000 evaluaciones nos arriesgamos a quedar atrapados en un óptimo local, con BMB esta búsqueda se diversifica desde diferentes puntos de inicio, lo que nos permite quedarnos con la mejor solución obteniendo únicamente 41.5 puntos de desviación.
+BMB es un algoritmo que realiza varias ejecuciones de la búsqueda local. Para realizar una comparativa justa con BL, el número total de evaluaciones de la función objetivo siempre es el mismo, 100000, pero en BMB estas evaluaciones se dividen entre las 10 ejecuciones que realiza internamente de la búsqueda local. O sea, cada ejecución interna de la búsqueda local realizará 10000 evaluaciones. Aunque cada una de ellas profundice en menor medida en el espacio de búsqueda, tiene la ventaja de que cada ejecución se inicia desde diferentes puntos de este espacio, lo que consigue evitar óptimos locales o soluciones iniciales muy alejadas del óptimo. En una única ejecución de BL con 100000 evaluaciones nos arriesgamos a quedar atrapados en un óptimo local, con BMB esta búsqueda se diversifica desde diferentes puntos de inicio, lo que nos permite quedarnos con la mejor solución obteniendo únicamente 41.5 puntos de desviación.
 
 ILS sigue una idea parecida a BMB, pero en este caso la solución inicial de cada ejecución de búsqueda local se basa en la solución de la ejecución anterior. A esta se le aplica una mutación, en nuestro caso únicamente al 10\% de los genes. Se puede observar que los resultados son peores que con BMB, se obtienen 50.08 puntos de desviación. Esto se debe a que aunque se realiza una mutación, la solución obtenida al realizar una ejecución de la búsqueda local sigue dependiendo en gran medida de la anterior. Elevar el porcentaje de genes mutados podría ser una solución para introducir más diferencias.
 
-Finalmente, ILS-ES es una hibridación de ILS con enfriamiento simulado. Devuelve una buena desviación (41.89), similar a la que se obtiene con BMB. En comparación con ILS se obtienen mejores resultados, esto puede deberse a que de por sí ES ya incorpora una fase de exploración que compensa la falta de diversificación que tenía la BL en ILS.
+Finalmente, ILS-ES es una hibridación de ILS con enfriamiento simulado. Devuelve una buena desviación (41.89), similar a la que se obtiene con BMB. En comparación con ILS se obtienen mejores resultados, esto puede deberse a que de por sí ES ya incorpora una fase de exploración que compensa la falta que tenía BL en ILS.
 
 Por tanto, BMB e ILS-ES son los algoritmos que devuelven un mejor resultado para este problema, por su equilibrio entre exploración y explotación.
 
-En cuanto a tiempos de ejecución, todos resuelven la tarea en un tiempo similar. Este tiempo es bajo ya que tanto BL como ES realizan un cálculo factorizado de la función objetivo. Este tiempo es aún menor en Greedy, ya que realiza una construcción incremental de la solución y termina cuando esta ha alcanzado los $m$ elementos.
+En cuanto a tiempos de ejecución, todos resuelven la tarea en un tiempo similar. Este tiempo es bajo, ya que tanto BL como ES realizan un cálculo factorizado de la función objetivo. Este tiempo es aún menor en Greedy, ya que realiza una construcción incremental de la solución y termina cuando esta ha alcanzado los $m$ elementos.
 
 \section{Resultados completos}
 \subsection*{Búsqueda Local}

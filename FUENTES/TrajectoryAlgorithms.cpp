@@ -172,12 +172,6 @@ void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vec
             double delta_min = min(delta[swapU], delta_min_w);
             double neighbour_cost = delta_max - delta_min;
 
-//            vector<int> solution_p = solution;
-//            vector<int> unselected_items_p = unselected_items;
-//            solution_p[indexS] = swapU;
-//            unselected_items_p[indexU] = swapS;
-//            double neighbour_cost = dispersion(distanceMatrix,solution_p);
-
             double delta_f = fabs(neighbour_cost - current_cost);
             count_neighbours++;
             eval++;
@@ -185,8 +179,6 @@ void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vec
             double prob01 = dist01(rng_gen);
             double exp_formula = exp(-delta_f/t);
             if (neighbour_cost < current_cost || prob01 <= exp_formula) {
-//                solution = solution_p;
-//                unselected_items = unselected_items_p;
                 solution[indexS] = swapU;
                 unselected_items[indexU] = swapS;
                 sum = delta;
@@ -197,13 +189,11 @@ void TrajectoryAlgorithms::simulatedAnnealing(vector<int>& unselected_items, vec
                     best_solution = solution;
                     best_unselected_items = unselected_items;
                     best_cost = current_cost;
-//                    cout << "bestCost=" << best_cost << ". realBestCost=" << dispersion(distanceMatrix, solution) << endl;
                 }
             }
         }
 
         t = t / (1+beta*t);
-//        cout << "Neighbours=" << count_neighbours << ". Successes=" << count_successes << endl;
     }
     solution = best_solution;
     unselected_items = best_unselected_items;
