@@ -1,0 +1,795 @@
+\input{preambuloSimple.tex}
+
+
+%----------------------------------------------------------------------------------------
+%	TÍTULO Y DATOS DEL ALUMNO
+%----------------------------------------------------------------------------------------
+
+\title{	
+\normalfont \normalsize 
+\huge{\textbf{Metaheurísticas (Curso 2021-2022)}\linebreak \linebreak Grado en Ingeniería Informática \\ Universidad de Granada} \\ [23pt] % Your university, school and/or department name(s)
+
+\begin{figure}[H]
+    \centering
+        \includegraphics[scale=0.4]{img/ugr.png}
+\end{figure}
+
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Práctica final: Metaheurística  \linebreak 
+\huge Big Bang - Big Crunch \linebreak % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+\vspace{2cm}
+
+\Large{Pedro Bedmar López - 75935296Z} \\
+\Large{pedrobedmar@correo.ugr.es} \linebreak
+
+}
+
+\date{}
+
+%----------------------------------------------------------------------------------------
+% DOCUMENTO
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\clearpage
+\maketitle % Muestra el Título
+\thispagestyle{empty}
+
+\newpage %inserta un salto de página
+
+\tableofcontents % para generar el índice de contenidos
+
+\newpage
+
+
+
+%----------------------------------------------------------------------------------------
+%	Cuestión 1
+%----------------------------------------------------------------------------------------
+
+\part{Resumen de la Metaheurística}
+
+En la creación de nuevas Metaheurísticas, una fuente de inspiración es la naturaleza. Por sí misma, la naturaleza contiene procesos muy interesantes desde el punto de vista de la optimización. Como ejemplo, la evolución es uno de estos mecanismos que permite a los sistemas biológicos mejorar en cada generación, debido a la selección natural que sufren los individuos.
+
+En este trabajo vamos a estudiar el comportamiento de una Metaheurística basada en la naturaleza, concretamente en la física. Una de las teorías que intenta explicar la creación del universo miles de millones de años atrás se conoce como Big Bang, donde tras una gran explosión en un punto concreto del espacio, comienza la expansión de materia y energía por todo este. La expansión se producirá en todas las direcciones y cúmulos de materia cercana darán lugar a las galaxias. 
+
+Hoy en día el universo sigue en expansión, pero algunos científicos sostienen que esta está comenzando a enlentecerse. Y es que existe otra teoría conocida como Big Crunch donde se defiende que este volverá a contraerse al estado original anterior al Big Bang, entrando en un proceso cíclico de expansión-contracción del universo.
+
+Esta Metaheurística toma esta idea para trasladarla al ámbito de optimización de problemas. El funcionamiento que sigue es similar al de un algoritmo genético, se parte de una población inicial de determinado tamaño generada de forma aleatoria siguiendo una distribución uniforme. Cada individuo de esta población tendrá un número de dimensiones o genes determinado que lo caracterizarán.
+
+\begin{figure}[H]
+    \centering
+        \includegraphics[scale=0.23]{img/initial_big_bang.png}
+        \caption{Población tras la fase Big Bang inicial}
+\end{figure}
+
+Esta será la primera fase Big Bang, donde la población se habrá expandido uniformemente por todo el espacio.
+
+A continuación ocurre la fase Big Crunch. Actúa como operador de convergencia, donde a partir de todos los individuos de la población se genera una única salida llamada centro de masas. El término masa en este ámbito se refiere a la inversa del valor que toma la función de fitness. Este centro de masas se representa como $\vec{x}^c$ y se calcula con la siguiente fórmula:
+
+\begin{equation}
+    \vec{x}^c = \frac{\sum^{N}_{i=1}\frac{1}{f^i}\vec{x}^i}{\sum^{N}_{i=1}\frac{1}{f^i}}
+\end{equation}
+
+Donde $f^i$ representa el valor fitness del individuo $\vec{x}^i$. Los autores también proponen escoger como centro de masas el individuo con mejor fitness en vez de utilizar esta ecuación.
+
+\begin{figure}[H]
+\centering
+    \includegraphics[scale=0.28]{img/big_crunch.png}
+    \caption{Elección del centro de masas en la fase Big Crunch}
+\end{figure}
+
+Tras la fase Big Crunch, se vuelve a producir otro Big Bang que genera nuevos individuos que reemplazan a la población anterior. En la publicación no se especifica si este reemplazo debe de ser total o parcial, así que nosotros decidimos reemplazar un 30\% de la población, manteniendo los individuos con mejor fitness y el centro de masas. Una política de sustitución podría ser la que se utiliza en el Big Bang inicial, generar individuos aleatorios de forma uniforme, pero entonces estaríamos siguiendo una búsqueda aleatoria. Por ello, en la publicación proponen generar los individuos basándose en una distribución normal centrada en el centro de masas. La desviación de los individuos generados irá disminuyendo conforme se lleva a cabo la ejecución, de forma que los puntos se generen cada vez más cerca del centro de masas para que el algoritmo converja. 
+
+\begin{figure}[H]
+    \centering
+        \includegraphics[scale=0.28]{img/big_bang.png}
+        \caption{Fase Big Bang genera individuos alrededor de un centro de masas}
+    \end{figure}
+
+A nivel de implementación, la generación de nuevos individuos en la fase Big Bang viene dada por la siguiente ecuación, donde $x^c$ es el centro de masas, l el valor máximo que puede tomar un cromosoma, r un valor aleatorio de una distribución normal y k la iteración actual.
+
+\begin{equation}
+    x^{new} = x^c + lr/k
+\end{equation}
+
+Al realizar este proceso, se debe comprobar que \noindent $x^{new}$ toma valores dentro del dominio permitido (en nuestro caso, [-100, 100]). 
+
+Este proceso Big Bang - Big Crunch se repetirá de forma continuada durante la ejecución del algoritmo, hasta que la condición de parada lo indique. En nuestro caso, el número de evaluaciones de la función objetivo, aunque también podría tomarse el número de iteraciones que se realizan. Con este proceso se espera que la población se reúna en torno a un centro de masas que coincida o sea cercano al óptimo global. Al terminar, se devuelve el mejor individuo de la población. 
+
+\begin{figure}[H]
+\centering
+    \includegraphics[scale=0.23]{img/end.png}
+    \caption{Estado tras la finalización del algoritmo}
+\end{figure}
+
+Cada una de las fases del algoritmo trata una de las componentes que son necesarias en este tipo de algoritmos de optimización, la exploración y la explotación. La fase Big Bang coincide con exploración, se generan individuos por todo el espacio de búsqueda, reduciéndose la probabilidad de converger hacia óptimos locales. La fase Big Crunch se encarga de que el algoritmo converja hacia un centro de masas supuestamente cercano a un óptimo. Al inicio de la ejecución, la fase Big Bang puede generar individuos en todo el espacio de búsqueda, pero conforme avanza la generación será de individuos cada vez más cercanos al centro de masas. 
+
+En definitiva, se busca un equilibrio entre exploración y explotación que permita al algoritmo encontrar buenas soluciones.
+
+% \part{Formulación del problema}
+
+% Sea $G = (V,E)$ un grafo completo no dirigido donde $V$, de tamaño $n$, es el conjunto de vértices que lo forman y $E$ es el conjunto de las aristas que unen estos vértices. Este grafo es un grafo ponderado, ya que cada una de las aristas $e_{u,v} \in E$ lleva asociada un peso que representa la distancia $d_{u,v}$ entre dos vértices $u,v \in V$.
+
+% La dispersión es una medida que se puede aplicar en este dominio, donde dado un subconjunto $S \subset V$ de tamaño $m$ se mide cómo de homogéneas son las distancias entre los vértices que forman $S$. Una de las aplicaciones más importantes de las Ciencias de la Computación consiste en optimizar valores como éste, maximizando o minimizando el resultado que devuelve una \textbf{función objetivo}. 
+
+% En esta práctica queremos minimizar su valor, obteniendo la mínima dispersión. Este problema tiene un gran paralelismo con problemas reales, como puede ser la organización del género en almacenes, donde minimizar la dispersión de la mercancía reduce los costes. Por tanto, si resolvemos este problema de forma teórica es trivial aplicar la solución en estos casos.
+
+% Anteriormente he definido la dispersión de una forma muy genérica, sin entrar en su formalización. Y es que se puede definir de diferentes formas, teniendo en cuenta la dispersión media de los elementos del conjunto $S$ o utilizando los valores extremos (máximos y mínimos) en éste. Esta segunda opción se define formalmente como:
+% \begin{align*}
+%     diff(S) = max_{i \in S} \{ \sum_{j \in S} d_{i,j}\} - min_{i \in S} \{ \sum_{j \in S} d_{i,j}\}
+% \end{align*}
+
+% Utilizando esta definición de dispersión como función objetivo obtenemos lo que se conoce como \textbf{Problema de la Mínima Dispersión Diferencial (MDD)}, es decir: 
+% \begin{align*}
+%     S^{*} = {arg min}_{S \subset V} diff(S)
+% \end{align*}
+
+
+% \part{Descripción de la aplicación de los algoritmos}
+% En la tercera práctica de la asignatura implementamos los algoritmos de \textbf{Enfriamiento Simulado (ES)}, \textbf{Búsqueda multiarranque básica (BMB)}, \textbf{Búsqueda Local Reiterada (ILS)} e \textbf{Hibridación de ILS y ES (ILS-ES)}, y comparamos su rendimiento entre ellos y con los algoritmos Greedy y Búsqueda Local de la primera práctica. Antes de describirlos, vamos a comentar información común a ambos.
+
+
+% \section{Datos utilizados}
+% Los datos que necesitamos para analizar el comportamiento de los algoritmos en este problema no son muy complejos. En cada posible instancia se necesita conocer el valor $n$ indicando el número de puntos que contiene el dataset, el valor $m < n$ indicando cuantos puntos se quieren escoger de forma que se minimice la dispersión en esos $m$ puntos y la matriz $d$ con tamaño $n \times n$, simétrica y con valor 0 en su diagonal, que contiene las distancias entre cada uno de los $n$ puntos del dataset. En definitiva, se necesita conocer el grafo $G$.
+
+% En total, en los experimentos utilizamos 50 instancias diferentes con datos extraídos del dataset \textbf{GKD}. Las instancias toman valores $n \in \{25,50,100,125,150\}$ y $m \in [2,45]$.
+
+
+% \section{Representación de soluciones}
+
+% El conjunto $V$ descrito en la formulación del problema coincide con $n$ en tamaño. $S$ es una solución válida del problema si:
+% \begin{itemize}
+%     \item $|S| = m$
+%     \item $S \subset V$
+% \end{itemize}
+% Y por tanto, $m < n$.
+
+% \section{Función objetivo}
+
+% Como hemos comentado al describir el problema, la función objetivo a minimizar se define como:
+% \begin{align*}
+%     diff(S) = max_{i \in S} \{ \sum_{j \in S} d_{i,j}\} - min_{i \in S} \{ \sum_{j \in S} d_{i,j}\}
+% \end{align*}
+
+% \noindent En pseudocódigo quedaría de la siguiente forma:
+% \begin{algorithm}
+%     \caption{Función objetivo}
+% \begin{algorithmic}
+% \State $max \gets -\infty$
+% \State $min \gets \infty$
+% \For{$s \in S$}
+%     \State $distance \gets \sum_{s2 \in S} d_{s,s2}$
+%     \If{$distance > max$}
+%         \State $max \gets distance$
+%     \EndIf
+%     \If{$distance < min$}
+%         \State $min \gets distance$
+%     \EndIf
+% \EndFor
+% \State \textbf{return} $max - min$
+% \end{algorithmic}
+% \end{algorithm}
+
+% Tanto en la Búsqueda Local como en el Enfriamiento Simulado, no se utiliza directamente esta implementación de la funcion objetivo (excepto para inicializarlos). Esto se debe a que es costosa, en concreto tiene una complejidad computacional de $O(n^2)$. Utilizamos versiones factorizadas de la función, que reutilizan cálculos previos de iteraciones anteriores para actualizar el valor de la dispersión. De esta forma, obtenemos una complejidad de $O(n)$.
+
+% \newpage
+% \section{Generador de soluciones aleatorias}
+% Utilizado en diferentes algoritmos para generar soluciones iniciales.
+
+% \begin{algorithm}[H]
+%     \caption{Generador de soluciones aleatorias en representación entera.}
+% \begin{algorithmic}[1]
+% \Procedure{generateRandomSolution}{}
+%     \State $U \leftarrow [ \, ]$
+%     \State $S \leftarrow [ \, ]$
+%     \State
+%     \For{$i = 0$ \textbf{to} $n-1$}
+%         \State $U \leftarrow U + \{i\}$
+%     \EndFor
+%     \State
+%     \State shuffle($U$)
+%     \For{$i = 0$ \textbf{to} $m-1$}
+%         \State $aux \leftarrow U.last$
+%         \State $U \leftarrow U - \{U.last\}$
+%         \State $S \leftarrow S + \{aux\}$
+%     \EndFor
+%     \State
+%     \State \textbf{return} $U, S$
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
+
+
+
+% \part{Pseudocódigo de los algoritmos}
+% A diferencia de los algoritmos genéticos, en los algoritmos basados en trayectorias se parte de una única solución y se inicia una búsqueda que sigue una trayectoria en el espacio de soluciones. En algunos de estos algoritmos, se realizan diferentes ejecuciones desde distintos puntos de inicio con el objetivo de evitar óptimos locales. A continuación, mostramos el pseudocódigo de los cuatro algoritmos que se implementan en la práctica junto con el de la búsqueda local.
+
+% \section{Búsqueda Local (BL)}
+% \begin{algorithm}[H]
+% \caption{Algoritmo Búsqueda Local primero el mejor. Dada una solución inicial, se explora su entorno devolviendo la mejor solución encontrada en un número de evaluaciones determinado. El cálculo de la dispersión se realiza de forma factorizada.}
+% \begin{algorithmic}[1]
+% \Procedure{localSearch}{$U$, $S$, $current\_cost$, $max\_eval$}
+%     \State $best\_S \leftarrow S$
+%     \State $best\_U \leftarrow U$
+%     \State $best\_cost \leftarrow current\_cost$
+%     \State 
+%     \State $sum \gets [ \, ]$ \Comment Array inicializado a 0
+%     \For{$w \in S$}
+%         \For{$w2 \in S$}
+%             \State $sum[w] \leftarrow d_{w,w2}$
+%         \EndFor
+%     \EndFor
+%     \State
+%     \State eval $\gets 0$
+%     \State $better\_solution \gets true$
+%     \State
+%     \While{eval $< max\_eval$ \textbf{and} $better\_solution$}
+%         \State $better\_solution \gets false$
+%         \State
+%         \For{$u \in S$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < max\_eval$}
+%             \For{$v \in U$ \textbf{and while} $!better\_solution$ \textbf{and} $eval < max\_eval$}
+%                 \State $eval \gets eval+1$
+                
+%                 \State
+% \algstore{myalg2}
+% \end{algorithmic}
+% \end{algorithm}
+
+% \begin{algorithm}[H]
+% \begin{algorithmic}
+% \algrestore{myalg2}
+%                 \State
+%                 \State $\delta \gets [\,]$ \Comment Array inicializado a 0
+%                 \State $\delta(w)_{max} \gets -\infty$
+%                 \State $\delta(w)_{min} \gets \infty$
+%                 \State
+%                 \For{$w \in S$}
+%                     \If{$w != u$}
+%                         \State $\delta[w] \gets sum[w] - d_{w,u} + d_{w,v}$
+%                         \State $\delta[v] \pluseq d_{w,v}$
+%                         \State
+%                         \If{$\delta[w] > \delta(w)_{max}$}
+%                             \State $\delta(w)_{max} \gets \delta[w]$
+%                         \EndIf
+%                         \If{$\delta[w] < \delta(w)_{min}$}
+%                             \State $\delta(w)_{min} \gets \delta[w]$
+%                         \EndIf
+%                     \EndIf
+%                 \EndFor
+%                 \State
+%                 \State $\delta_{max} \gets max(\delta[v], \delta(w)_{max})$
+%                 \State $\delta_{min} \gets min(\delta[v], \delta(w)_{min})$
+%                 \State $new\_cost \gets \delta_{max} - \delta_{min}$
+%                 \If{$new\_cost < current\_cost$}
+%                     \State $best\_cost \gets new\_cost$
+%                     \State $current\_cost \gets new\_cost$
+%                     \State
+%                     \State $swap \gets u$ \Comment intercambio $u$ y $v$ en $S$ y $U$
+%                     \State $u \gets v$
+%                     \State $v \gets swap$
+%                     \State $better\_solution = true$
+%                     \State $best\_S = S$
+%                     \State $best\_U = U$
+%                 \EndIf
+%                 \State
+%             \EndFor
+%         \EndFor
+%         \State
+%         \State shuffle($S$)
+%         \State shuffle($U$)
+%     \EndWhile
+%     \State
+%     \State \textbf{return} $U, S, best\_cost$  
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
+
+% \section{Enfriamiento Simulado (ES)}
+% \begin{algorithm}[H]
+% \caption{Algoritmo de enfriamiento simulado. Parte de una solución inicial e itera buscando soluciones vecinas que mejoren a la actual. Además, tiene la capacidad de aceptar soluciones que no cumplen esta condición de forma aleatoria, pero conforme avanza el algoritmo, la probabilidad de aceptar aleatoriamente se disminuye.}
+% \begin{algorithmic}[1]
+% \Procedure{simulatedAnnealing}{$U$, $S$, $current\_cost$, $max\_eval$}
+%     \State $best\_S \leftarrow S$
+%     \State $best\_U \leftarrow U$
+%     \State $best\_cost \leftarrow current\_cost$
+%     \State
+%     \State $max\_nb \leftarrow 5*n$
+%     \State $max\_successes \leftarrow 0.1*max\_nb$
+%     \State $M \leftarrow max\_eval/max\_nb$
+%     \State $eval \leftarrow 0$
+%     \State
+%     \State $sum \gets [ \, ]$ \Comment Array inicializado a 0
+%     \For{$w \in S$}
+%         \For{$w2 \in S$}
+%             \State $sum[w] \leftarrow d_{w,w2}$
+%         \EndFor
+%     \EndFor
+%     \State
+%     \State $t0 \leftarrow (0.3*current\_cost)/(-log(0.3))$ \Comment Cálculo de la temperatura inicial
+%     \State $tf \leftarrow 0.001$
+%     \While{$t0 <= tf$ \textbf{and} $current\_cost != 0$} \Comment Su valor debe ser menor que $tf$
+%         \State $tf \leftarrow tf/10$
+%     \EndWhile
+%     \State
+%     \State $beta \leftarrow (t0 - tf)/(0.3*t0*tf)$
+%     \State $t \leftarrow t0$
+%     \While{$eval < max\_eval$}
+%         \State $count\_nb \leftarrow 0$
+%         \State $count\_successes \leftarrow 0$
+%         \State
+%         \While{$count\_nb < max\_nb$ \textbf{and} $count\_successes < max\_successes$}
+%             \State $index\_s \leftarrow$ randint($0, m-1$)
+%             \State $index\_u \leftarrow$ randint($0, n-m-1$)
+%             \State $swap\_s \leftarrow S[index\_s]$
+%             \State $swap\_u \leftarrow U[index\_u]$
+%             \State
+%             \State $\delta \leftarrow [ \, ]$ \Comment Array inicializado a 0
+%             \State $\delta(w)_{max} \gets -\infty$
+%             \State $\delta(w)_{min} \gets \infty$
+% \algstore{es}
+% \end{algorithmic}
+% \end{algorithm}
+            
+% \begin{algorithm}[H]
+% \begin{algorithmic}
+%     \algrestore{es}
+%             \State
+%             \For{$w \in S$}
+%                 \If{$w != swap\_s$}
+%                     \State $\delta[w] \gets sum[w] - d_{w,swap\_s} + d_{w,swap\_u}$
+%                     \State $\delta[swap\_u] \pluseq d_{w,swap\_u}$
+%                     \State
+%                     \If{$\delta[w] > \delta(w)_{max}$}
+%                         \State $\delta(w)_{max} \gets \delta[w]$
+%                     \EndIf
+%                     \If{$\delta[w] < \delta(w)_{min}$}
+%                         \State $\delta(w)_{min} \gets \delta[w]$
+%                     \EndIf
+%                 \EndIf
+%             \EndFor
+%             \State
+%             \State $\delta_{max} \gets max(\delta[swap\_u], \delta(w)_{max})$
+%             \State $\delta_{min} \gets min(\delta[swap\_u], \delta(w)_{min})$
+%             \State $new\_cost \gets \delta_{max} - \delta_{min}$
+%             \State
+%             \State $\delta_f =$ fabs($neighbout\_cost - current\_cost$)
+%             \State $count\_nb \leftarrow count\_nb + 1$
+%             \State $eval \leftarrow eval + 1$
+%             \State
+%             \If{$neighbout\_cost < current\_cost$ \textbf{or} $randFloat(0,1) <= e^{(-\delta_f/t)}$}
+%                 \State $S[index\_s] \leftarrow swap\_u$
+%                 \State $U[index\_u] = swap\_s$
+%                 \State $sum \leftarrow delta$
+%                 \State $current\_cost \leftarrow neighbout\_cost$
+%                 \State $count\_successes \leftarrow count\_successes + 1$
+%                 \State
+%                 \If{$current\_cost < best\_cost$}
+%                     \State $best\_S \leftarrow S$
+%                     \State $best\_U \leftarrow U$
+%                     \State $best\_cost \leftarrow current\_cost$
+%                 \EndIf
+%                 \State
+%             \EndIf 
+%         \EndWhile
+%         \State $t \leftarrow t/(1+beta*t)$ \Comment Enfriamiento de la temperatura
+%         \State
+%     \EndWhile
+%     \State
+%     \State \textbf{return} $U, S, best\_cost$  
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
+
+
+% \section{Búsqueda multiarranque básica (BMB)}
+% \begin{algorithm}[H]
+% \caption{Algoritmo de la búsqueda multiarranque básica. En vez de ejecutar la búsqueda local una única vez hasta las 100000 evaluaciones, se ejecuta 10 veces hasta las 10000 evaluaciones cada vez. Finalmente se devuelve el resultado de la mejor ejecución. En cada una se parte de una solución generada aleatoriamente.}
+% \begin{algorithmic}[1]
+%     \Procedure{BMB}{}
+%         \State $T \leftarrow 10$
+%         \State $maxEvalsLS \leftarrow 100000/T$
+%         \State
+%         \State $best\_cost \leftarrow \infty$
+%         \For{$i = 0$ \textbf{to} $T-1$}
+%             \State $U, S \leftarrow$ generateRandomSolution()
+%             \State
+%             \State $current\_cost \leftarrow$ dispersion($S$)
+%             \State $U, S, current\_cost \leftarrow$ localSearch($U, S, current\_cost, maxEvalsLS$)
+%             \State
+%             \If{$current\_cost < best\_cost$}
+%                 \State $best_S \leftarrow S$
+%                 \State $best\_cost \leftarrow current\_cost$
+%             \EndIf
+%         \EndFor
+%         \State
+%         \State \textbf{return} $best\_S$  
+%     \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
+
+% \newpage
+% \section{Búsqueda Local Reiterada (ILS)}
+% \begin{algorithm}[H]
+% \caption{Algoritmo de la búsqueda local reiterada. Se parte de una solución generada aleatoriamente a la que se aplica la búsqueda local y se almacena la solución. Se inicia un proceso iterativo en el que se aplica una mutación a la solución anterior, se le vuelve a aplicar la búsqueda local, y si la solución mejora a la anterior, la sustituye. Finalmente, se devuelve la almacenada en la última iteración.}
+% \begin{algorithmic}[1]
+% \Procedure{ILS}{}
+%     \State $T \leftarrow 10$
+%     \State $maxEvalsLS \leftarrow 100000/T$
+%     \State $num\_mutations \leftarrow 0.1*m$
+%     \If{$num\_mutations < 1$} 
+%         \State $num\_mutations \leftarrow 1$
+%     \EndIf
+%     \State
+%     \State $U, S \leftarrow$ generateRandomSolution()
+%     \State
+%     \State $best\_cost \leftarrow$ dispersion(S)
+%     \State localSearch($U, S, best\_cost, maxEvalsLS$)
+%     \State $T \leftarrow T - 1$
+%     \State
+%     \For{$i = 0$ \textbf{to} $T-1$}
+%         \State $newS \leftarrow$ shuffle($S$)
+%         \State $newU \leftarrow$ shuffle($U$)
+%         \State
+%         \For{$j = 0$ \textbf{to} $num\_mutations-1$} \Comment Operador de mutación
+%             \State $swap \leftarrow newS[j]$
+%             \State $newS \leftarrow newU[j]$
+%             \State $newU \leftarrow swap$
+%         \EndFor
+%         \State 
+%         \State $new\_cost \leftarrow$ dispersion($newS$)
+%         \State $newU, newS, new\_cost \leftarrow$ localSearch($newU, newS, new\_cost, maxEvalsLS$)
+%         \State
+%         \If{$new\_cost < best\_cost$}
+%             \State $bestS \leftarrow newS$
+%             \State $bestU \leftarrow newU$
+%             \State $best\_cost \leftarrow new\_cost$
+%         \EndIf
+%     \EndFor
+%     \State
+%     \State \textbf{return} $bestS$  
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
+
+% \newpage
+% \section{Hibridación de ILS y ES (ILS-ES)}
+% \begin{algorithm}[H]
+%     \caption{Algoritmo ILS hibridado con enfriamiento simulado. Realiza el mismo proceso que el algoritmo ILS, utilizando el enfriamiento simulado en vez de la búsqueda local.}
+%     \begin{algorithmic}[1]
+%     \Procedure{ILS-ES}{}
+%         \State $T \leftarrow 10$
+%         \State $maxEvalsES \leftarrow 100000/T$
+%         \State $num\_mutations \leftarrow 0.1*m$
+%         \If{$num\_mutations < 1$} 
+%             \State $num\_mutations \leftarrow 1$
+%         \EndIf
+%         \State
+%         \State $U, S \leftarrow$ generateRandomSolution()
+%         \State
+%         \State $best\_cost \leftarrow$ dispersion(S)
+%         \State simulatedAnnealing($U, S, best\_cost, maxEvalsES$)
+%         \State $T \leftarrow T - 1$
+%         \State
+%         \For{$i = 0$ \textbf{to} $T-1$}
+%             \State $newS \leftarrow$ shuffle($S$)
+%             \State $newU \leftarrow$ shuffle($U$)
+%             \State
+%             \For{$j = 0$ \textbf{to} $num\_mutations-1$}
+%                 \State $swap \leftarrow newS[j]$
+%                 \State $newS \leftarrow newU[j]$
+%                 \State $newU \leftarrow swap$
+%             \EndFor
+%             \State 
+%             \State $new\_cost \leftarrow$ dispersion($newS$)
+%             \State $newU, newS, new\_cost \leftarrow$ simulatedAnnealing($newU, newS, new\_cost, maxEvalsES$)
+%             \State
+%             \If{$new\_cost < best\_cost$}
+%                 \State $bestS \leftarrow newS$
+%                 \State $bestU \leftarrow newU$
+%                 \State $best\_cost \leftarrow new\_cost$
+%             \EndIf
+%         \EndFor
+%         \State
+%         \State \textbf{return} $bestS$  
+%     \EndProcedure
+%     \end{algorithmic}
+%     \end{algorithm}
+
+% \part{Procedimiento considerado para desarrollar la práctica}
+
+% La implementación de los algoritmos ha sido realizada en C++, concretamente en su versión de 2017. Para ello, hemos creado un proyecto con la siguiente estructura:
+
+% \dirtree{%
+%     .1 /.
+%     .2 BIN\DTcomment{archivos ejecutables}.
+%     .3 practica1.
+%     .3 practica2.
+%     .3 practica3.
+%     .2 data\DTcomment{ficheros .txt con los datos de entrada}.
+%     .3 data\_index.txt\DTcomment{índice con los nombres de los archivos de datos}.
+%     .3 ....
+%     .2 doc.
+%     .2 FUENTES.
+%     .3 DataLoader.cpp\DTcomment{clase encargada de cargar los datos de los ficheros}.
+%     .3 DataLoader.h.
+%     .3 functions.cpp\DTcomment{funciones auxiliares}.
+%     .3 functions.h.
+%     .3 GreedyAlgorithm.cpp\DTcomment{implementación del algoritmo Greedy}.
+%     .3 GreedyAlgorithm.h.
+%     .3 LocalSearchAlgorithm.cpp\DTcomment{implementación del algoritmo BL}.
+%     .3 LocalSearchAlgorithm.h.
+%     .3 GeneticAlgorithm.cpp\DTcomment{implementación del algoritmo Genético}.
+%     .3 GeneticAlgorithm.h.
+%     .3 MemeticAlgorithm.cpp\DTcomment{implementación del algoritmo Memético}.
+%     .3 MemeticAlgorithm.h.
+%     .3 TrajectoryAlgorithms.cpp\DTcomment{impl. de los alg. basados en trayectorias}.
+%     .3 TrajectoryAlgorithms.h.
+%     .3 practica1.cpp.
+%     .3 practica2.cpp.
+%     .3 practica3.cpp\DTcomment{archivo desde donde se inicia la ejecución}.
+%     .2 obj\DTcomment{ficheros objeto}.
+%     .2 makefile.
+%     .2 LEEME.
+% }
+
+% Se ha partido desde cero, sin utilizar ningún framework de metaheurísticas ni librería adicional a las que vienen incluídas en el propio C++. Para la generación de números aleatorios, se utiliza la librería $<random>$ incluida en el lenguaje. La semilla utilizada en los experimentos es el número $1$. El equipo donde se han realizado las pruebas es un MacBook Pro de 15 pulgadas del año 2015, con CPU Intel Core i7 2.5 GHz I7-4870HQ y 16 GB de RAM. Utiliza el sistema operativo macOS Big Sur 11.6.1.
+
+% Para ejecutar el código, nos situamos en la raíz del proyecto y ejecutamos $make$ $clean$ y a continuación $make$ en la terminal. Finalmente, ejecutamos:
+
+% \noindent $./bin/practica3$ <$semilla$> \space <$algoritmo$> \space <$fichero\_datos$>
+
+% \noindent Donde <$algoritmo$> \space puede tomar como valor ES (Enfriamiento Simulado), BMB (Búsqueda Multiarranque Básica), ILS (Búsqueda Local Reiterada) o ILS-ES (Hibridación de ILS y ES).
+
+% \noindent Ejemplo: ./bin/practica3 1 ES data/GKD-b\_50\_n150\_m45.txt
+
+
+% \part{Experimentos y análisis de resultados}
+% Para comprobar el funcionamiento de los algoritmos, realizamos experimentos de ejecución. Nuestros algoritmos no son determinísticos, ya que la aleatoriedad está presente en ellos. Por tanto, para que los resultados sean reproducibles es necesario fijar una semilla. Como mencionamos al principio de la práctica, fijamos su valor en $1$. 
+
+% Vamos a ejecutar cada algoritmo con los 50 casos que tenemos. En la tabla siguiente se muestran los resultados medios de ejecución de cada algoritmo en cada uno de esos problemas.
+
+% % Please add the following required packages to your document preamble:
+% % \usepackage{booktabs}
+% \begin{table}[H]
+% \centering
+% \caption{Resultados medios de cada algoritmo}
+% \begin{tabular}{@{}lll@{}}
+% \toprule
+% \textbf{Algoritmo} & \textbf{Desviación} & \textbf{Tiempo} \\ \midrule
+% Greedy             & 66.71               & 0.00006         \\ \midrule
+% BL                 & 55.62               & 0.026           \\
+% ES                 & 54.86               & 0.001           \\ \midrule
+% BMB                & 41.5                & 0.02            \\
+% ILS                & 50.08               & 0.01            \\
+% ILS-ES             & 41.89               & 0.01            \\ \bottomrule
+% \end{tabular}
+% \end{table}
+
+% Como cabía esperar, el peor resultado viene dado por el algoritmo greedy. Para este problema, el criterio heurístico que utiliza no es demasiado bueno. La búsqueda local se comporta bien tanto en tiempo de ejecución como en desviación de la solución óptima, pero es mejorable ya que por su naturaleza puede atascarse en óptimos locales. 
+
+% Por ello surgen algoritmos basados en trayectorias como el enfriamiento simulado, donde se permiten movimientos hacia soluciones peores. Mientras que la búsqueda local revisa el vecindario y sólo acepta soluciones que mejoran la encontrada hasta ahora, el enfriamiento simulado acepta de forma aleatoria soluciones peores.
+
+% El nombre de enfriamiento simulado proviene de una analogía con la termodinámica. En el algoritmo, existe una variable temperatura que va disminuyendo su valor conforme se desarrolla la ejecución. A menor temperatura, menor probabilidad de aceptar una solución peor. Por ello, este algoritmo equilibra la exploración al principio de su ejecución con la explotación al final.
+
+% En la práctica, para este problema no encontramos diferencias muy marcadas entre BL y ES, siendo ES un poco mejor que BL. 
+
+% BMB es un algoritmo que realiza varias ejecuciones de la búsqueda local. Para realizar una comparativa justa con BL, el número total de evaluaciones de la función objetivo siempre es el mismo, 100000, pero en BMB estas evaluaciones se dividen entre las 10 ejecuciones que realiza internamente de la búsqueda local. O sea, cada ejecución interna de la búsqueda local realizará 10000 evaluaciones. Aunque cada una de ellas profundice en menor medida en el espacio de búsqueda, tiene la ventaja de que cada ejecución se inicia desde diferentes puntos de este espacio, lo que consigue evitar óptimos locales o soluciones iniciales muy alejadas del óptimo. En una única ejecución de BL con 100000 evaluaciones nos arriesgamos a quedar atrapados en un óptimo local, con BMB esta búsqueda se diversifica desde diferentes puntos de inicio, lo que nos permite quedarnos con la mejor solución obteniendo únicamente 41.5 puntos de desviación.
+
+% ILS sigue una idea parecida a BMB, pero en este caso la solución inicial de cada ejecución de búsqueda local se basa en la solución de la ejecución anterior. A esta se le aplica una mutación, en nuestro caso únicamente al 10\% de los genes. Se puede observar que los resultados son peores que con BMB, se obtienen 50.08 puntos de desviación. Esto se debe a que aunque se realiza una mutación, la solución obtenida al realizar una ejecución de la búsqueda local sigue dependiendo en gran medida de la anterior. Elevar el porcentaje de genes mutados podría ser una solución para introducir más diferencias.
+
+% Finalmente, ILS-ES es una hibridación de ILS con enfriamiento simulado. Devuelve una buena desviación (41.89), similar a la que se obtiene con BMB. En comparación con ILS se obtienen mejores resultados, esto puede deberse a que de por sí ES ya incorpora una fase de exploración que compensa la falta que tenía BL en ILS.
+
+% Por tanto, BMB e ILS-ES son los algoritmos que devuelven un mejor resultado para este problema, por su equilibrio entre exploración y explotación.
+
+% En cuanto a tiempos de ejecución, todos resuelven la tarea en un tiempo similar. Este tiempo es bajo, ya que tanto BL como ES realizan un cálculo factorizado de la función objetivo. Este tiempo es aún menor en Greedy, ya que realiza una construcción incremental de la solución y termina cuando esta ha alcanzado los $m$ elementos.
+
+% \section{Resultados completos}
+% \subsection*{Búsqueda Local}
+% \begin{table}[H]
+% \scriptsize
+% \centering
+% \caption{Ejecución de la BL en cada problema}
+% \begin{tabular}{@{}lccc@{}}
+% \toprule
+% \textbf{Caso}        & \textbf{Coste medio obtenido} & \textbf{Desv} & \textbf{Tiempo} \\ \midrule
+% GKD-b\_1\_n25\_m2    & 0.0000                        & 0.00          & 1.58E-02        \\
+% GKD-b\_2\_n25\_m2    & 0.0000                        & 0.00          & 1.62E-02        \\
+% GKD-b\_3\_n25\_m2    & 0.0000                        & 0.00          & 1.58E-02        \\
+% GKD-b\_4\_n25\_m2    & 0.0000                        & 0.00          & 1.51E-02        \\
+% GKD-b\_5\_n25\_m2    & 0.0000                        & 0.00          & 1.56E-02        \\
+% GKD-b\_6\_n25\_m7    & 26.4899                       & 51.99         & 1.65E-02        \\
+% GKD-b\_7\_n25\_m7    & 29.5395                       & 52.27         & 1.33E-02        \\
+% GKD-b\_8\_n25\_m7    & 34.3999                       & 51.28         & 1.36E-02        \\
+% GKD-b\_9\_n25\_m7    & 39.7469                       & 57.06         & 1.35E-02        \\
+% GKD-b\_10\_n25\_m7   & 35.6030                       & 34.65         & 1.63E-02        \\
+% GKD-b\_11\_n50\_m5   & 16.0448                       & 88.00         & 2.22E-02        \\
+% GKD-b\_12\_n50\_m5   & 14.0267                       & 84.88         & 2.48E-02        \\
+% GKD-b\_13\_n50\_m5   & 16.1494                       & 85.37         & 2.18E-02        \\
+% GKD-b\_14\_n50\_m5   & 11.0517                       & 84.95         & 3.00E-02        \\
+% GKD-b\_15\_n50\_m5   & 16.2757                       & 82.47         & 2.87E-02        \\
+% GKD-b\_16\_n50\_m15  & 121.9782                      & 64.96         & 4.24E-02        \\
+% GKD-b\_17\_n50\_m15  & 109.6692                      & 56.13         & 3.53E-02        \\
+% GKD-b\_18\_n50\_m15  & 68.8174                       & 37.23         & 3.47E-02        \\
+% GKD-b\_19\_n50\_m15  & 143.7370                      & 67.71         & 3.22E-02        \\
+% GKD-b\_20\_n50\_m15  & 96.4486                       & 50.53         & 3.48E-02        \\
+% GKD-b\_21\_n100\_m10 & 46.0147                       & 69.94         & 3.90E-02        \\
+% GKD-b\_22\_n100\_m10 & 42.0094                       & 67.47         & 3.19E-02        \\
+% GKD-b\_23\_n100\_m10 & 36.0227                       & 57.40         & 2.76E-02        \\
+% GKD-b\_24\_n100\_m10 & 37.7987                       & 77.14         & 2.82E-02        \\
+% GKD-b\_25\_n100\_m10 & 44.9021                       & 61.69         & 2.65E-02        \\
+% GKD-b\_26\_n100\_m30 & 387.6356                      & 56.47         & 3.48E-02        \\
+% GKD-b\_27\_n100\_m30 & 376.6248                      & 66.25         & 3.15E-02        \\
+% GKD-b\_28\_n100\_m30 & 379.9123                      & 72.00         & 3.18E-02        \\
+% GKD-b\_29\_n100\_m30 & 344.0501                      & 60.05         & 3.03E-02        \\
+% GKD-b\_30\_n100\_m30 & 304.0676                      & 58.08         & 3.01E-02        \\
+% GKD-b\_31\_n125\_m12 & 48.7661                       & 75.92         & 2.24E-02        \\
+% GKD-b\_32\_n125\_m12 & 49.8411                       & 62.30         & 2.29E-02        \\
+% GKD-b\_33\_n125\_m12 & 68.7881                       & 73.06         & 2.38E-02        \\
+% GKD-b\_34\_n125\_m12 & 51.6503                       & 62.27         & 2.39E-02        \\
+% GKD-b\_35\_n125\_m12 & 61.8754                       & 70.73         & 2.34E-02        \\
+% GKD-b\_36\_n125\_m37 & 403.2151                      & 61.45         & 3.25E-02        \\
+% GKD-b\_37\_n125\_m37 & 418.0820                      & 52.43         & 3.41E-02        \\
+% GKD-b\_38\_n125\_m37 & 446.9816                      & 57.95         & 3.34E-02        \\
+% GKD-b\_39\_n125\_m37 & 411.6134                      & 59.04         & 3.27E-02        \\
+% GKD-b\_40\_n125\_m37 & 386.2099                      & 53.86         & 3.34E-02        \\
+% GKD-b\_41\_n150\_m15 & 69.7972                       & 66.55         & 1.99E-02        \\
+% GKD-b\_42\_n150\_m15 & 65.2854                       & 58.97         & 2.11E-02        \\
+% GKD-b\_43\_n150\_m15 & 65.6087                       & 59.22         & 2.06E-02        \\
+% GKD-b\_44\_n150\_m15 & 61.1381                       & 57.58         & 2.05E-02        \\
+% GKD-b\_45\_n150\_m15 & 56.5077                       & 50.85         & 1.99E-02        \\
+% GKD-b\_46\_n150\_m45 & 575.4527                      & 60.42         & 3.52E-02        \\
+% GKD-b\_47\_n150\_m45 & 399.5420                      & 42.78         & 3.50E-02        \\
+% GKD-b\_48\_n150\_m45 & 520.6545                      & 56.45         & 4.16E-02        \\
+% GKD-b\_49\_n150\_m45 & 457.3357                      & 50.49         & 3.58E-02        \\
+% GKD-b\_50\_n150\_m45 & 528.6708                      & 52.93         & 3.49E-02        \\ \bottomrule
+% \end{tabular}
+% \end{table}
+
+% \subsection*{ES y BMB}
+% \begin{table}[H]
+% \scriptsize
+% \centering
+% \caption{Ejecución de ES y BMB en cada problema}
+% \begin{tabular}{@{}l
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c @{}}
+% \toprule
+% \multicolumn{1}{l|}{\cellcolor[HTML]{FFFFFF}}                                & \multicolumn{3}{c|}{\cellcolor[HTML]{FFFFFF}ES}                                                        & \multicolumn{3}{c}{\cellcolor[HTML]{FFFFFF}BMB}           \\ \cmidrule(l){2-7} 
+% \multicolumn{1}{l|}{\multirow{-2}{*}{\cellcolor[HTML]{FFFFFF}\textbf{Caso}}} & \textbf{Coste obtenido} & \textbf{Desv} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFFFFF}\textbf{Tiempo}} & \textbf{Coste obtenido} & \textbf{Desv} & \textbf{Tiempo} \\ \midrule
+% GKD-b\_1\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.00                    & 0.00          & 0.00            \\
+% GKD-b\_2\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.00                    & 0.00          & 0.00            \\
+% GKD-b\_3\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.00                    & 0.00          & 0.00            \\
+% GKD-b\_4\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.00                    & 0.00          & 0.00            \\
+% GKD-b\_5\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.00                    & 0.00          & 0.00            \\
+% GKD-b\_6\_n25\_m7                                                            & 30.8142                 & 58.73         & 0.0001                                                       & 15.29                   & 16.80         & 0.00            \\
+% GKD-b\_7\_n25\_m7                                                            & 31.3085                 & 54.97         & 0.0001                                                       & 20.02                   & 29.59         & 0.00            \\
+% GKD-b\_8\_n25\_m7                                                            & 47.5303                 & 64.74         & 0.0001                                                       & 20.96                   & 20.03         & 0.00            \\
+% GKD-b\_9\_n25\_m7                                                            & 17.0692                 & 0.00          & 0.0001                                                       & 25.54                   & 33.17         & 0.00            \\
+% GKD-b\_10\_n25\_m7                                                           & 36.4859                 & 36.23         & 0.0002                                                       & 26.88                   & 13.46         & 0.00            \\
+% GKD-b\_11\_n50\_m5                                                           & 3.9312                  & 51.00         & 0.0002                                                       & 11.55                   & 83.32         & 0.00            \\
+% GKD-b\_12\_n50\_m5                                                           & 9.6897                  & 78.11         & 0.0002                                                       & 7.05                    & 69.93         & 0.00            \\
+% GKD-b\_13\_n50\_m5                                                           & 15.9943                 & 85.23         & 0.0002                                                       & 13.27                   & 82.20         & 0.00            \\
+% GKD-b\_14\_n50\_m5                                                           & 22.6287                 & 92.65         & 0.0002                                                       & 4.87                    & 65.85         & 0.00            \\
+% GKD-b\_15\_n50\_m5                                                           & 23.6894                 & 87.96         & 0.0002                                                       & 11.46                   & 75.11         & 0.00            \\
+% GKD-b\_16\_n50\_m15                                                          & 144.7402                & 70.47         & 0.0005                                                       & 73.59                   & 41.92         & 0.00            \\
+% GKD-b\_17\_n50\_m15                                                          & 116.4918                & 58.70         & 0.0003                                                       & 83.23                   & 42.20         & 0.01            \\
+% GKD-b\_18\_n50\_m15                                                          & 67.6273                 & 36.13         & 0.0003                                                       & 57.32                   & 24.65         & 0.01            \\
+% GKD-b\_19\_n50\_m15                                                          & 133.9178                & 65.34         & 0.0003                                                       & 83.22                   & 44.23         & 0.00            \\
+% GKD-b\_20\_n50\_m15                                                          & 93.4749                 & 48.95         & 0.0003                                                       & 76.31                   & 37.48         & 0.00            \\
+% GKD-b\_21\_n100\_m10                                                         & 43.4814                 & 68.19         & 0.0006                                                       & 17.50                   & 20.94         & 0.01            \\
+% GKD-b\_22\_n100\_m10                                                         & 86.8405                 & 84.27         & 0.0004                                                       & 30.86                   & 55.72         & 0.01            \\
+% GKD-b\_23\_n100\_m10                                                         & 37.7569                 & 59.36         & 0.0004                                                       & 25.78                   & 40.48         & 0.01            \\
+% GKD-b\_24\_n100\_m10                                                         & 58.9135                 & 85.33         & 0.0005                                                       & 27.59                   & 68.68         & 0.01            \\
+% GKD-b\_25\_n100\_m10                                                         & 44.9492                 & 61.73         & 0.0005                                                       & 25.38                   & 32.24         & 0.01            \\
+% GKD-b\_26\_n100\_m30                                                         & 335.5107                & 49.71         & 0.0012                                                       & 285.68                  & 40.94         & 0.03            \\
+% GKD-b\_27\_n100\_m30                                                         & 314.4841                & 59.59         & 0.0014                                                       & 215.02                  & 40.89         & 0.03            \\
+% GKD-b\_28\_n100\_m30                                                         & 246.5015                & 56.84         & 0.0018                                                       & 277.20                  & 61.62         & 0.03            \\
+% GKD-b\_29\_n100\_m30                                                         & 416.4145                & 66.99         & 0.0008                                                       & 248.88                  & 44.77         & 0.03            \\
+% GKD-b\_30\_n100\_m30                                                         & 317.1722                & 59.81         & 0.0011                                                       & 262.70                  & 51.47         & 0.03            \\
+% GKD-b\_31\_n125\_m12                                                         & 57.3335                 & 79.51         & 0.0007                                                       & 27.70                   & 57.60         & 0.02            \\
+% GKD-b\_32\_n125\_m12                                                         & 43.7520                 & 57.06         & 0.0006                                                       & 35.15                   & 46.55         & 0.01            \\
+% GKD-b\_33\_n125\_m12                                                         & 50.6182                 & 63.39         & 0.0007                                                       & 27.48                   & 32.56         & 0.01            \\
+% GKD-b\_34\_n125\_m12                                                         & 47.6088                 & 59.07         & 0.0006                                                       & 34.10                   & 42.85         & 0.01            \\
+% GKD-b\_35\_n125\_m12                                                         & 58.0287                 & 68.79         & 0.0004                                                       & 29.47                   & 38.53         & 0.01            \\
+% GKD-b\_36\_n125\_m37                                                         & 466.2217                & 66.66         & 0.0007                                                       & 326.64                  & 52.41         & 0.04            \\
+% GKD-b\_37\_n125\_m37                                                         & 464.5845                & 57.19         & 0.0017                                                       & 332.59                  & 40.20         & 0.04            \\
+% GKD-b\_38\_n125\_m37                                                         & 463.5547                & 59.45         & 0.0013                                                       & 419.64                  & 55.21         & 0.04            \\
+% GKD-b\_39\_n125\_m37                                                         & 333.4804                & 49.45         & 0.0010                                                       & 305.47                  & 44.81         & 0.03            \\
+% GKD-b\_40\_n125\_m37                                                         & 455.9530                & 60.92         & 0.0015                                                       & 353.24                  & 49.55         & 0.03            \\
+% GKD-b\_41\_n150\_m15                                                         & 47.2989                 & 50.64         & 0.0008                                                       & 47.43                   & 50.77         & 0.01            \\
+% GKD-b\_42\_n150\_m15                                                         & 94.9071                 & 71.77         & 0.0008                                                       & 46.20                   & 42.02         & 0.01            \\
+% GKD-b\_43\_n150\_m15                                                         & 137.1540                & 80.49         & 0.0005                                                       & 46.17                   & 42.06         & 0.02            \\
+% GKD-b\_44\_n150\_m15                                                         & 67.8017                 & 61.75         & 0.0005                                                       & 40.31                   & 35.66         & 0.02            \\
+% GKD-b\_45\_n150\_m15                                                         & 38.9101                 & 28.62         & 0.0012                                                       & 49.26                   & 43.62         & 0.02            \\
+% GKD-b\_46\_n150\_m45                                                         & 563.2659                & 59.57         & 0.0020                                                       & 483.23                  & 52.87         & 0.03            \\
+% GKD-b\_47\_n150\_m45                                                         & 403.5339                & 43.35         & 0.0027                                                       & 388.95                  & 41.23         & 0.05            \\
+% GKD-b\_48\_n150\_m45                                                         & 501.1548                & 54.76         & 0.0034                                                       & 494.48                  & 54.14         & 0.04            \\
+% GKD-b\_49\_n150\_m45                                                         & 652.6593                & 65.31         & 0.0014                                                       & 558.58                  & 59.47         & 0.05            \\
+% GKD-b\_50\_n150\_m45                                                         & 700.7514                & 64.49         & 0.0029                                                       & 558.43                  & 55.44         & 0.04            \\ \bottomrule
+% \end{tabular}
+% \end{table}
+
+
+% \subsection*{ILS e ILS-ES}
+% \begin{table}[H]
+% \scriptsize
+% \centering
+% \caption{Ejecución de la ILS e ILS-ES en cada problema}
+% \begin{tabular}{@{}l
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c 
+% >{\columncolor[HTML]{FFFFFF}}c @{}}
+% \toprule
+% \multicolumn{1}{l|}{\cellcolor[HTML]{FFFFFF}}                                & \multicolumn{3}{c|}{\cellcolor[HTML]{FFFFFF}ILS}                                                       & \multicolumn{3}{c}{\cellcolor[HTML]{FFFFFF}ILS-ES}        \\ \cmidrule(l){2-7} 
+% \multicolumn{1}{l|}{\multirow{-2}{*}{\cellcolor[HTML]{FFFFFF}\textbf{Caso}}} & \textbf{Coste obtenido} & \textbf{Desv} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFFFFF}\textbf{Tiempo}} & \textbf{Coste obtenido} & \textbf{Desv} & \textbf{Tiempo} \\ \midrule
+% GKD-b\_1\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.0000                  & 0.00          & 0.0003          \\
+% GKD-b\_2\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.0000                  & 0.00          & 0.0002          \\
+% GKD-b\_3\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0002                                                       & 0.0000                  & 0.00          & 0.0002          \\
+% GKD-b\_4\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.0000                  & 0.00          & 0.0002          \\
+% GKD-b\_5\_n25\_m2                                                            & 0.0000                  & 0.00          & 0.0001                                                       & 0.0000                  & 0.00          & 0.0004          \\
+% GKD-b\_6\_n25\_m7                                                            & 27.3520                 & 53.50         & 0.0003                                                       & 25.8947                 & 50.89         & 0.0013          \\
+% GKD-b\_7\_n25\_m7                                                            & 25.6926                 & 45.13         & 0.0003                                                       & 19.6142                 & 28.12         & 0.0014          \\
+% GKD-b\_8\_n25\_m7                                                            & 39.5138                 & 57.58         & 0.0002                                                       & 20.9589                 & 20.03         & 0.0010          \\
+% GKD-b\_9\_n25\_m7                                                            & 38.9251                 & 56.15         & 0.0003                                                       & 17.0692                 & 0.00          & 0.0013          \\
+% GKD-b\_10\_n25\_m7                                                           & 44.5938                 & 47.83         & 0.0003                                                       & 26.8843                 & 13.46         & 0.0012          \\
+% GKD-b\_11\_n50\_m5                                                           & 14.9851                 & 87.15         & 0.0006                                                       & 3.9312                  & 51.00         & 0.0030          \\
+% GKD-b\_12\_n50\_m5                                                           & 14.7687                 & 85.64         & 0.0007                                                       & 7.6237                  & 72.18         & 0.0034          \\
+% GKD-b\_13\_n50\_m5                                                           & 14.5079                 & 83.72         & 0.0007                                                       & 8.9731                  & 73.67         & 0.0037          \\
+% GKD-b\_14\_n50\_m5                                                           & 8.0826                  & 79.42         & 0.0007                                                       & 6.7611                  & 75.40         & 0.0027          \\
+% GKD-b\_15\_n50\_m5                                                           & 15.3743                 & 81.44         & 0.0007                                                       & 8.6983                  & 67.20         & 0.0040          \\
+% GKD-b\_16\_n50\_m15                                                          & 87.0772                 & 50.91         & 0.0016                                                       & 112.7921                & 62.10         & 0.0057          \\
+% GKD-b\_17\_n50\_m15                                                          & 131.4499                & 63.40         & 0.0015                                                       & 83.6308                 & 42.48         & 0.0067          \\
+% GKD-b\_18\_n50\_m15                                                          & 67.7767                 & 36.27         & 0.0017                                                       & 67.6273                 & 36.13         & 0.0063          \\
+% GKD-b\_19\_n50\_m15                                                          & 170.4828                & 72.78         & 0.0018                                                       & 66.5658                 & 30.28         & 0.0065          \\
+% GKD-b\_20\_n50\_m15                                                          & 100.1682                & 52.36         & 0.0017                                                       & 83.7435                 & 43.02         & 0.0061          \\
+% GKD-b\_21\_n100\_m10                                                         & 48.1798                 & 71.29         & 0.0033                                                       & 34.0256                 & 59.35         & 0.0086          \\
+% GKD-b\_22\_n100\_m10                                                         & 34.5064                 & 60.40         & 0.0026                                                       & 36.3172                 & 62.38         & 0.0070          \\
+% GKD-b\_23\_n100\_m10                                                         & 57.5326                 & 73.33         & 0.0026                                                       & 21.1500                 & 27.44         & 0.0087          \\
+% GKD-b\_24\_n100\_m10                                                         & 46.1266                 & 81.27         & 0.0027                                                       & 34.6530                 & 75.07         & 0.0066          \\
+% GKD-b\_25\_n100\_m10                                                         & 54.8968                 & 68.67         & 0.0025                                                       & 29.1385                 & 40.97         & 0.0067          \\
+% GKD-b\_26\_n100\_m30                                                         & 179.5874                & 6.05          & 0.0226                                                       & 241.6666                & 30.18         & 0.0135          \\
+% GKD-b\_27\_n100\_m30                                                         & 293.1102                & 56.64         & 0.0242                                                       & 264.2277                & 51.90         & 0.0134          \\
+% GKD-b\_28\_n100\_m30                                                         & 237.0526                & 55.12         & 0.0271                                                       & 226.3351                & 53.00         & 0.0117          \\
+% GKD-b\_29\_n100\_m30                                                         & 187.0094                & 26.50         & 0.0371                                                       & 303.5755                & 54.72         & 0.0118          \\
+% GKD-b\_30\_n100\_m30                                                         & 214.2950                & 40.51         & 0.0406                                                       & 207.0661                & 38.44         & 0.0122          \\
+% GKD-b\_31\_n125\_m12                                                         & 65.6209                 & 82.10         & 0.0068                                                       & 22.7916                 & 48.47         & 0.0117          \\
+% GKD-b\_32\_n125\_m12                                                         & 45.3354                 & 58.56         & 0.0050                                                       & 37.3428                 & 49.69         & 0.0110          \\
+% GKD-b\_33\_n125\_m12                                                         & 50.3064                 & 63.16         & 0.0051                                                       & 40.7318                 & 54.50         & 0.0109          \\
+% GKD-b\_34\_n125\_m12                                                         & 50.2437                 & 61.21         & 0.0059                                                       & 43.1295                 & 54.81         & 0.0135          \\
+% GKD-b\_35\_n125\_m12                                                         & 83.1226                 & 78.21         & 0.0055                                                       & 30.6815                 & 40.97         & 0.0112          \\
+% GKD-b\_36\_n125\_m37                                                         & 317.9790                & 51.12         & 0.0432                                                       & 342.1841                & 54.58         & 0.0148          \\
+% GKD-b\_37\_n125\_m37                                                         & 299.1416                & 33.51         & 0.0537                                                       & 381.1489                & 47.82         & 0.0201          \\
+% GKD-b\_38\_n125\_m37                                                         & 262.5100                & 28.40         & 0.0545                                                       & 315.6762                & 40.46         & 0.0173          \\
+% GKD-b\_39\_n125\_m37                                                         & 273.0323                & 38.25         & 0.0548                                                       & 313.1201                & 46.16         & 0.0181          \\
+% GKD-b\_40\_n125\_m37                                                         & 301.8810                & 40.97         & 0.0514                                                       & 300.3319                & 40.67         & 0.0172          \\
+% GKD-b\_41\_n150\_m15                                                         & 51.7237                 & 54.86         & 0.0078                                                       & 47.2989                 & 50.64         & 0.0142          \\
+% GKD-b\_42\_n150\_m15                                                         & 46.2038                 & 42.02         & 0.0091                                                       & 50.8322                 & 47.30         & 0.0121          \\
+% GKD-b\_43\_n150\_m15                                                         & 71.9053                 & 62.79         & 0.0072                                                       & 32.1134                 & 16.69         & 0.0080          \\
+% GKD-b\_44\_n150\_m15                                                         & 71.0724                 & 63.51         & 0.0077                                                       & 60.9271                 & 57.43         & 0.0117          \\
+% GKD-b\_45\_n150\_m15                                                         & 53.4290                 & 48.02         & 0.0078                                                       & 41.7350                 & 33.45         & 0.0116          \\
+% GKD-b\_46\_n150\_m45                                                         & 476.8534                & 52.24         & 0.0488                                                       & 524.1422                & 56.55         & 0.0243          \\
+% GKD-b\_47\_n150\_m45                                                         & 378.1455                & 39.55         & 0.0410                                                       & 396.7161                & 42.38         & 0.0277          \\
+% GKD-b\_48\_n150\_m45                                                         & 382.8464                & 40.77         & 0.0366                                                       & 422.8448                & 46.38         & 0.0347          \\
+% GKD-b\_49\_n150\_m45                                                         & 410.1888                & 44.80         & 0.0417                                                       & 488.6990                & 53.67         & 0.0278          \\
+% GKD-b\_50\_n150\_m45                                                         & 340.9032                & 27.00         & 0.0414                                                       & 524.6836                & 52.57         & 0.0233          \\ \bottomrule
+% \end{tabular}
+% \end{table}
+
+
+
+
+%------------------------------------------------
+
+\end{document}
+
+
