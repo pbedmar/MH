@@ -69,10 +69,6 @@ Individual bigbang_bigcrunch_equation(int num_candidates, int dim, mt19937 &gen,
     int eval = 0;
     const int MAX_EVAL = 10000*dim;
 
-    // during the big bang phase, percentage of regenerated individuals
-    double new_individual_probability = 0.3;
-    int replace_until = num_candidates*(1-new_individual_probability);
-
     // compute the initial population - initial big bang
     vector<Individual> population;
     for (int i=0; i<num_candidates; i++) {
@@ -90,10 +86,9 @@ Individual bigbang_bigcrunch_equation(int num_candidates, int dim, mt19937 &gen,
 
         // select the best individual - big crunch phase
         Individual mass_center = massCenterEquation(population, eval);
-        population[replace_until] = mass_center;
 
         // replace the worst individuals of the population
-        for (int i=num_candidates-1; i>replace_until; i--) {
+        for (int i=0; i<num_candidates; i++) {
             for (int j=0; j<dim; j++) {
                 double distance = upper_limit*dist_n(gen)/iter;
                 double new_gen = mass_center.individual[j] + distance;
@@ -131,10 +126,6 @@ Individual bigbang_bigcrunch_bestindiv(int num_candidates, int dim, mt19937 &gen
     int eval = 0;
     const int MAX_EVAL = 10000*dim;
 
-    // during the big bang phase, percentage of regenerated individuals
-    double new_individual_probability = 0.3;
-    int replace_until = num_candidates*(1-new_individual_probability);
-
     // compute the initial population - initial big bang
     vector<Individual> population;
     for (int i=0; i<num_candidates; i++) {
@@ -154,7 +145,7 @@ Individual bigbang_bigcrunch_bestindiv(int num_candidates, int dim, mt19937 &gen
         Individual mass_center = population[0];
 
         // replace the worst individuals of the population
-        for (int i=num_candidates-1; i>replace_until; i--) {
+        for (int i=0; i<num_candidates; i++) {
             for (int j=0; j<dim; j++) {
                 double distance = upper_limit*dist_n(gen)/iter;
                 double new_gen = mass_center.individual[j] + distance;
@@ -213,7 +204,7 @@ int main() {
     for (int v=0; v<versions.size(); v++) {
         std::mt19937 gen(v);
 
-        string name_ = versions[v];
+        string name_ = "original_" + versions[v];
         char name[CHAR_MAX_SIZE];
         strcpy(name, name_.c_str());
 
