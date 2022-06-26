@@ -49,15 +49,15 @@
 %	Cuestión 1
 %----------------------------------------------------------------------------------------
 
-\part{Resumen de la Metaheurística}
+\part{Resumen de la metaheurística}
 
-En la creación de nuevas Metaheurísticas, una fuente de inspiración es la naturaleza. Por sí misma, la naturaleza contiene procesos muy interesantes desde el punto de vista de la optimización. Como ejemplo, la evolución es uno de estos mecanismos que permite a los sistemas biológicos mejorar en cada generación, debido a la selección natural que sufren los individuos.
+En la creación de nuevas metaheurísticas, una fuente de inspiración es la naturaleza. Por sí misma, la naturaleza contiene procesos muy interesantes desde el punto de vista de la optimización. Como ejemplo, la evolución es uno de estos mecanismos que permite a los sistemas biológicos mejorar en cada generación, debido a la selección natural que sufren los individuos.
 
-En este trabajo vamos a estudiar el comportamiento de una Metaheurística basada en la naturaleza, concretamente en la física. Una de las teorías que intenta explicar la creación del universo miles de millones de años atrás se conoce como Big Bang, donde tras una gran explosión en un punto concreto del espacio, comienza la expansión de materia y energía por todo este. La expansión se producirá en todas las direcciones y cúmulos de materia cercana darán lugar a las galaxias. 
+En este trabajo vamos a estudiar el comportamiento de una metaheurística basada en la naturaleza, concretamente en la física. Una de las teorías que intenta explicar la creación del universo miles de millones de años atrás se conoce como Big Bang, donde tras una gran explosión en un punto concreto del espacio, comienza la expansión de materia y energía por todo este. La expansión se producirá en todas las direcciones y cúmulos de materia cercana darán lugar a las galaxias. 
 
 Hoy en día el universo sigue en expansión, pero algunos científicos sostienen que esta está comenzando a enlentecerse. Y es que existe otra teoría conocida como Big Crunch donde se defiende que este volverá a contraerse al estado original anterior al Big Bang, entrando en un proceso cíclico de expansión-contracción del universo.
 
-Esta Metaheurística toma esta idea para trasladarla al ámbito de optimización de problemas. El funcionamiento que sigue es similar al de un algoritmo genético, se parte de una población inicial de determinado tamaño generada de forma aleatoria siguiendo una distribución uniforme. Cada individuo de esta población tendrá un número de dimensiones o genes determinado que lo caracterizarán.
+La metaheurística Big Bang - Big Crunch \cite{EROL2006106} toma esta idea para trasladarla al ámbito de optimización de problemas. El funcionamiento que sigue es similar al de un algoritmo genético, se parte de una población inicial de determinado tamaño generada de forma aleatoria siguiendo una distribución uniforme. Cada individuo de esta población tendrá un número de dimensiones o genes determinado que lo caracterizarán.
 
 \begin{figure}[H]
     \centering
@@ -82,7 +82,7 @@ Donde $f^i$ representa el valor fitness del individuo $\vec{x}^i$. Los autores t
     \caption{Elección del centro de masas en la fase Big Crunch}
 \end{figure}
 
-Tras la fase Big Crunch, se vuelve a producir otro Big Bang que genera nuevos individuos que reemplazan a la población anterior. En la publicación no se especifica si este reemplazo debe de ser total o parcial, así que nosotros decidimos reemplazar un 30\% de la población, manteniendo los individuos con mejor fitness y el centro de masas. Una política de sustitución podría ser la que se utiliza en el Big Bang inicial, generar individuos aleatorios de forma uniforme, pero entonces estaríamos siguiendo una búsqueda aleatoria. Por ello, en la publicación proponen generar los individuos basándose en una distribución normal centrada en el centro de masas. La desviación de los individuos generados irá disminuyendo conforme se lleva a cabo la ejecución, de forma que los puntos se generen cada vez más cerca del centro de masas para que el algoritmo converja. 
+Tras la fase Big Crunch, se vuelve a producir otro Big Bang que genera nuevos individuos que reemplazan a la población anterior. Una política de sustitución podría ser la que se utiliza en el Big Bang inicial, generar individuos aleatorios de forma uniforme, pero entonces estaríamos siguiendo una búsqueda aleatoria. Por ello, en la publicación proponen generar los individuos basándose en una distribución normal centrada en el centro de masas. La desviación de los individuos generados irá disminuyendo conforme se lleva a cabo la ejecución, de forma que los puntos se generen cada vez más cerca del centro de masas para que el algoritmo converja. 
 
 \begin{figure}[H]
     \centering
@@ -93,6 +93,7 @@ Tras la fase Big Crunch, se vuelve a producir otro Big Bang que genera nuevos in
 A nivel de implementación, la generación de nuevos individuos en la fase Big Bang viene dada por la siguiente ecuación, donde $x^c$ es el centro de masas, l el valor máximo que puede tomar un cromosoma, r un valor aleatorio de una distribución normal y k la iteración actual.
 
 \begin{equation}
+    \label{eqn:desv}
     x^{new} = x^c + lr/k
 \end{equation}
 
@@ -111,27 +112,158 @@ Cada una de las fases del algoritmo trata una de las componentes que son necesar
 En definitiva, se busca un equilibrio entre exploración y explotación que permita al algoritmo encontrar buenas soluciones.
 
 \part{Pseudocódigo de la Metaheurística}
+Explicamos dos versiones, mostrando diferentes formas de implementar el centro de masas. Ambas están contempladas en la publicación original.
 
-\section{Big Bang - Big Crunch}
+Pero antes, mostramos como se inicializa la población en la fase Big Bang inicial:
 
-\section{Búsqueda local Solis Wets}
+\begin{algorithm}[H]
+\caption{Procedimiento encargado de generar la primera fase Big Bang, generando una población de individuos aleatorios a partir de una distribución uniforme.}
+\begin{algorithmic}[1]
+\Procedure{InitialBigBang}{population\_size, dim, eval}
+  \State population = [ ]
+  \For{i = 0 \textbf{to} population\_size - 1}
+    \State individual = [ ]
+    \For{j = 0 \textbf{to} dim - 1}
+      \State individual[j] = RandUniformFloat(-100, 100)
+    \EndFor
+    \State
+    \State individual.fitness = Fitness(individual)
+    \State population += {individual}
+    \State eval += 1
+  \EndFor
+  \State
+  \State \textbf{return} population, eval
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
+\newpage
+\section{Big Bang - Big Crunch (Ecuación \ref{eqn:centromasas})}
+En esta primera versión, implementamos el algoritmo con la ecuación \ref{eqn:centromasas} explicada en el apartado anterior. En esta versión, el centro de masas se calcula como una media ponderada del resto de individuos de la población. La ponderación viene dada por la inversa del valor de fitness, de forma que cuanto menor coste tenga el individuo más contribuirá a definir el centro de masas.
 
+\begin{algorithm}[H]
+\caption{Big Bang - Big Crunch (Ecuación \ref{eqn:centromasas}): Se implementa el algoritmo Big Bang calculando el centro de masas mediante la ecuación descrita en la publicación.}
+\begin{algorithmic}[1]
+\Procedure{BigBangBigCrunch\_Equation}{population\_size, dim, MAX\_EVAL}
+  \State iter = 1
+  \State eval = 0
+  \State population, eval = InitialBigBang(population\_size, dim, eval)
+  \State
+  \While{eval < MAX\_EVAL}
+    \State mass\_center, eval = ComputeMassCenter(population, eval, population\_size, dim)
+    \State
+    \For{i = 0 \textbf{to} population\_size - 1}
+      \For{j = 0 \textbf{to} dim - 1}
+        \State distance = 100*RandNormalFloat(mean: 0, std: 1)/iter
+        \State new\_gen = mass\_center[j] + distance
+        \State
+        \If{new\_gen > upper\_limit}
+          \State new\_gen = upper\_limit
+        \EndIf
+        \If{new\_gen > lower\_limit}
+          \State new\_gen = lower\_limit
+        \EndIf
+        \State
+        \State population[i][j] = new\_gen
+      \EndFor
+      \State population[i].fitness = Fitness(population[i])
+      \State eval += 1
+    \EndFor
+    \State iter += 1 
+  \EndWhile
+  \State
+  \State SortByFitness(population)
+  \State \textbf{return} population[0]
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
+\begin{algorithm}[H]
+\caption{Cálculo del centro de masas según la ecuación \ref{eqn:centromasas}.}
+\begin{algorithmic}[1]
+\Procedure{ComputeMassCenter}{population, eval, population\_size, dim}
+  \State mass\_center = [ ] \Comment{Sus elementos se inicializan a 0}
+  \State inverted\_fitness = [ ]
+  \State sum\_inverted\_fitness = 0
+  \State 
+  \For{individual $\in$ population}
+    \State inverted\_fitness += {1/individual.fitness}
+    \State sum\_inverted\_fitness += 1/individual.fitness
+  \EndFor
+  \State
+  \For{i = 0 \textbf{to} population\_size - 1}
+    \For{j = 0 \textbf{to} dim - 1}
+      \State mass\_center[j] += inverted\_fitness[i] * population[i][j]
+    \EndFor
+  \EndFor
+  \State
+  \For{j = 0 \textbf{to} dim - 1}
+    \State mass\_center[i] = mass\_center[i]/sum\_inverted\_fitness
+  \EndFor
+  \State
+  \State eval += 1
+  \State mass\_center.fitness = Fitness(mass\_center)
+  \State \textbf{return} mass\_center, eval
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+\section{Big Bang - Big Crunch (Mejor individuo)}
+A continuación, mostramos el pseudocódigo de la versión utilizando el mejor individuo de la población como centro de masas. Es muy similar a la anterior, sólo cambia la parte correspondiente esta elección.
+\begin{algorithm}[H]
+\caption{Big Bang - Big Crunch (Mejor Individuo): Se implementa el algoritmo Big Bang calculando el centro de masas como el mejor individuo de la población.}
+\begin{algorithmic}[1]
+\Procedure{BigBangBigCrunch\_BestIndividual}{population\_size, dim, MAX\_EVAL}
+  \State iter = 1
+  \State eval = 0
+  \State population, eval = InitialBigBang(population\_size, dim, eval)
+  \State
+  \While{eval < MAX\_EVAL}
+    \State SortByFitness(population)
+    \State mass\_center = population[0]
+    \State
+    \For{i = 0 \textbf{to} population\_size - 1}
+      \For{j = 0 \textbf{to} dim - 1}
+        \State distance = 100*RandNormalFloat(mean: 0, std: 1)/iter
+        \State new\_gen = mass\_center[j] + distance
+        \State
+        \If{new\_gen > upper\_limit}
+          \State new\_gen = upper\_limit
+        \EndIf
+        \If{new\_gen > lower\_limit}
+          \State new\_gen = lower\_limit
+        \EndIf
+        \State
+        \State population[i][j] = new\_gen
+      \EndFor
+      \State population[i].fitness = Fitness(population[i])
+      \State eval += 1
+    \EndFor
+    \State iter += 1 
+  \EndWhile
+  \State
+  \State SortByFitness(population)
+  \State \textbf{return} population[0]
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 
 \part{Experimentación}
-En este apartado, tras haber implementado la metaheurística, evaluamos su comportamiento. Para ello utilizamos la suite CEC'2017 que nos permite obtener unos resultados de error estandarizados, para su posterior comparación con otros algoritmos. Las pruebas se realizarán llevando a cabo 10 ejecuciones diferentes y se promediarán los resultados, de forma que se reduzca el efecto de resultados atípicos. 
+En este apartado, tras haber implementado la metaheurística, evaluamos su comportamiento. Para ello utilizamos la suite CEC'2017 que nos permite obtener unos resultados de error estandarizados, para su posterior comparación con otros algoritmos. Las pruebas se realizarán llevando a cabo 10 ejecuciones diferentes y se promediarán los resultados, de forma que se reduzca el efecto de los valores atípicos. 
 
-A continuación los resultados obtenidos se procesarán en TACOlab \cite{tacolab} donde serán comparados con los de otros algoritmos. TACOlab permite elegir con qué algoritmos se va a realizar la comparación, nosotros elegimos PSO (\textit{Particle Swarm Optimization}, Optimización por enjambre de partículas) y DE (\textit{Differential Evolution}, Evolución diferencial).
+A continuación, los resultados obtenidos se procesarán en TACOlab \cite{tacolab} donde serán comparados con los de otros algoritmos. TACOlab permite elegir con qué algoritmos se va a realizar la comparación, nosotros elegimos PSO (\textit{Particle Swarm Optimization}, Optimización por enjambre de partículas) y DE (\textit{Differential Evolution}, Evolución diferencial).
 
-PSO es una metaheurística basada en adaptación social que emula el comportamiento de grupos de individuos en la naturaleza, como pueden ser los bancos de peces o una colmena de abejas. Estos seres, de forma individual, tienen un comportamiento simple y no fiable. En cambio al trabajar en grupo, cooperan y se comunican para obtener un resultado de calidad. 
+PSO es una metaheurística basada en adaptación social que emula el comportamiento de grupos de individuos en la naturaleza, como pueden ser los bancos de peces o una colmena de abejas. Estos seres, de forma individual, tienen un comportamiento simple y no fiable. En cambio al trabajar en grupo, cooperan y se comunican para obtener un resultado de calidad.
 
-Por otro lado, DE es una metaheurística basada en poblaciones. Al igual que otras de esta clasificación, parte de una población inicial donde sus individuos se cruzan y mutan simulando la evolución natural.
+Por otro lado, DE es una metaheurística basada en poblaciones. Al igual que otras de esta categoría, parte de una población inicial donde sus individuos se cruzan y mutan simulando la evolución natural.
+
+La experimentación se llevará a cabo con individuos de 4 dimensiones diferentes (10, 30, 50 y 100). Estas dimensiones representan el tamaño de los individuos, el número de genes que los caracterizan. También, se realizarán mediciones en diferentes puntos de la ejecución: cuando se haya completado el 10\% de las evaluaciones, el 50\% y el 100\%.
 
 
 \section{Metaheurística original}
-En esta primera sección evaluamos el rendimiento de la metaheurística original, tal y como viene descrita en el paper. Recordamos que se proponen dos formas de calcular el centro de masas, utilizando la ecuación \ref{eqn:centromasas} o tomando el mejor individuo.
+En esta primera sección evaluamos el rendimiento de la metaheurística original, tal y como viene descrita en el paper. Recordamos que se proponen dos formas de calcular el centro de masas, utilizando la ecuación \ref{eqn:centromasas} o tomando el mejor individuo. Vamos a evaluar los resultados de ambas.
 
 \subsection{Versión 1: Centro de masas calculado como en la ecuación \ref{eqn:centromasas}}
 
@@ -1204,7 +1336,7 @@ En esta primera sección evaluamos el rendimiento de la metaheurística original
 \newpage
 Como se puede observar, en el caso en que se utiliza la fórmula descrita en la publicación como centro de masas los resultados obtenidos por BB-BC no son buenos. Cuando el número de evaluaciones es bajo, la metaheurística es capaz de superar en rendimiento a los otros algoritmos hasta en 4/30 funciones. Al aumentar el número de evaluaciones al 50\%, este rendimiento desciende para sólamente superar a los otros algoritmos en 2/30. Finalmente, al alcanzar el 100\% de evaluaciones sólamente ocurre esto en 1/30 funciones. De las tres metaheurísticas, la que mejor funciona es DE, superando a las otras dos en más de 20 funciones para cualquier número de evaluaciones y dimensión. 
 
-Si utilizamos como centro el mejor individuo de la población, los resultados mejoran en gran medida. Aunque se observa la misma tendencia de empeoramiento con respecto a las otras metaheurísticas al aumentar el número de evaluaciones, ahora el algoritmo BB-BC obtiene mejores resultados en muchas ocasiones, superando a DE en la mayoría de los casos. Otra tendencia destacable es la capacidad de superar a los otros algoritmos en mayor medida cuanto mayor es la dimensión. En el 100\% de evaluaciones, en dimensión 10 supera a los otros algoritmos en 7 ocasiones, pero en dimensión 100 lo hace en 23 ocasiones. Por otro lado, en PSO ocurre lo contrario y empeora al aumentar la dimensión. Esto puede deberse a la capacidad de exploración de BB-BC sea alta y por tanto compruebe soluciones en todo el espacio de búsqueda, o lo contrario, que las otras metaheurísticas no tengan esta capacidad de exploración.
+Si utilizamos como centro el mejor individuo de la población, los resultados mejoran en gran medida. Aunque se observa la misma tendencia de empeoramiento con respecto a las otras metaheurísticas al aumentar el número de evaluaciones, ahora el algoritmo BB-BC obtiene mejores resultados en muchas ocasiones, superando a DE en la mayoría de los casos. Otra tendencia destacable es la capacidad de superar a los otros algoritmos en mayor medida cuanto mayor es la dimensión. En el 100\% de evaluaciones, en dimensión 10 supera a los otros algoritmos en 7 ocasiones, pero en dimensión 100 lo hace en 23 ocasiones. Por otro lado, en PSO ocurre lo contrario y empeora al aumentar la dimensión. Esto puede deberse a que DE y PSO no tengan una buena capacidad de exploración del espacio de búsqueda y converjan demasiado rápido hacia óptimos locales, y por ello no funcionen bien en dimensiones altas.
 
 Por tanto, elegimos como implementación adecuada la versión que utiliza el mejor individuo de la población como centro de masas, y será la que utilicemos en el resto de experimentos.
 
@@ -1745,14 +1877,561 @@ Ahora combinamos la metaheurística original con la búsqueda local Solis Wets. 
 \end{table}
 
 \newpage
+Solis Wets es un tipo de búsqueda local preparada para funcionar en dominios continuos. Este es nuestro caso, ya que el valor que toman los genes puede ser cualquiera entre -100 y 100, pudiendo ser un número real. En las prácticas de la asignatura hemos utilizado un dominio discreto, por lo que aplicar la búsqueda local implementada en la práctica 1 no se puede hacer de forma directa. Solis Wets está implementado en el repositorio \cite{cec_dmolina} creado por Daniel Molina, lo utilizaremos para crear la versión memética de la metaheurística.
+
 Como se puede observar, los resultados no mejoran a los obtenidos con la versión original. En la mayoría de casos son algo peores. Esto puede deberse a que de por sí BB-BC ya realiza una fase de explotación cada vez más intensiva conforme avanza la ejecución (se va reduciendo la desviación de los puntos generados a partir del centro de masas), por lo que la búsqueda local pierde el sentido en las últimas iteraciones. 
 
-Es cierto que al inicio de la ejecución la desviación de los puntos generados respecto al centro de masas es alta y no se está realizando explotación sino exploración, pero esto es conveniente ya que primero conviene explorar el espacio de búsqueda y conocer dónde se puede encontrar la solución óptima. Por ello aplicar la búsqueda local en las primeras iteraciones tampoco supone una gran ayuda.
+Es cierto que al inicio de la ejecución la desviación de los puntos generados respecto al centro de masas es alta y no se está realizando explotación sino exploración, pero esto es conveniente ya que primero conviene explorar el espacio de búsqueda y conocer dónde se puede encontrar la solución óptima. Por ello aplicar la búsqueda local en las primeras iteraciones tampoco tiene demasiado sentido.
 
+\newpage
 \section{Posibles mejoras de la metaheurística}
-Como hemos estudiado, BB-BC parece realizar una explotación que funciona bien, ya que con la búsqueda local no hemos observado mejoras significativas. ¿Y la exploración que realiza, es también de buena calidad o es mejorable? Por ello se nos ocurre como posible mejora modificar la metaheurística para darle más énfasis a la exploración, comprobando si se puede balancear más adecuadamente la exploración y explotación y así obtener mejores resultados.
+Como hemos estudiado, BB-BC parece realizar una explotación que funciona bien, ya que con la búsqueda local no hemos observado mejoras significativas. ¿Y la exploración que realiza, es mejorable? Se nos ocurre como posible mejora modificar la metaheurística para darle más énfasis a la exploración, comprobando si se puede balancear más adecuadamente la exploración y explotación y así obtener mejores resultados.
 
-En la última práctica de la asignatura implementamos la búsqueda multiarranque básica (BMB), que generaba un determinado número de soluciones aleatorias iniciales y optimizaba cada una de ellas con el algoritmo de BL. Podemos utilizar esta misma idea en esta metaheurística: partimos de diferentes poblaciones iniciales, aplicamos el algoritmo y nos quedamos con la mejor solución.
+En la última práctica de la asignatura implementamos la búsqueda multiarranque básica (BMB), que generaba un determinado número de soluciones aleatorias iniciales y optimizaba cada una de ellas con el algoritmo elegido. Podemos utilizar esta misma idea en esta metaheurística: partimos de diferentes poblaciones iniciales, aplicamos el algoritmo y nos quedamos con la mejor solución. Tomaremos T=10, donde T es el número de poblaciones iniciales de las que se parte.
+
+\subsection*{10\% de las evaluaciones}
+
+\begin{table}[H]
+    \begin{minipage}{.5\linewidth}
+      \caption{Dimensión 10}
+      \centering
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &        DE &       PSO \\
+        \midrule
+        F01  &  1.79e+05 &  3.14e+07 &  8.30e+08 \\
+        F02  &  1.62e+01 &  6.05e+03 &  1.00e+00 \\
+        F03  &  6.81e-01 &  1.39e+03 &  1.28e+04 \\
+        F04  &  2.35e+00 &  9.80e+00 &  1.16e+02 \\
+        F05  &  2.50e+01 &  1.17e+02 &  7.09e+01 \\
+        F06  &  1.16e+01 &  5.06e+01 &  2.59e+01 \\
+        F07  &  4.12e+01 &  7.78e+01 &  8.90e+01 \\
+        F08  &  2.29e+01 &  3.08e+01 &  5.69e+01 \\
+        F09  &  4.59e+02 &  8.09e+02 &  2.95e+02 \\
+        F10  &  1.01e+03 &  1.37e+03 &  1.59e+03 \\
+        F11  &  9.54e+01 &  2.45e+01 &  1.16e+02 \\
+        F12  &  3.30e+05 &  4.77e+04 &  2.63e+07 \\
+        F13  &  1.62e+04 &  4.17e+02 &  1.48e+05 \\
+        F14  &  8.43e+03 &  3.50e+01 &  5.51e+02 \\
+        F15  &  2.11e+04 &  1.50e+01 &  8.78e+03 \\
+        F16  &  2.19e+02 &  4.62e+02 &  3.42e+02 \\
+        F17  &  1.49e+02 &  5.31e+01 &  1.31e+02 \\
+        F18  &  1.54e+04 &  1.13e+02 &  2.36e+05 \\
+        F19  &  9.85e+03 &  9.46e+00 &  2.36e+04 \\
+        F20  &  1.70e+02 &  3.91e+02 &  1.78e+02 \\
+        F21  &  2.29e+02 &  2.09e+02 &  1.89e+02 \\
+        F22  &  3.49e+02 &  1.14e+02 &  1.61e+02 \\
+        F23  &  3.20e+02 &  8.28e+02 &  3.58e+02 \\
+        F24  &  3.24e+02 &  1.11e+02 &  2.66e+02 \\
+        F25  &  4.34e+02 &  4.12e+02 &  4.84e+02 \\
+        F26  &  3.98e+02 &  3.28e+02 &  6.01e+02 \\
+        F27  &  4.04e+02 &  4.01e+02 &  4.49e+02 \\
+        F28  &  5.60e+02 &  4.10e+02 &  7.36e+02 \\
+        F29  &  4.01e+02 &  3.25e+02 &  4.30e+02 \\
+        F30  &  1.06e+06 &  1.23e+05 &  3.77e+06 \\
+        Best &        11 &        16 &         3 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+        \caption{Dimensión 30}
+        \begin{tabular}{llll}
+          \toprule
+          {} & BB-BC-BMB &        DE &       PSO \\
+          \midrule
+          F01  &  1.23e+06 &  5.81e+09 &  1.39e+10 \\
+          F02  &  1.12e+12 &  3.90e+32 &  1.00e+00 \\
+          F03  &  2.74e+04 &  5.87e+04 &  1.18e+05 \\
+          F04  &  8.26e+01 &  7.58e+02 &  3.36e+03 \\
+          F05  &  1.59e+02 &  3.51e+02 &  3.23e+02 \\
+          F06  &  3.46e+01 &  7.81e+01 &  6.37e+01 \\
+          F07  &  1.70e+02 &  3.29e+02 &  5.15e+02 \\
+          F08  &  1.52e+02 &  2.82e+02 &  2.89e+02 \\
+          F09  &  5.40e+03 &  9.91e+03 &  7.07e+03 \\
+          F10  &  3.54e+03 &  5.59e+03 &  7.89e+03 \\
+          F11  &  2.56e+02 &  5.10e+02 &  3.21e+03 \\
+          F12  &  2.07e+06 &  3.39e+08 &  1.86e+09 \\
+          F13  &  1.46e+05 &  2.22e+07 &  1.02e+09 \\
+          F14  &  1.23e+04 &  1.32e+03 &  1.01e+06 \\
+          F15  &  4.32e+04 &  5.93e+04 &  1.20e+07 \\
+          F16  &  1.16e+03 &  2.01e+03 &  2.51e+03 \\
+          F17  &  6.55e+02 &  8.71e+02 &  9.47e+02 \\
+          F18  &  2.04e+05 &  2.43e+05 &  1.34e+07 \\
+          F19  &  2.38e+05 &  4.29e+05 &  2.15e+07 \\
+          F20  &  6.09e+02 &  5.70e+02 &  9.21e+02 \\
+          F21  &  3.37e+02 &  4.05e+02 &  5.19e+02 \\
+          F22  &  3.29e+03 &  9.19e+02 &  2.33e+03 \\
+          F23  &  5.01e+02 &  6.29e+02 &  7.58e+02 \\
+          F24  &  5.46e+02 &  6.87e+02 &  8.11e+02 \\
+          F25  &  3.94e+02 &  6.30e+02 &  1.16e+03 \\
+          F26  &  2.92e+03 &  2.09e+03 &  4.60e+03 \\
+          F27  &  5.71e+02 &  6.23e+02 &  1.08e+03 \\
+          F28  &  4.15e+02 &  8.20e+02 &  1.84e+03 \\
+          F29  &  1.35e+03 &  1.61e+03 &  2.24e+03 \\
+          F30  &  9.31e+05 &  3.83e+06 &  6.12e+07 \\
+          Best &        25 &         4 &         1 \\
+          \bottomrule
+          \end{tabular}
+          
+    \end{minipage} 
+\end{table}
+
+\begin{table}[H]
+    \begin{minipage}{.5\linewidth}
+      \caption{Dimensión 50}
+      \centering
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &        DE &       PSO \\
+        \midrule
+        F01  &  4.74e+06 &  2.53e+10 &  4.33e+10 \\
+        F02  &  1.45e+24 &  2.37e+62 &  1.00e+00 \\
+        F03  &  9.39e+04 &  1.41e+05 &  2.41e+05 \\
+        F04  &  1.32e+02 &  3.86e+03 &  9.35e+03 \\
+        F05  &  2.91e+02 &  5.86e+02 &  5.97e+02 \\
+        F06  &  5.22e+01 &  9.23e+01 &  7.93e+01 \\
+        F07  &  3.57e+02 &  6.94e+02 &  1.08e+03 \\
+        F08  &  2.78e+02 &  6.14e+02 &  5.57e+02 \\
+        F09  &  2.18e+04 &  3.54e+04 &  3.00e+04 \\
+        F10  &  6.02e+03 &  1.22e+04 &  1.42e+04 \\
+        F11  &  4.04e+02 &  2.91e+03 &  1.04e+04 \\
+        F12  &  1.64e+07 &  5.93e+09 &  1.55e+10 \\
+        F13  &  6.21e+05 &  8.60e+08 &  4.03e+09 \\
+        F14  &  4.66e+04 &  4.35e+05 &  9.94e+06 \\
+        F15  &  1.84e+05 &  1.84e+07 &  2.00e+08 \\
+        F16  &  1.90e+03 &  3.92e+03 &  4.10e+03 \\
+        F17  &  1.46e+03 &  2.39e+03 &  2.53e+03 \\
+        F18  &  4.27e+05 &  3.77e+06 &  3.86e+07 \\
+        F19  &  7.69e+05 &  1.82e+07 &  1.65e+08 \\
+        F20  &  1.03e+03 &  1.33e+03 &  2.29e+03 \\
+        F21  &  4.90e+02 &  7.45e+02 &  8.49e+02 \\
+        F22  &  6.51e+03 &  1.33e+04 &  1.42e+04 \\
+        F23  &  7.63e+02 &  1.10e+03 &  1.27e+03 \\
+        F24  &  8.75e+02 &  1.10e+03 &  1.43e+03 \\
+        F25  &  5.51e+02 &  2.47e+03 &  5.77e+03 \\
+        F26  &  4.90e+03 &  4.38e+03 &  9.44e+03 \\
+        F27  &  9.20e+02 &  1.29e+03 &  2.32e+03 \\
+        F28  &  5.35e+02 &  2.70e+03 &  4.72e+03 \\
+        F29  &  1.95e+03 &  3.61e+03 &  5.58e+03 \\
+        F30  &  2.58e+07 &  2.03e+08 &  8.37e+08 \\
+        Best &        28 &         1 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+      \caption{Dimensión 100}
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &         DE &       PSO \\
+        \midrule
+        F01  &  1.14e+07 &   1.05e+11 &  1.64e+11 \\
+        F02  &  1.82e+86 &  2.11e+145 &  1.00e+00 \\
+        F03  &  4.35e+05 &   3.20e+05 &  5.12e+05 \\
+        F04  &  3.02e+02 &   2.30e+04 &  3.70e+04 \\
+        F05  &  8.33e+02 &   1.39e+03 &  1.48e+03 \\
+        F06  &  6.68e+01 &   1.03e+02 &  9.71e+01 \\
+        F07  &  1.18e+03 &   1.94e+03 &  2.94e+03 \\
+        F08  &  8.05e+02 &   1.31e+03 &  1.50e+03 \\
+        F09  &  5.48e+04 &   7.68e+04 &  8.35e+04 \\
+        F10  &  1.29e+04 &   2.73e+04 &  3.12e+04 \\
+        F11  &  2.10e+03 &   1.37e+05 &  1.82e+05 \\
+        F12  &  7.01e+07 &   4.40e+10 &  6.31e+10 \\
+        F13  &  5.87e+05 &   5.42e+09 &  9.41e+09 \\
+        F14  &  4.21e+05 &   7.47e+06 &  4.61e+07 \\
+        F15  &  2.66e+05 &   1.14e+09 &  2.27e+09 \\
+        F16  &  3.57e+03 &   1.04e+04 &  1.21e+04 \\
+        F17  &  3.35e+03 &   8.08e+03 &  1.36e+04 \\
+        F18  &  6.57e+05 &   1.43e+07 &  1.01e+08 \\
+        F19  &  2.32e+06 &   1.22e+09 &  2.58e+09 \\
+        F20  &  2.81e+03 &   5.03e+03 &  5.86e+03 \\
+        F21  &  1.03e+03 &   1.86e+03 &  2.00e+03 \\
+        F22  &  1.39e+04 &   2.98e+04 &  3.26e+04 \\
+        F23  &  1.52e+03 &   2.34e+03 &  2.72e+03 \\
+        F24  &  2.24e+03 &   3.50e+03 &  4.11e+03 \\
+        F25  &  8.39e+02 &   1.02e+04 &  1.42e+04 \\
+        F26  &  1.46e+04 &   2.16e+04 &  2.88e+04 \\
+        F27  &  1.12e+03 &   3.08e+03 &  4.28e+03 \\
+        F28  &  1.10e+03 &   1.43e+04 &  1.67e+04 \\
+        F29  &  4.80e+03 &   1.13e+04 &  1.49e+04 \\
+        F30  &  1.85e+07 &   2.13e+09 &  6.92e+09 \\
+        Best &        28 &          1 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage} 
+\end{table}
+
+
+\subsection*{50\% de las evaluaciones}
+
+\begin{table}[H]
+    \begin{minipage}{.5\linewidth}
+      \caption{Dimensión 10}
+      \centering
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &        DE &       PSO \\
+        \midrule
+        F01  &  1.27e+05 &  2.00e-05 &  1.85e+08 \\
+        F02  &  0.00e+00 &  0.00e+00 &  1.00e+00 \\
+        F03  &  5.22e-01 &  2.81e-08 &  3.46e+03 \\
+        F04  &  1.17e+00 &  2.36e-01 &  6.36e+01 \\
+        F05  &  1.46e+01 &  1.15e+02 &  4.73e+01 \\
+        F06  &  5.39e-01 &  3.47e+01 &  1.36e+01 \\
+        F07  &  2.67e+01 &  4.38e+01 &  5.70e+01 \\
+        F08  &  1.54e+01 &  2.98e+01 &  2.97e+01 \\
+        F09  &  2.57e+01 &  2.09e+02 &  8.36e+01 \\
+        F10  &  6.21e+02 &  5.31e+02 &  1.32e+03 \\
+        F11  &  4.36e+01 &  5.90e+00 &  5.04e+01 \\
+        F12  &  8.07e+04 &  7.66e+01 &  4.64e+06 \\
+        F13  &  2.45e+03 &  1.11e+01 &  1.23e+04 \\
+        F14  &  5.70e+02 &  1.54e+01 &  1.64e+02 \\
+        F15  &  4.51e+03 &  4.37e-01 &  3.23e+03 \\
+        F16  &  8.19e+01 &  4.56e+02 &  1.85e+02 \\
+        F17  &  4.35e+01 &  3.12e+01 &  7.63e+01 \\
+        F18  &  7.28e+03 &  1.67e-01 &  2.65e+04 \\
+        F19  &  6.40e+02 &  4.60e-01 &  5.86e+03 \\
+        F20  &  8.58e+01 &  3.84e+02 &  1.10e+02 \\
+        F21  &  2.01e+02 &  1.92e+02 &  1.42e+02 \\
+        F22  &  1.05e+02 &  1.02e+02 &  1.03e+02 \\
+        F23  &  3.13e+02 &  8.12e+02 &  3.37e+02 \\
+        F24  &  2.93e+02 &  1.00e+02 &  2.04e+02 \\
+        F25  &  3.81e+02 &  4.04e+02 &  4.54e+02 \\
+        F26  &  3.01e+02 &  2.71e+02 &  4.17e+02 \\
+        F27  &  3.94e+02 &  3.90e+02 &  4.20e+02 \\
+        F28  &  4.45e+02 &  3.52e+02 &  5.24e+02 \\
+        F29  &  2.74e+02 &  2.51e+02 &  3.51e+02 \\
+        F30  &  4.01e+04 &  8.05e+04 &  1.48e+06 \\
+        Best &        11 &        19 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+        \caption{Dimensión 30}
+        \begin{tabular}{llll}
+          \toprule
+          {} & BB-BC-BMB &        DE &       PSO \\
+          \midrule
+          F01  &  8.76e+05 &  1.79e+07 &  7.70e+09 \\
+          F02  &  4.06e+06 &  5.44e+23 &  1.00e+00 \\
+          F03  &  1.37e+04 &  1.37e+04 &  7.12e+04 \\
+          F04  &  5.51e+01 &  9.42e+01 &  1.66e+03 \\
+          F05  &  1.19e+02 &  2.20e+02 &  2.60e+02 \\
+          F06  &  2.19e+01 &  2.14e+01 &  4.67e+01 \\
+          F07  &  1.36e+02 &  2.52e+02 &  4.10e+02 \\
+          F08  &  9.76e+01 &  2.09e+02 &  2.16e+02 \\
+          F09  &  2.97e+03 &  2.78e+03 &  4.10e+03 \\
+          F10  &  2.83e+03 &  4.42e+03 &  7.43e+03 \\
+          F11  &  1.69e+02 &  1.12e+02 &  1.56e+03 \\
+          F12  &  5.50e+05 &  5.64e+06 &  6.94e+08 \\
+          F13  &  9.07e+04 &  1.51e+03 &  2.36e+08 \\
+          F14  &  4.51e+03 &  8.11e+01 &  4.77e+05 \\
+          F15  &  3.65e+04 &  1.14e+02 &  1.26e+06 \\
+          F16  &  6.94e+02 &  1.51e+03 &  1.86e+03 \\
+          F17  &  3.14e+02 &  5.82e+02 &  5.51e+02 \\
+          F18  &  9.11e+04 &  3.29e+02 &  4.17e+06 \\
+          F19  &  1.48e+05 &  4.63e+01 &  2.33e+06 \\
+          F20  &  4.34e+02 &  3.11e+02 &  6.19e+02 \\
+          F21  &  3.03e+02 &  3.50e+02 &  4.49e+02 \\
+          F22  &  2.72e+03 &  1.18e+02 &  1.35e+03 \\
+          F23  &  4.70e+02 &  5.52e+02 &  6.91e+02 \\
+          F24  &  5.17e+02 &  6.21e+02 &  7.47e+02 \\
+          F25  &  3.85e+02 &  3.90e+02 &  7.75e+02 \\
+          F26  &  2.15e+03 &  4.90e+02 &  3.73e+03 \\
+          F27  &  5.34e+02 &  5.15e+02 &  8.85e+02 \\
+          F28  &  3.72e+02 &  4.37e+02 &  1.29e+03 \\
+          F29  &  8.95e+02 &  1.17e+03 &  1.61e+03 \\
+          F30  &  3.52e+05 &  1.57e+04 &  2.02e+07 \\
+          Best &        16 &        13 &         1 \\
+          \bottomrule
+          \end{tabular}
+          
+    \end{minipage} 
+\end{table}
+
+\begin{table}[H]
+    \begin{minipage}{.5\linewidth}
+      \caption{Dimensión 50}
+      \centering
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &        DE &       PSO \\
+        \midrule
+        F01  &  4.18e+06 &  2.17e+09 &  2.77e+10 \\
+        F02  &  2.73e+22 &  4.83e+55 &  1.00e+00 \\
+        F03  &  6.63e+04 &  9.97e+04 &  1.56e+05 \\
+        F04  &  8.61e+01 &  4.73e+02 &  5.62e+03 \\
+        F05  &  2.30e+02 &  4.20e+02 &  5.04e+02 \\
+        F06  &  3.84e+01 &  3.05e+01 &  6.43e+01 \\
+        F07  &  3.12e+02 &  5.14e+02 &  9.02e+02 \\
+        F08  &  2.34e+02 &  4.28e+02 &  4.62e+02 \\
+        F09  &  1.26e+04 &  2.76e+04 &  2.12e+04 \\
+        F10  &  4.79e+03 &  1.15e+04 &  1.37e+04 \\
+        F11  &  2.93e+02 &  3.58e+02 &  4.51e+03 \\
+        F12  &  9.20e+06 &  4.92e+08 &  8.92e+09 \\
+        F13  &  3.94e+05 &  1.17e+06 &  1.63e+09 \\
+        F14  &  1.74e+04 &  2.68e+02 &  2.88e+06 \\
+        F15  &  1.18e+05 &  4.14e+03 &  2.74e+07 \\
+        F16  &  1.27e+03 &  3.28e+03 &  3.13e+03 \\
+        F17  &  1.08e+03 &  1.99e+03 &  1.82e+03 \\
+        F18  &  1.72e+05 &  2.09e+05 &  1.80e+07 \\
+        F19  &  4.46e+05 &  3.56e+03 &  3.43e+07 \\
+        F20  &  8.36e+02 &  9.67e+02 &  1.58e+03 \\
+        F21  &  4.14e+02 &  6.43e+02 &  7.51e+02 \\
+        F22  &  5.49e+03 &  6.64e+02 &  1.33e+04 \\
+        F23  &  6.85e+02 &  8.76e+02 &  1.16e+03 \\
+        F24  &  7.76e+02 &  9.11e+02 &  1.27e+03 \\
+        F25  &  5.16e+02 &  7.40e+02 &  3.76e+03 \\
+        F26  &  4.04e+03 &  1.48e+03 &  8.46e+03 \\
+        F27  &  7.90e+02 &  6.95e+02 &  1.91e+03 \\
+        F28  &  4.96e+02 &  6.62e+02 &  3.88e+03 \\
+        F29  &  1.34e+03 &  2.48e+03 &  4.27e+03 \\
+        F30  &  1.80e+07 &  8.86e+06 &  4.57e+08 \\
+        Best &        21 &         8 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+      \caption{Dimensión 100}
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &         DE &       PSO \\
+        \midrule
+        F01  &  1.04e+07 &   3.27e+10 &  1.33e+11 \\
+        F02  &  8.76e+76 &  6.15e+138 &  1.00e+00 \\
+        F03  &  3.69e+05 &   2.69e+05 &  3.67e+05 \\
+        F04  &  2.52e+02 &   3.95e+03 &  2.77e+04 \\
+        F05  &  6.41e+02 &   1.04e+03 &  1.32e+03 \\
+        F06  &  5.57e+01 &   5.46e+01 &  8.43e+01 \\
+        F07  &  1.08e+03 &   1.39e+03 &  2.54e+03 \\
+        F08  &  6.71e+02 &   1.05e+03 &  1.35e+03 \\
+        F09  &  3.77e+04 &   7.18e+04 &  6.80e+04 \\
+        F10  &  1.11e+04 &   2.63e+04 &  3.06e+04 \\
+        F11  &  1.80e+03 &   5.86e+04 &  8.64e+04 \\
+        F12  &  4.15e+07 &   1.05e+10 &  4.69e+10 \\
+        F13  &  4.87e+05 &   2.98e+08 &  6.05e+09 \\
+        F14  &  1.59e+05 &   1.17e+06 &  2.72e+07 \\
+        F15  &  2.07e+05 &   1.15e+07 &  6.84e+08 \\
+        F16  &  3.01e+03 &   8.95e+03 &  9.97e+03 \\
+        F17  &  2.64e+03 &   5.87e+03 &  7.20e+03 \\
+        F18  &  3.47e+05 &   6.53e+06 &  3.11e+07 \\
+        F19  &  1.80e+06 &   3.44e+07 &  1.19e+09 \\
+        F20  &  2.42e+03 &   4.26e+03 &  5.45e+03 \\
+        F21  &  9.19e+02 &   1.35e+03 &  1.81e+03 \\
+        F22  &  1.27e+04 &   7.25e+03 &  3.19e+04 \\
+        F23  &  1.40e+03 &   1.65e+03 &  2.48e+03 \\
+        F24  &  1.91e+03 &   2.04e+03 &  3.65e+03 \\
+        F25  &  7.60e+02 &   4.07e+03 &  1.10e+04 \\
+        F26  &  1.30e+04 &   1.47e+04 &  2.65e+04 \\
+        F27  &  9.96e+02 &   1.41e+03 &  3.57e+03 \\
+        F28  &  7.31e+02 &   3.67e+03 &  1.41e+04 \\
+        F29  &  4.07e+03 &   7.58e+03 &  1.20e+04 \\
+        F30  &  9.94e+06 &   5.22e+07 &  4.51e+09 \\
+        Best &        26 &          3 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage} 
+\end{table}
+
+
+\subsection*{100\% de las evaluaciones}
+
+\begin{table}[H]
+    \begin{minipage}{.5\linewidth}
+      \caption{Dimensión 10}
+      \centering
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &        DE &       PSO \\
+        \midrule
+        F01  &  1.18e+05 &  0.00e+00 &  5.26e+07 \\
+        F02  &  0.00e+00 &  0.00e+00 &  1.00e+00 \\
+        F03  &  4.40e-01 &  0.00e+00 &  1.99e+03 \\
+        F04  &  6.91e-01 &  1.11e-04 &  4.68e+01 \\
+        F05  &  1.22e+01 &  1.15e+02 &  3.21e+01 \\
+        F06  &  3.18e-01 &  3.46e+01 &  1.00e+01 \\
+        F07  &  2.27e+01 &  3.85e+01 &  4.28e+01 \\
+        F08  &  1.05e+01 &  2.98e+01 &  2.20e+01 \\
+        F09  &  1.03e-01 &  1.94e+02 &  5.69e+01 \\
+        F10  &  5.75e+02 &  3.60e+02 &  1.08e+03 \\
+        F11  &  2.79e+01 &  1.94e-02 &  3.84e+01 \\
+        F12  &  2.65e+04 &  4.93e+00 &  2.52e+06 \\
+        F13  &  1.47e+03 &  5.99e+00 &  8.41e+03 \\
+        F14  &  1.35e+02 &  5.24e-02 &  9.99e+01 \\
+        F15  &  2.14e+03 &  6.06e-02 &  2.07e+03 \\
+        F16  &  3.56e+01 &  4.56e+02 &  1.41e+02 \\
+        F17  &  3.63e+01 &  2.35e+01 &  6.50e+01 \\
+        F18  &  2.72e+03 &  3.63e-02 &  1.48e+04 \\
+        F19  &  1.97e+02 &  5.19e-03 &  3.22e+03 \\
+        F20  &  6.97e+01 &  3.84e+02 &  8.44e+01 \\
+        F21  &  1.78e+02 &  1.89e+02 &  1.32e+02 \\
+        F22  &  9.58e+01 &  1.00e+02 &  7.74e+01 \\
+        F23  &  3.12e+02 &  8.10e+02 &  3.30e+02 \\
+        F24  &  2.67e+02 &  1.00e+02 &  1.81e+02 \\
+        F25  &  3.81e+02 &  4.04e+02 &  4.48e+02 \\
+        F26  &  3.01e+02 &  2.71e+02 &  3.73e+02 \\
+        F27  &  3.93e+02 &  3.90e+02 &  4.13e+02 \\
+        F28  &  3.74e+02 &  3.52e+02 &  4.70e+02 \\
+        F29  &  2.66e+02 &  2.38e+02 &  3.19e+02 \\
+        F30  &  1.07e+04 &  8.05e+04 &  6.35e+05 \\
+        Best &        11 &        18 &         2 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+        \caption{Dimensión 30}
+        \begin{tabular}{llll}
+          \toprule
+          {} & BB-BC-BMB &        DE &       PSO \\
+          \midrule
+          F01  &  8.15e+05 &  4.91e+04 &  4.18e+09 \\
+          F02  &  3.55e+06 &  1.31e+19 &  1.00e+00 \\
+          F03  &  8.65e+03 &  3.48e+03 &  5.45e+04 \\
+          F04  &  4.88e+01 &  8.43e+01 &  1.18e+03 \\
+          F05  &  9.63e+01 &  2.01e+02 &  2.17e+02 \\
+          F06  &  1.90e+01 &  6.32e+00 &  3.69e+01 \\
+          F07  &  1.27e+02 &  2.33e+02 &  3.60e+02 \\
+          F08  &  9.57e+01 &  1.89e+02 &  1.75e+02 \\
+          F09  &  2.37e+03 &  6.53e+01 &  2.84e+03 \\
+          F10  &  2.52e+03 &  3.76e+03 &  6.94e+03 \\
+          F11  &  1.50e+02 &  7.96e+01 &  1.21e+03 \\
+          F12  &  4.78e+05 &  3.26e+05 &  3.59e+08 \\
+          F13  &  8.35e+04 &  1.54e+02 &  4.51e+07 \\
+          F14  &  2.43e+03 &  7.10e+01 &  3.06e+05 \\
+          F15  &  3.23e+04 &  6.26e+01 &  2.74e+05 \\
+          F16  &  5.85e+02 &  1.32e+03 &  1.57e+03 \\
+          F17  &  2.54e+02 &  4.81e+02 &  4.73e+02 \\
+          F18  &  6.27e+04 &  6.12e+01 &  2.17e+06 \\
+          F19  &  1.13e+05 &  3.57e+01 &  1.26e+06 \\
+          F20  &  3.23e+02 &  2.75e+02 &  4.62e+02 \\
+          F21  &  2.84e+02 &  3.25e+02 &  4.11e+02 \\
+          F22  &  2.52e+03 &  1.00e+02 &  1.03e+03 \\
+          F23  &  4.49e+02 &  5.35e+02 &  6.40e+02 \\
+          F24  &  5.05e+02 &  6.06e+02 &  7.10e+02 \\
+          F25  &  3.85e+02 &  3.87e+02 &  6.86e+02 \\
+          F26  &  2.13e+03 &  4.04e+02 &  3.37e+03 \\
+          F27  &  5.26e+02 &  4.93e+02 &  8.07e+02 \\
+          F28  &  3.51e+02 &  3.94e+02 &  1.11e+03 \\
+          F29  &  8.31e+02 &  1.03e+03 &  1.41e+03 \\
+          F30  &  2.99e+05 &  3.66e+03 &  1.36e+07 \\
+          Best &        13 &        16 &         1 \\
+          \bottomrule
+          \end{tabular}
+          
+    \end{minipage} 
+\end{table}
+
+\begin{table}[H]
+    \begin{minipage}{.5\linewidth}
+      \caption{Dimensión 50}
+      \centering
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &        DE &       PSO \\
+        \midrule
+        F01  &  4.01e+06 &  2.04e+08 &  1.82e+10 \\
+        F02  &  1.92e+21 &  5.16e+52 &  1.00e+00 \\
+        F03  &  5.67e+04 &  7.60e+04 &  1.01e+05 \\
+        F04  &  6.09e+01 &  2.32e+02 &  4.09e+03 \\
+        F05  &  2.20e+02 &  3.98e+02 &  4.33e+02 \\
+        F06  &  3.42e+01 &  1.18e+01 &  5.45e+01 \\
+        F07  &  2.65e+02 &  4.78e+02 &  8.20e+02 \\
+        F08  &  2.32e+02 &  4.07e+02 &  4.08e+02 \\
+        F09  &  8.81e+03 &  3.76e+03 &  1.62e+04 \\
+        F10  &  4.59e+03 &  1.13e+04 &  1.29e+04 \\
+        F11  &  2.44e+02 &  2.17e+02 &  3.15e+03 \\
+        F12  &  6.60e+06 &  1.38e+08 &  6.06e+09 \\
+        F13  &  3.42e+05 &  2.73e+04 &  5.26e+08 \\
+        F14  &  1.54e+04 &  1.68e+02 &  1.56e+06 \\
+        F15  &  1.11e+05 &  5.09e+02 &  5.79e+06 \\
+        F16  &  1.15e+03 &  3.05e+03 &  2.74e+03 \\
+        F17  &  9.86e+02 &  1.83e+03 &  1.65e+03 \\
+        F18  &  1.29e+05 &  2.42e+04 &  1.20e+07 \\
+        F19  &  3.78e+05 &  1.32e+02 &  1.34e+07 \\
+        F20  &  7.48e+02 &  9.38e+02 &  1.28e+03 \\
+        F21  &  4.04e+02 &  6.18e+02 &  6.66e+02 \\
+        F22  &  4.99e+03 &  1.71e+02 &  1.26e+04 \\
+        F23  &  6.60e+02 &  8.43e+02 &  1.10e+03 \\
+        F24  &  7.69e+02 &  8.85e+02 &  1.21e+03 \\
+        F25  &  4.92e+02 &  5.67e+02 &  3.07e+03 \\
+        F26  &  3.90e+03 &  5.75e+02 &  7.89e+03 \\
+        F27  &  7.54e+02 &  5.77e+02 &  1.74e+03 \\
+        F28  &  4.80e+02 &  5.01e+02 &  3.47e+03 \\
+        F29  &  1.26e+03 &  2.22e+03 &  3.57e+03 \\
+        F30  &  1.70e+07 &  2.39e+06 &  3.37e+08 \\
+        Best &        17 &        12 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+      \caption{Dimensión 100}
+      \begin{tabular}{llll}
+        \toprule
+        {} & BB-BC-BMB &         DE &       PSO \\
+        \midrule
+        F01  &  1.02e+07 &   1.03e+10 &  1.10e+11 \\
+        F02  &  2.39e+74 &  7.02e+135 &  1.00e+00 \\
+        F03  &  3.48e+05 &   2.28e+05 &  2.92e+05 \\
+        F04  &  2.20e+02 &   1.49e+03 &  2.26e+04 \\
+        F05  &  6.31e+02 &   9.97e+02 &  1.16e+03 \\
+        F06  &  5.30e+01 &   3.60e+01 &  7.54e+01 \\
+        F07  &  1.01e+03 &   1.18e+03 &  2.37e+03 \\
+        F08  &  6.55e+02 &   9.97e+02 &  1.23e+03 \\
+        F09  &  3.43e+04 &   3.09e+04 &  5.58e+04 \\
+        F10  &  1.07e+04 &   2.60e+04 &  2.97e+04 \\
+        F11  &  1.72e+03 &   2.78e+04 &  6.68e+04 \\
+        F12  &  3.37e+07 &   4.40e+09 &  3.66e+10 \\
+        F13  &  4.74e+05 &   3.04e+07 &  3.72e+09 \\
+        F14  &  1.19e+05 &   2.13e+05 &  1.88e+07 \\
+        F15  &  1.91e+05 &   7.51e+05 &  9.41e+07 \\
+        F16  &  2.84e+03 &   8.58e+03 &  8.69e+03 \\
+        F17  &  2.46e+03 &   5.53e+03 &  5.96e+03 \\
+        F18  &  3.31e+05 &   4.45e+06 &  1.16e+07 \\
+        F19  &  1.74e+06 &   4.17e+06 &  5.26e+08 \\
+        F20  &  2.23e+03 &   3.94e+03 &  4.93e+03 \\
+        F21  &  8.64e+02 &   1.26e+03 &  1.68e+03 \\
+        F22  &  1.26e+04 &   1.98e+03 &  3.15e+04 \\
+        F23  &  1.34e+03 &   1.55e+03 &  2.37e+03 \\
+        F24  &  1.91e+03 &   1.90e+03 &  3.46e+03 \\
+        F25  &  7.33e+02 &   2.28e+03 &  9.64e+03 \\
+        F26  &  1.26e+04 &   1.36e+04 &  2.54e+04 \\
+        F27  &  9.53e+02 &   1.11e+03 &  3.21e+03 \\
+        F28  &  6.88e+02 &   1.69e+03 &  1.27e+04 \\
+        F29  &  3.81e+03 &   6.96e+03 &  1.07e+04 \\
+        F30  &  8.84e+06 &   8.92e+06 &  3.02e+09 \\
+        Best &        24 &          5 &         1 \\
+        \bottomrule
+        \end{tabular}
+        
+    \end{minipage} 
+\end{table}
+
+\newpage
+Comparándola con la versión original, esta nueva versión no aporta demasiadas mejoras. Se aprecia que especialmente en la dimensión 10, se mejora en 1-3 funciones con respecto a la versión original. Pero si aumentamos la dimensión, pierde algo de rendimiento. Por ello, aunque hay cierta mejoría, no podría catalogarse como una mejora disruptiva.
+
+Otro cambio que se podría llevar a cabo es probar con diferentes tamaños de poblaciones. En estos experimentos, para la dimensión 10 hemos tomado un tamaño de población 30, para la dimensión 30 un tamaño 50, para la 50 un tamaño 100 y para la 100 un tamaño 150. Nos pareció conveniente ir aumentando el tamaño de la población al aumentar la dimensión. En la publicación no se especifica la relación que debe existir entre dimensión y tamaño de población, así que podríamos probar con otros valores para ver si los resultados mejoran. 
+
+Otra posible mejora estaría en ajustar el descenso de la desviación típica de los puntos generados alrededor del centro de masas en cada etapa Big Bang. En la metaheurística original, el descenso de la desviación se realiza de forma lineal al número de iteraciones (como se establece en la ecuación \ref{eqn:desv}): puede que este descenso sea demasiado pronuciado, por lo que se podría probar a añadir un factor logarítmico de forma que la desviación descienda más lentamente:
+
+\begin{equation}
+    x^{new} = x^c + lr/log2(k)
+\end{equation}
+
+Donde $x^c$ es el centro de masas, l el valor máximo que puede tomar un cromosoma, r un valor aleatorio de una distribución normal y k la iteración actual.
+
 
 
 % \subsubsection*{10\% de las evaluaciones}

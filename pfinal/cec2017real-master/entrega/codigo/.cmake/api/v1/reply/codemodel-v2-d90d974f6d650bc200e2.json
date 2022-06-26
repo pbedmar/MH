@@ -1,0 +1,110 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "cec17",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "bmb::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-bmb-Release-57015b1774f72b01006b.json",
+					"name" : "bmb",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "cec17_test_func::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-cec17_test_func-Release-3f3d15796c3e6caba955.json",
+					"name" : "cec17_test_func",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ls::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ls-Release-dfaf531e847895aa7561.json",
+					"name" : "ls",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "original::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-original-Release-48904246882a556adca5.json",
+					"name" : "original",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test-Release-7cb6442413c0bb889555.json",
+					"name" : "test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testrandom::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testrandom-Release-81991ad31d24e2fcc1dc.json",
+					"name" : "testrandom",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testsolis::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testsolis-Release-630b9469f67bc1fb81e4.json",
+					"name" : "testsolis",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/pfinal/cec2017real-master/code",
+		"source" : "/Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/pfinal/cec2017real-master/code"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

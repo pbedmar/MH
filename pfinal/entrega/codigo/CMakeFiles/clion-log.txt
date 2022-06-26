@@ -1,0 +1,15 @@
+"/Users/pedrobedmar/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/221.5080.224/CLion.app/Contents/bin/cmake/mac/bin/cmake" "-DCMAKE_MAKE_PROGRAM=/Users/pedrobedmar/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/221.5080.224/CLion.app/Contents/bin/ninja/mac/ninja" -G Ninja -S /Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/pfinal/cec2017real-master/code -B /Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/pfinal/cec2017real-master/code
+-- Configuring done
+CMake Warning (dev):
+  Policy CMP0042 is not set: MACOSX_RPATH is enabled by default.  Run "cmake
+  --help-policy CMP0042" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+
+  MACOSX_RPATH is not specified for the following targets:
+
+   cec17_test_func
+
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Generating done
+-- Build files have been written to: /Users/pedrobedmar/GoogleDrive/4_ING_INFORMATICA/MH/practicas/pfinal/cec2017real-master/code
